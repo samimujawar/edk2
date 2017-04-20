@@ -1,0 +1,33 @@
+## @file
+#
+#  Copyright (c) 2018, ARM Limited. All rights reserved.
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+##
+
+[Defines]
+  INF_VERSION    = 0x00010019
+  BASE_NAME      = DsdtParserLib
+  FILE_GUID      = 3047842B-9FA6-4CA2-9513-D7FD6AD09574
+  VERSION_STRING = 1.0
+  MODULE_TYPE    = DXE_DRIVER
+  LIBRARY_CLASS  = NULL|DXE_DRIVER
+  CONSTRUCTOR    = DsdtParserLibConstructor
+  DESTRUCTOR     = DsdtParserLibDestructor
+
+[Sources]
+  DsdtParser.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  ShellAcpiViewCommandLib
