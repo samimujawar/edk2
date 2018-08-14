@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2011-2013, ARM Limited. All rights reserved.
+//  Copyright (c) 2011-2018, ARM Limited. All rights reserved.
 //  Copyright (c) 2015-2016, Linaro Limited. All rights reserved.
 //
 //  This program and the accompanying materials
@@ -143,8 +143,13 @@ ASM_PFX(DiscoverDramFromDt):
   //
   cbnz  x0, 0f
   ldr   x0, PcdGet64 (PcdDeviceTreeInitialBaseAddress)
+  b     1f
 
-0:mov   x29, x30            // preserve LR
+  // Store the device tree base address.
+0:adr   x8, PcdGet64 (PcdDeviceTreeInitialBaseAddress)
+  str   x0, [x8]
+
+1:mov   x29, x30            // preserve LR
   mov   x28, x0             // preserve DTB pointer
   mov   x27, x1             // preserve base of image pointer
 

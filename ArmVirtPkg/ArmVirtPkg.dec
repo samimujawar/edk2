@@ -42,15 +42,19 @@
 [Protocols]
   gFdtClientProtocolGuid = { 0xE11FACA0, 0x4710, 0x4C8E, { 0xA7, 0xA2, 0x01, 0xBA, 0xA2, 0x59, 0x1B, 0x4C } }
 
-[PcdsFixedAtBuild, PcdsPatchableInModule]
+[PcdsFixedAtBuild.common, PcdsDynamic.common, PcdsPatchableInModule.common]
   #
   # This is the physical address where the device tree is expected to be stored
-  # upon first entry into UEFI. This needs to be a FixedAtBuild PCD, so that we
-  # can do a first pass over the device tree in the SEC phase to discover the
-  # UART base address.
+  # upon first entry into UEFI. In some cases this needs to be a FixedAtBuild
+  # PCD, so that we can do a first pass over the device tree in the SEC phase
+  # to discover the UART base address. In other cases where the base address
+  # for the DT is passed in X0 (by an earlier firmware stage or by a virtual
+  # machine manager), this needs to be a PcdsDynamic so that the value can be
+  # updated.
   #
   gArmVirtTokenSpaceGuid.PcdDeviceTreeInitialBaseAddress|0x0|UINT64|0x00000001
 
+[PcdsFixedAtBuild]
   #
   # Padding in bytes to add to the device tree allocation, so that the DTB can
   # be modified in place (default: 256 bytes)
