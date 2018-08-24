@@ -6,6 +6,7 @@
 #
 # Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
 # Copyright (c) 2017, AMD Inc. All rights reserved.<BR>
+# Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
 #
 # This program and the accompanying materials
 # are licensed and made available under the terms and conditions of the BSD License
@@ -201,6 +202,13 @@
   ## Specifies RTC Target Register address in I/O space.
   # @Prompt RTC Target Register address
   gPcAtChipsetPkgTokenSpaceGuid.PcdRtcTargetRegister|0x71|UINT8|0x0000001F
+
+  ## Indicates the RTC port registers are in MMIO space, or in I/O space.
+  #  Default is I/O space.<BR><BR>
+  #   TRUE  - RTC port registers are in MMIO space.<BR>
+  #   FALSE - RTC port registers are in I/O space.<BR>
+  # @Prompt RTC port registers use MMIO.
+  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcUseMmio|FALSE|BOOLEAN|0x00000020
 
 [UserExtensions.TianoCore."ExtraFiles"]
   PcAtChipsetPkgExtra.uni

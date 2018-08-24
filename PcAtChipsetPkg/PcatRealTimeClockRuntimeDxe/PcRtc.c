@@ -3,6 +3,7 @@
 
 Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 Copyright (c) 2017, AMD Inc. All rights reserved.<BR>
+Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
 
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
@@ -15,6 +16,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "PcRtc.h"
+
+extern EFI_PHYSICAL_ADDRESS   mRtcRegisterBase;
 
 //
 // Days of month.
@@ -72,7 +75,21 @@ RtcRead (
   IN  UINT8 Address
   )
 {
-  IoWrite8 (PcdGet8 (PcdRtcIndexRegister), (UINT8) (Address | (UINT8) (IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80)));
+  if (FixedPcdGetBool (PcdRtcUseMmio)) {
+    MmioWrite8 (
+      mRtcRegisterBase,
+      (UINT8)(Address | (UINT8)(MmioRead8 (mRtcRegisterBase) & 0x80))
+      );
+    return MmioRead8 (
+             mRtcRegisterBase + (PcdGet8 (PcdRtcTargetRegister) -
+               PcdGet8 (PcdRtcIndexRegister))
+             );
+  }
+
+  IoWrite8 (
+    PcdGet8 (PcdRtcIndexRegister),
+    (UINT8)(Address | (UINT8)(IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80))
+    );
   return IoRead8 (PcdGet8 (PcdRtcTargetRegister));
 }
 
@@ -90,8 +107,23 @@ RtcWrite (
   IN  UINT8   Data
   )
 {
-  IoWrite8 (PcdGet8 (PcdRtcIndexRegister), (UINT8) (Address | (UINT8) (IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80)));
-  IoWrite8 (PcdGet8 (PcdRtcTargetRegister), Data);
+  if (FixedPcdGetBool (PcdRtcUseMmio)) {
+    MmioWrite8 (
+      mRtcRegisterBase,
+      (UINT8)(Address | (UINT8)(MmioRead8 (mRtcRegisterBase) & 0x80))
+      );
+    MmioWrite8 (
+      mRtcRegisterBase + (PcdGet8 (PcdRtcTargetRegister) -
+        PcdGet8 (PcdRtcIndexRegister)),
+      Data
+      );
+  } else {
+    IoWrite8 (
+      PcdGet8 (PcdRtcIndexRegister),
+      (UINT8)(Address | (UINT8)(IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80))
+      );
+    IoWrite8 (PcdGet8 (PcdRtcTargetRegister), Data);
+  }
 }
 
 /**
