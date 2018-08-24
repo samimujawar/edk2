@@ -3,12 +3,15 @@
 
 Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 Copyright (c) 2017, AMD Inc. All rights reserved.<BR>
+Copyright (c) 2018 - 2020, ARM Limited. All rights reserved.<BR>
 
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "PcRtc.h"
+
+extern EFI_PHYSICAL_ADDRESS   mRtcRegisterBase;
 
 //
 // Days of month.
@@ -19,6 +22,28 @@ UINTN mDayOfMonth[] = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 // The name of NV variable to store the timezone and daylight saving information.
 //
 CHAR16 mTimeZoneVariableName[] = L"RTC";
+
+/**
+  A function pointer that evaluates to a function that reads the RTC content
+  through its registers either using IO or MMIO access.
+
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
+
+  @return The data of UINT8 type read from RTC.
+**/
+RTC_READ  RtcRead;
+
+/**
+  A function pointer that evaluates to a function that reads the RTC content
+  through its registers either using IO or MMIO access.
+
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
+
+  @return The data of UINT8 type read from RTC.
+**/
+RTC_WRITE RtcWrite;
 
 /**
   Compare the Hour, Minute and Second of the From time and the To time.
@@ -54,38 +79,96 @@ IsWithinOneDay (
   );
 
 /**
-  Read RTC content through its registers.
+  Read RTC content through its registers using IO access.
 
-  @param  Address  Address offset of RTC. It is recommended to use macros such as
-                   RTC_ADDRESS_SECONDS.
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
 
   @return The data of UINT8 type read from RTC.
 **/
+STATIC
 UINT8
-RtcRead (
+IoRtcRead (
   IN  UINT8 Address
   )
 {
-  IoWrite8 (PcdGet8 (PcdRtcIndexRegister), (UINT8) (Address | (UINT8) (IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80)));
+  IoWrite8 (
+    PcdGet8 (PcdRtcIndexRegister),
+    (UINT8)(Address | (UINT8)(IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80))
+    );
   return IoRead8 (PcdGet8 (PcdRtcTargetRegister));
 }
 
 /**
-  Write RTC through its registers.
+  Write RTC through its registers  using IO access.
 
-  @param  Address  Address offset of RTC. It is recommended to use macros such as
-                   RTC_ADDRESS_SECONDS.
-  @param  Data     The content you want to write into RTC.
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
+  @param  Data      The content you want to write into RTC.
 
 **/
+STATIC
 VOID
-RtcWrite (
+IoRtcWrite (
   IN  UINT8   Address,
   IN  UINT8   Data
   )
 {
-  IoWrite8 (PcdGet8 (PcdRtcIndexRegister), (UINT8) (Address | (UINT8) (IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80)));
+  IoWrite8 (
+    PcdGet8 (PcdRtcIndexRegister),
+    (UINT8)(Address | (UINT8)(IoRead8 (PcdGet8 (PcdRtcIndexRegister)) & 0x80))
+    );
   IoWrite8 (PcdGet8 (PcdRtcTargetRegister), Data);
+}
+
+/**
+  Read RTC content through its registers using MMIO access.
+
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
+
+  @return The data of UINT8 type read from RTC.
+**/
+STATIC
+UINT8
+MmioRtcRead (
+  IN  UINT8 Address
+  )
+{
+  MmioWrite8 (
+    mRtcRegisterBase,
+    (UINT8)(Address | (UINT8)(MmioRead8 (mRtcRegisterBase) & 0x80))
+    );
+  return MmioRead8 (
+           mRtcRegisterBase + (PcdGet8 (PcdRtcTargetRegister) -
+             PcdGet8 (PcdRtcIndexRegister))
+           );
+}
+
+/**
+  Write RTC through its registers using MMIO access.
+
+  @param  Address   Address offset of RTC. It is recommended to use
+                    macros such as RTC_ADDRESS_SECONDS.
+  @param  Data      The content you want to write into RTC.
+
+**/
+STATIC
+VOID
+MmioRtcWrite (
+  IN  UINT8   Address,
+  IN  UINT8   Data
+  )
+{
+  MmioWrite8 (
+    mRtcRegisterBase,
+    (UINT8)(Address | (UINT8)(MmioRead8 (mRtcRegisterBase) & 0x80))
+    );
+  MmioWrite8 (
+    mRtcRegisterBase + (PcdGet8 (PcdRtcTargetRegister) -
+      PcdGet8 (PcdRtcIndexRegister)),
+    Data
+    );
 }
 
 /**
@@ -111,6 +194,18 @@ PcRtcInit (
   UINT32          TimerVar;
   BOOLEAN         Enabled;
   BOOLEAN         Pending;
+
+  //
+  // Initialize the RtcRead and RtcWrite functions
+  // based on the chosen IO/MMIO access.
+  //
+  if (FixedPcdGetBool (PcdRtcUseMmio)) {
+    RtcRead = MmioRtcRead;
+    RtcWrite = MmioRtcWrite;
+  } else {
+    RtcRead = IoRtcRead;
+    RtcWrite = IoRtcWrite;
+  }
 
   //
   // Acquire RTC Lock to make access to RTC atomic

@@ -6,6 +6,7 @@
 #
 # Copyright (c) 2009 - 2019, Intel Corporation. All rights reserved.<BR>
 # Copyright (c) 2017, AMD Inc. All rights reserved.<BR>
+# Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
 #
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -141,6 +142,13 @@
   ## RTC Update Timeout Value(microsecond).
   # @Prompt RTC Update Timeout Value.
   gPcAtChipsetPkgTokenSpaceGuid.PcdRealTimeClockUpdateTimeout|100000|UINT32|0x00000020
+
+  ## Indicates the RTC port registers are in MMIO space, or in I/O space.
+  #  Default is I/O space.<BR><BR>
+  #   TRUE  - RTC port registers are in MMIO space.<BR>
+  #   FALSE - RTC port registers are in I/O space.<BR>
+  # @Prompt RTC port registers use MMIO.
+  gPcAtChipsetPkgTokenSpaceGuid.PcdRtcUseMmio|FALSE|BOOLEAN|0x00000021
 
 [UserExtensions.TianoCore."ExtraFiles"]
   PcAtChipsetPkgExtra.uni

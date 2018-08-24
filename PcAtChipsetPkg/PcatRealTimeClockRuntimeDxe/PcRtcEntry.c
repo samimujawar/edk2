@@ -2,15 +2,31 @@
   Provides Set/Get time operations.
 
 Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018 - 2020, ARM Limited. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#include <Library/DxeServicesTableLib.h>
 #include "PcRtc.h"
 
 PC_RTC_MODULE_GLOBALS  mModuleGlobal;
 
 EFI_HANDLE             mHandle = NULL;
+
+STATIC EFI_EVENT       mVirtualAddrChangeEvent;
+
+EFI_PHYSICAL_ADDRESS   mRtcRegisterBase;
+
+//
+// Function pointer for the Rtc Read interface function
+//
+extern RTC_READ   RtcRead;
+
+//
+// Function pointer for the Rtc Write interface function
+//
+extern RTC_WRITE  RtcWrite;
 
 /**
   Returns the current time and date information, and the time-keeping capabilities
@@ -106,6 +122,33 @@ PcRtcEfiSetWakeupTime (
 }
 
 /**
+  Fixup internal data so that EFI can be called in virtual mode.
+  Call the passed in Child Notify event and convert any pointers in
+  lib to virtual mode.
+
+  @param[in]    Event   The Event that is being processed
+  @param[in]    Context Event Context
+**/
+VOID
+EFIAPI
+LibRtcVirtualNotifyEvent (
+  IN EFI_EVENT        Event,
+  IN VOID             *Context
+  )
+{
+  // Only needed if you are going to support the OS calling RTC functions in
+  // virtual mode. You will need to call EfiConvertPointer (). To convert any
+  // stored physical addresses to virtual address. After the OS transitions to
+  // calling in virtual mode, all future runtime calls will be made in virtual
+  // mode.
+  EfiConvertPointer (0x0, (VOID**)&mRtcRegisterBase);
+
+  // Convert the RtcRead and RtcWrite pointers for runtime use.
+  EfiConvertPointer (0x0, (VOID**)&RtcRead);
+  EfiConvertPointer (0x0, (VOID**)&RtcWrite);
+}
+
+/**
   The user Entry Point for PcRTC module.
 
   This is the entry point for PcRTC module. It installs the UEFI runtime service
@@ -125,11 +168,76 @@ InitializePcRtc (
   IN EFI_SYSTEM_TABLE                      *SystemTable
   )
 {
-  EFI_STATUS  Status;
-  EFI_EVENT   Event;
+  EFI_STATUS             Status;
+  EFI_EVENT              Event;
+  EFI_PHYSICAL_ADDRESS   RtcPageBase;
 
   EfiInitializeLock (&mModuleGlobal.RtcLock, TPL_CALLBACK);
   mModuleGlobal.CenturyRtcAddress = GetCenturyRtcAddress ();
+
+  if (FixedPcdGetBool (PcdRtcUseMmio)) {
+    mRtcRegisterBase = PcdGet8 (PcdRtcIndexRegister);
+    RtcPageBase = mRtcRegisterBase & ~(EFI_PAGE_SIZE - 1);
+
+    // Declare the controller as EFI_MEMORY_RUNTIME
+    Status = gDS->AddMemorySpace (
+                    EfiGcdMemoryTypeMemoryMappedIo,
+                    RtcPageBase,
+                    EFI_PAGE_SIZE,
+                    EFI_MEMORY_UC | EFI_MEMORY_RUNTIME
+                    );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR, "Failed to add memory space. Status = %r\n",
+        Status
+        ));
+      return Status;
+    }
+
+    Status = gDS->AllocateMemorySpace (
+                    EfiGcdAllocateAddress,
+                    EfiGcdMemoryTypeMemoryMappedIo,
+                    0,
+                    EFI_PAGE_SIZE,
+                    &RtcPageBase,
+                    ImageHandle,
+                    NULL
+                    );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "Failed to allocate memory space. Status = %r\n",
+        Status
+        ));
+      gDS->RemoveMemorySpace (
+             RtcPageBase,
+             EFI_PAGE_SIZE
+             );
+      return Status;
+    }
+
+    Status = gDS->SetMemorySpaceAttributes (
+                    RtcPageBase,
+                    EFI_PAGE_SIZE,
+                    EFI_MEMORY_UC | EFI_MEMORY_RUNTIME
+                    );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "Failed to set memory attributes. Status = %r\n",
+        Status
+        ));
+      gDS->FreeMemorySpace (
+               RtcPageBase,
+               EFI_PAGE_SIZE
+               );
+      gDS->RemoveMemorySpace (
+             RtcPageBase,
+             EFI_PAGE_SIZE
+             );
+      return Status;
+    }
+  }
 
   Status = PcRtcInit (&mModuleGlobal);
   ASSERT_EFI_ERROR (Status);
@@ -165,7 +273,23 @@ InitializePcRtc (
                   NULL,
                   NULL
                   );
-  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    ASSERT_EFI_ERROR (Status);
+    return Status;
+  }
+
+  if (FixedPcdGetBool (PcdRtcUseMmio)) {
+    // Register for the virtual address change event
+    Status = gBS->CreateEventEx (
+                    EVT_NOTIFY_SIGNAL,
+                    TPL_NOTIFY,
+                    LibRtcVirtualNotifyEvent,
+                    NULL,
+                    &gEfiEventVirtualAddressChangeGuid,
+                    &mVirtualAddrChangeEvent
+                    );
+    ASSERT_EFI_ERROR (Status);
+  }
 
   return Status;
 }
