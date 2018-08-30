@@ -5,6 +5,7 @@
 # four EFI_RUNTIME_SERVICES: SetVariable, GetVariable, GetNextVariableName and QueryVariableInfo.
 #
 # Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -53,6 +54,7 @@
   BaseMemoryLib
   HobLib
   PcdLib
+  DxeServicesTableLib
 
 [Protocols]
   gEfiVariableArchProtocolGuid                  ## PRODUCES
@@ -77,9 +79,13 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxHardwareErrorVariableSize    ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdVariableStoreSize               ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdHwErrStorageSize                ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMapEmuVariableNvStoreReserved   ## CONSUMES
 
 [FeaturePcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdVariableCollectStatistics   ## CONSUMES # statistic the information of variable.
+
+[Depex.common.DXE_RUNTIME_DRIVER]
+  gEfiCpuArchProtocolGuid
 
 [Depex]
   TRUE

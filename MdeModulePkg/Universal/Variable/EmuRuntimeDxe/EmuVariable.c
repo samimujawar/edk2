@@ -4,6 +4,7 @@
   The nonvolatile variable space doesn't exist.
 
 Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -13,6 +14,8 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
+#include <Library/DxeServicesTableLib.h>
 
 #include "Variable.h"
 
@@ -1643,11 +1646,13 @@ EmuQueryVariableInfo (
 
   This function allocates memory space for variable store area and initializes its attributes.
 
+  @param  ImageHandle    The Image handle of this driver.
   @param  VolatileStore  Indicates if the variable store is volatile.
 
 **/
 EFI_STATUS
 InitializeVariableStore (
+  IN  EFI_HANDLE            ImageHandle,
   IN  BOOLEAN               VolatileStore
   )
 {
@@ -1693,6 +1698,74 @@ InitializeVariableStore (
     VariableStore =
       (VARIABLE_STORE_HEADER *)(VOID*)(UINTN)
         PcdGet64 (PcdEmuVariableNvStoreReserved);
+
+    if (PcdGetBool (PcdMapEmuVariableNvStoreReserved)) {
+      DEBUG((
+        DEBUG_INFO,
+        "Initializing NV Variable Store at %p, Size = 0x%x\n",
+        VariableStore, PcdGet32 (PcdVariableStoreSize)
+        ));
+
+      // Declare the NV Storage as persistent EFI_MEMORY_RUNTIME memory
+      Status = gDS->AddMemorySpace (
+                      EfiGcdMemoryTypePersistent,
+                      (EFI_PHYSICAL_ADDRESS)VariableStore,
+                      PcdGet32 (PcdVariableStoreSize),
+                      EFI_MEMORY_UC | EFI_MEMORY_RUNTIME
+                      );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR, "Failed to add memory space. Status = %r\n",
+          Status
+          ));
+        return Status;
+      }
+
+      Status = gDS->AllocateMemorySpace (
+                      EfiGcdAllocateAddress,
+                      EfiGcdMemoryTypePersistent,
+                      0,
+                      PcdGet32 (PcdVariableStoreSize),
+                      (EFI_PHYSICAL_ADDRESS*)&VariableStore,
+                      ImageHandle,
+                      NULL
+                      );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "Failed to allocate memory space. Status = %r\n",
+          Status
+          ));
+        gDS->RemoveMemorySpace (
+               (EFI_PHYSICAL_ADDRESS)VariableStore,
+               PcdGet32 (PcdVariableStoreSize)
+               );
+        return Status;
+      }
+
+      Status = gDS->SetMemorySpaceAttributes (
+                      (EFI_PHYSICAL_ADDRESS)VariableStore,
+                      PcdGet32 (PcdVariableStoreSize),
+                      EFI_MEMORY_UC | EFI_MEMORY_RUNTIME
+                      );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "Failed to set memory attributes. Status = %r\n",
+          Status
+          ));
+        gDS->FreeMemorySpace (
+               (EFI_PHYSICAL_ADDRESS)VariableStore,
+               PcdGet32 (PcdVariableStoreSize)
+               );
+        gDS->RemoveMemorySpace (
+               (EFI_PHYSICAL_ADDRESS)VariableStore,
+               PcdGet32 (PcdVariableStoreSize)
+               );
+        return Status;
+      }
+    }
+
     if (
          (VariableStore->Size == PcdGet32 (PcdVariableStoreSize)) &&
          (VariableStore->Format == VARIABLE_STORE_FORMATTED) &&
@@ -1806,7 +1879,7 @@ VariableCommonInitialize (
   //
   // Intialize volatile variable store
   //
-  Status = InitializeVariableStore (TRUE);
+  Status = InitializeVariableStore (ImageHandle, TRUE);
   if (EFI_ERROR (Status)) {
     FreePool(mVariableModuleGlobal);
     return Status;
@@ -1814,7 +1887,7 @@ VariableCommonInitialize (
   //
   // Intialize non volatile variable store
   //
-  Status = InitializeVariableStore (FALSE);
+  Status = InitializeVariableStore (ImageHandle, FALSE);
 
   return Status;
 }
