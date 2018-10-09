@@ -2,6 +2,8 @@
   UART Serial Port library functions
 
   Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2018, ARM Limited. All rights reserved.<BR>
+
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -57,6 +59,66 @@ UINT8   gParity   = 0;
 UINT8   gBreakSet = 0;
 
 /**
+  Reads an 8-bit value from the serial port.
+
+  This function checks PcdSerialUseMmio to determine if I/O
+  mapped IO or Memory Mapped IO operations must be performed on
+  the serial port. It then uses the appropriate interface to
+  read the Value from the serial port.
+
+  If PcdSerialUseMmio is TRUE, then the value is read from MMIO space.
+  If PcdSerialUseMmio is FALSE, then the value is read from I/O space.
+
+  @param  Address   The UART register to read from.
+
+  @return The value read from the serial port.
+
+**/
+STATIC
+UINT8
+SerialPortRead8 (
+  IN  UINTN   Address
+)
+{
+  if (FixedPcdGetBool (PcdSerialUseMmio)) {
+    return MmioRead8 (Address);
+  }
+
+  return IoRead8 (Address);
+}
+
+/**
+  Writes an 8-bit value to the serial port.
+
+  This function checks PcdSerialUseMmio to determine if I/O
+  mapped IO or Memory Mapped IO operations must be performed on
+  the serial port. It then uses the appropriate interface to
+  write the Value to the serial port.
+
+  If PcdSerialUseMmio is TRUE, then the value is written to MMIO space.
+  If PcdSerialUseMmio is FALSE, then the value is written to I/O space.
+
+  @param  Address   The UART register to write.
+  @param  Value     The value to write to the I/O port.
+
+  @return The value written to the serial port.
+
+**/
+STATIC
+UINT8
+SerialPortWrite8 (
+  IN  UINTN   Address,
+  IN  UINT8   Value
+)
+{
+  if (FixedPcdGetBool (PcdSerialUseMmio)) {
+    return MmioWrite8 (Address, Value);
+  }
+
+  return IoWrite8 (Address, Value);
+}
+
+/**
   Initialize the serial device hardware.
 
   If no initialization is required, then return RETURN_SUCCESS.
@@ -91,19 +153,19 @@ SerialPortInitialize (
   // Set communications format
   //
   OutputData = (UINT8) ((DLAB << 7) | (gBreakSet << 6) | (gParity << 3) | (gStop << 2) | Data);
-  IoWrite8 (gUartBase + LCR_OFFSET, OutputData);
+  SerialPortWrite8 (gUartBase + LCR_OFFSET, OutputData);
 
   //
   // Configure baud rate
   //
-  IoWrite8 (gUartBase + BAUD_HIGH_OFFSET, (UINT8) (Divisor >> 8));
-  IoWrite8 (gUartBase + BAUD_LOW_OFFSET, (UINT8) (Divisor & 0xff));
+  SerialPortWrite8 (gUartBase + BAUD_HIGH_OFFSET, (UINT8) (Divisor >> 8));
+  SerialPortWrite8 (gUartBase + BAUD_LOW_OFFSET, (UINT8) (Divisor & 0xff));
 
   //
   // Switch back to bank 0
   //
   OutputData = (UINT8) ( (gBreakSet << 6) | (gParity << 3) | (gStop << 2) | Data);
-  IoWrite8 (gUartBase + LCR_OFFSET, OutputData);
+  SerialPortWrite8 (gUartBase + LCR_OFFSET, OutputData);
 
   return RETURN_SUCCESS;
 }
@@ -148,9 +210,9 @@ SerialPortWrite (
     // Wait for the serail port to be ready.
     //
     do {
-      Data = IoRead8 ((UINT16) gUartBase + LSR_OFFSET);
+      Data = SerialPortRead8 ((UINT16) gUartBase + LSR_OFFSET);
     } while ((Data & LSR_TXRDY) == 0);
-    IoWrite8 ((UINT16) gUartBase, *Buffer++);
+    SerialPortWrite8 ((UINT16) gUartBase, *Buffer++);
   }
 
   return Result;
@@ -189,10 +251,10 @@ SerialPortRead (
     // Wait for the serail port to be ready.
     //
     do {
-      Data = IoRead8 ((UINT16) gUartBase + LSR_OFFSET);
+      Data = SerialPortRead8 ((UINT16) gUartBase + LSR_OFFSET);
     } while ((Data & LSR_RXDA) == 0);
 
-    *Buffer++ = IoRead8 ((UINT16) gUartBase);
+    *Buffer++ = SerialPortRead8 ((UINT16) gUartBase);
   }
 
   return Result;
@@ -220,7 +282,7 @@ SerialPortPoll (
   //
   // Read the serial port status.
   //
-  Data = IoRead8 ((UINT16) gUartBase + LSR_OFFSET);
+  Data = SerialPortRead8 ((UINT16) gUartBase + LSR_OFFSET);
 
   return (BOOLEAN) ((Data & LSR_RXDA) != 0);
 }
@@ -253,7 +315,7 @@ SerialPortSetControl (
   //
   // Read the Modem Control Register.
   //
-  Mcr = IoRead8 ((UINT16) gUartBase + MCR_OFFSET);
+  Mcr = SerialPortRead8 ((UINT16) gUartBase + MCR_OFFSET);
   Mcr &= (~(MCR_DTRC | MCR_RTS));
 
   if ((Control & EFI_SERIAL_DATA_TERMINAL_READY) == EFI_SERIAL_DATA_TERMINAL_READY) {
@@ -267,7 +329,7 @@ SerialPortSetControl (
   //
   // Write the Modem Control Register.
   //
-  IoWrite8 ((UINT16) gUartBase + MCR_OFFSET, Mcr);
+  SerialPortWrite8 ((UINT16) gUartBase + MCR_OFFSET, Mcr);
 
   return RETURN_SUCCESS;
 }
@@ -297,7 +359,7 @@ SerialPortGetControl (
   //
   // Read the Modem Status Register.
   //
-  Msr = IoRead8 ((UINT16) gUartBase + MSR_OFFSET);
+  Msr = SerialPortRead8 ((UINT16) gUartBase + MSR_OFFSET);
 
   if ((Msr & MSR_CTS) == MSR_CTS) {
     *Control |= EFI_SERIAL_CLEAR_TO_SEND;
@@ -318,7 +380,7 @@ SerialPortGetControl (
   //
   // Read the Modem Control Register.
   //
-  Mcr = IoRead8 ((UINT16) gUartBase + MCR_OFFSET);
+  Mcr = SerialPortRead8 ((UINT16) gUartBase + MCR_OFFSET);
 
   if ((Mcr & MCR_DTRC) == MCR_DTRC) {
     *Control |= EFI_SERIAL_DATA_TERMINAL_READY;
@@ -331,7 +393,7 @@ SerialPortGetControl (
   //
   // Read the Line Status Register.
   //
-  Lsr = IoRead8 ((UINT16) gUartBase + LSR_OFFSET);
+  Lsr = SerialPortRead8 ((UINT16) gUartBase + LSR_OFFSET);
 
   if ((Lsr & LSR_TXRDY) == LSR_TXRDY) {
     *Control |= EFI_SERIAL_OUTPUT_BUFFER_EMPTY;
@@ -470,19 +532,19 @@ SerialPortSetAttributes (
   // Set communications format
   //
   OutputData = (UINT8) ((DLAB << 7) | (gBreakSet << 6) | (LcrParity << 3) | (LcrStop << 2) | LcrData);
-  IoWrite8 (gUartBase + LCR_OFFSET, OutputData);
+  SerialPortWrite8 (gUartBase + LCR_OFFSET, OutputData);
 
   //
   // Configure baud rate
   //
-  IoWrite8 (gUartBase + BAUD_HIGH_OFFSET, (UINT8) (Divisor >> 8));
-  IoWrite8 (gUartBase + BAUD_LOW_OFFSET, (UINT8) (Divisor & 0xff));
+  SerialPortWrite8 (gUartBase + BAUD_HIGH_OFFSET, (UINT8) (Divisor >> 8));
+  SerialPortWrite8 (gUartBase + BAUD_LOW_OFFSET, (UINT8) (Divisor & 0xff));
 
   //
   // Switch back to bank 0
   //
   OutputData = (UINT8) ((gBreakSet << 6) | (LcrParity << 3) | (LcrStop << 2) | LcrData);
-  IoWrite8 (gUartBase + LCR_OFFSET, OutputData);
+  SerialPortWrite8 (gUartBase + LCR_OFFSET, OutputData);
 
   return RETURN_SUCCESS;
 }
