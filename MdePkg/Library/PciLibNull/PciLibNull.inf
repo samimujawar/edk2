@@ -1,0 +1,25 @@
+#/** @file
+#
+#  Null implementation of Pcilib
+#
+#  Copyright (c) 2019, ARM Limited. All rights reserved.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = PciLibNull
+  FILE_GUID                      = C2E95ECC-9A39-4293-9F52-4C82BA370952
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PciLib
+
+
+[Sources]
+  PciLibNull.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
