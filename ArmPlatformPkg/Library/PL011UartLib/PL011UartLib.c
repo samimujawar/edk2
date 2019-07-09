@@ -2,7 +2,7 @@
   Serial I/O Port library functions with no library constructor/destructor
 
   Copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
-  Copyright (c) 2011 - 2016, ARM Ltd. All rights reserved.<BR>
+  Copyright (c) 2011 - 2019, ARM Ltd. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -78,6 +78,7 @@ PL011UartInitializePort (
   UINT32      Integer;
   UINT32      Fractional;
   UINT32      HardwareFifoDepth;
+  UINT64      DivisorValue;
 
   HardwareFifoDepth = (PL011_UARTPID2_VER (MmioRead32 (UartBase + UARTPID2)) \
                        > PL011_VER_R1P4) \
@@ -188,7 +189,12 @@ PL011UartInitializePort (
       return RETURN_INVALID_PARAMETER;
     }
 
-    Divisor = (UartClkInHz * 4) / *BaudRate;
+    DivisorValue = (((UINT64)UartClkInHz * 4) / *BaudRate);
+    if (DivisorValue > MAX_UINT32) {
+      return RETURN_INVALID_PARAMETER;
+    }
+
+    Divisor = (UINT32)DivisorValue;
     Integer = Divisor >> FRACTION_PART_SIZE_IN_BITS;
     Fractional = Divisor & FRACTION_PART_MASK;
   }
