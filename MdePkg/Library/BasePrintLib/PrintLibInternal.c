@@ -2,11 +2,19 @@
   Print Library internal worker functions.
 
   Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2019, ARM Ltd. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "PrintLibInternal.h"
+
+//
+// Declare a VA_LIST global variable that is used to initialise VA_LIST
+// variables before use. The VA_LIST cannot be assigned a NULL value
+// because some compilers define VA_LIST to be a structure.
+//
+extern VA_LIST gNullVaList;
 
 #define WARNING_STATUS_NUMBER         5
 #define ERROR_STATUS_NUMBER           33
@@ -1256,6 +1264,7 @@ BasePrintLibSPrint (
   VA_LIST  Marker;
   UINTN    NumberOfPrinted;
 
+  Marker = gNullVaList;
   VA_START (Marker, FormatString);
   NumberOfPrinted = BasePrintLibSPrintMarker (StartOfBuffer, BufferSize, Flags, FormatString, Marker, NULL);
   VA_END (Marker);

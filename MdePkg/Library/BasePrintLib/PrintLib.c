@@ -3,6 +3,7 @@
 
   Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
   Portions copyright (c) 2008 - 2009, Apple Inc. All rights reserved.<BR>
+  Copyright (c) 2019, ARM Ltd. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -177,6 +178,7 @@ UnicodeSPrint (
   VA_LIST Marker;
   UINTN   NumberOfPrinted;
 
+  Marker = gNullVaList;
   VA_START (Marker, FormatString);
   NumberOfPrinted = UnicodeVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
   VA_END (Marker);
@@ -337,6 +339,7 @@ UnicodeSPrintAsciiFormat (
   VA_LIST Marker;
   UINTN   NumberOfPrinted;
 
+  Marker = gNullVaList;
   VA_START (Marker, FormatString);
   NumberOfPrinted = UnicodeVSPrintAsciiFormat (StartOfBuffer, BufferSize, FormatString, Marker);
   VA_END (Marker);
@@ -614,6 +617,7 @@ AsciiSPrint (
   VA_LIST Marker;
   UINTN   NumberOfPrinted;
 
+  Marker = gNullVaList;
   VA_START (Marker, FormatString);
   NumberOfPrinted = AsciiVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
   VA_END (Marker);
@@ -774,6 +778,7 @@ AsciiSPrintUnicodeFormat (
   VA_LIST Marker;
   UINTN   NumberOfPrinted;
 
+  Marker = gNullVaList;
   VA_START (Marker, FormatString);
   NumberOfPrinted = AsciiVSPrintUnicodeFormat (StartOfBuffer, BufferSize, FormatString, Marker);
   VA_END (Marker);
