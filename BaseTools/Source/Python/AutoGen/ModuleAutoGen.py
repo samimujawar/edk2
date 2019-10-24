@@ -931,7 +931,14 @@ class ModuleAutoGen(AutoGen):
     @cached_property
     def CodaTargetList(self):
         self.Targets
-        return self._FinalBuildTargetList
+
+        # To resolve dependencies on compiled ASL files (.aml files) in modules,
+        # build them first by putting them as the first targets in the
+        # CodaTargetList.
+        OrderedList = list(self._FinalBuildTargetList)
+        OrderedList.sort(key=lambda T: (T.Target.Ext.lower() != '.aml'))
+
+        return OrderedList
 
     @cached_property
     def FileTypes(self):
