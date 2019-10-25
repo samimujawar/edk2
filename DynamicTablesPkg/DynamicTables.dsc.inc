@@ -14,6 +14,7 @@
 
 [LibraryClasses.common]
   TableHelperLib|DynamicTablesPkg/Library/Common/TableHelperLib/TableHelperLib.inf
+  AmlLib|DynamicTablesPkg/Library/Common/AmlLib/AmlLib.inf
 
 [Components.common]
   #
