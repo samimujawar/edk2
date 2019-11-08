@@ -23,6 +23,7 @@
 [Sources]
   AcpiTableFactory/AcpiTableFactory.c
   DeviceTreeTableFactory/DeviceTreeTableFactory.c
+  DynamicTableFactory.h
   DynamicTableFactoryDxe.c
   SmbiosTableFactory/SmbiosTableFactory.c
 
