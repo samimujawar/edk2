@@ -2,7 +2,7 @@
 # Standalone MM Platform.
 #
 # Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
-# Copyright (c) 2016 - 2018, ARM Limited. All rights reserved.<BR>
+# Copyright (c) 2016 - 2019, ARM Limited. All rights reserved.<BR>
 #
 #    SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -112,6 +112,9 @@
 #                        module style (EDK or EDKII) specified in [Components] section.
 #
 ###################################################################################################
+[BuildOptions.common]
+*_*_*_CC_FLAGS = -DDISABLE_NEW_DEPRECATED_INTERFACES
+
 [BuildOptions.AARCH64]
 GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000 -march=armv8-a+nofp -mstrict-align
 GCC:*_*_*_CC_FLAGS = -mstrict-align
