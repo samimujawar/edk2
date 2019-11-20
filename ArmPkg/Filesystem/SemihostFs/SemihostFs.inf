@@ -2,7 +2,7 @@
 #  Support a Semi Host file system over a debuggers JTAG
 #
 #  Copyright (c) 2009, Apple Inc. All rights reserved.<BR>
-#  Portions copyright (c) 2011 - 2013, ARM Ltd. All rights reserved.
+#  Portions copyright (c) 2011 - 2019, ARM Ltd. All rights reserved.
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -19,6 +19,7 @@
 
 [Sources.ARM, Sources.AARCH64]
   Arm/SemihostFs.c
+  Arm/SemihostFs.h
 
 [Packages]
   MdePkg/MdePkg.dec
