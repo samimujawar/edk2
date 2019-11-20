@@ -1,7 +1,7 @@
 #/** @file
 #  INF file for the MMC Host Protocol implementation for the ARM PrimeCell PL180.
 #
-#  Copyright (c) 2011, ARM Limited. All rights reserved.
+#  Copyright (c) 2011 - 2019, ARM Limited. All rights reserved.
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -18,6 +18,7 @@
 
 [Sources.common]
   PL180Mci.c
+  PL180Mci.h
 
 [Packages]
   ArmPlatformPkg/ArmPlatformPkg.dec

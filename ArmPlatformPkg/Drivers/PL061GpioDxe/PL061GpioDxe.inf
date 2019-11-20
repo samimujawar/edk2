@@ -17,6 +17,7 @@
 
 [Sources.common]
   PL061Gpio.c
+  PL061Gpio.h
 
 [Packages]
   MdePkg/MdePkg.dec
