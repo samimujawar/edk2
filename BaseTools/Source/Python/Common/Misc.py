@@ -2,6 +2,7 @@
 # Common routines used by all tools
 #
 # Copyright (c) 2007 - 2019, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
@@ -1438,6 +1439,7 @@ class PathClass(object):
                  Arch='COMMON', ToolChainFamily='', Target='', TagName='', ToolCode=''):
         self.Arch = Arch
         self.File = str(File)
+        self.SourceFileDependencies = []
         if os.path.isabs(self.File):
             self.Root = ''
             self.AlterRoot = ''

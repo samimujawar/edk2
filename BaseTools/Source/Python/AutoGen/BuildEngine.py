@@ -2,6 +2,7 @@
 # The engine for building files
 #
 # Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
@@ -53,6 +54,7 @@ class TargetDescBlock(object):
         self.Outputs = Outputs
         self.Commands = Commands
         self.Dependencies = Dependencies
+        self.SourceFileDependencies = None
         if self.Outputs:
             self.Target = self.Outputs[0]
         else:
@@ -277,6 +279,9 @@ class FileBuildRule:
             TargetDesc.GenListFile = self.GenListFile
             TargetDesc.GenIncListFile = self.GenIncListFile
             self.BuildTargets[DstFile[0]] = TargetDesc
+
+        TargetDesc.SourceFileDependencies = SourceFile.SourceFileDependencies
+
         return TargetDesc
 
     def _BuildCommand(self, Macros):

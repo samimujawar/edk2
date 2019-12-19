@@ -1013,6 +1013,11 @@ cleanlib:
 
                 Deps = []
                 CCodeDeps = []
+
+                if T.SourceFileDependencies:
+                    for File in T.SourceFileDependencies:
+                        Deps.append(self.PlaceMacro(str(File), self.Macros))
+
                 # Add force-dependencies
                 for Dep in T.Dependencies:
                     Deps.append(self.PlaceMacro(str(Dep), self.Macros))
@@ -1091,6 +1096,9 @@ cleanlib:
                     if SingleCommandList[-1].endswith("%s%s.c" % (TAB_SLASH, CmdSumDict[CmdSign[3:].rsplit(TAB_SLASH, 1)[0]])):
                         Cpplist = CmdCppDict[T.Target.SubDir]
                         Cpplist.insert(0, '$(OBJLIST_%d): ' % list(self.ObjTargetDict.keys()).index(T.Target.SubDir))
+                        if T.UserDependencies:
+                            for File in T.UserDependencies:
+                                Cpplist.append(self.PlaceMacro(str(File), self.Macros))
                         T.Commands[Index] = '%s\n\t%s' % (' \\\n\t'.join(Cpplist), CmdTargetDict[CmdSign])
                     else:
                         T.Commands.pop(Index)

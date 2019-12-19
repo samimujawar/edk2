@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
 # (C) Copyright 2015-2018 Hewlett Packard Enterprise Development LP<BR>
+# Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
@@ -735,8 +736,20 @@ class InfParser(MetaFileParser):
     #
     @ParseMacro
     def _SourceFileParser(self):
-        TokenList = GetSplitValueList(self._CurrentLine, TAB_VALUE_SPLIT)
-        self._ValueList[0:len(TokenList)] = TokenList
+        SourceFileDependencySplit = GetSplitValueList(self._CurrentLine, TAB_COLON_SPLIT, 1)
+        BuildOptionSplit = GetSplitValueList(SourceFileDependencySplit[0], TAB_VALUE_SPLIT, 1)
+
+        # Get the filename.
+        self._ValueList[0] = BuildOptionSplit[0]
+
+        # Get the build options.
+        if len(BuildOptionSplit) > 1:
+            self._ValueList[1] = BuildOptionSplit[1]
+
+        # Get the dependencies.
+        if len(SourceFileDependencySplit) > 1:
+            self._ValueList[2] = SourceFileDependencySplit[1]
+
         Macros = self._Macros
         # For Acpi tables, remove macro like ' TABLE_NAME=Sata1'
         if 'COMPONENT_TYPE' in Macros:

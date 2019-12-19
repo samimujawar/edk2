@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2008 - 2018, Intel Corporation. All rights reserved.<BR>
 # (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
+# Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
@@ -536,12 +537,19 @@ class InfBuildData(ModuleBuildClassObject):
             return []
 
         RetVal = []
+        PendingSourceFileDependencies = dict()
         RecordList = self._RawData[MODEL_EFI_SOURCE_FILE, self._Arch, self._Platform]
         Macros = self._Macros
         for Record in RecordList:
             LineNo = Record[-1]
-            ToolChainFamily = Record[1]
-            TagName = Record[2]
+
+            BuildOptions = ['', '']
+            SplittedValueList = GetSplitValueList(Record[1], TAB_VALUE_SPLIT, 1)
+            BuildOptions[0:len(SplittedValueList)] = SplittedValueList
+            SourceFileDependencies = list(set(GetSplitValueList(Record[2], TAB_SPACE_SPLIT)))
+
+            ToolChainFamily = BuildOptions[0]
+            TagName = BuildOptions[1]
             ToolCode = Record[3]
 
             File = PathClass(NormPath(Record[0], Macros), self._ModuleDir, '',
@@ -552,9 +560,28 @@ class InfBuildData(ModuleBuildClassObject):
                 EdkLogger.error('build', ErrorCode, ExtraData=ErrorInfo, File=self.MetaFile, Line=LineNo)
 
             RetVal.append(File)
+
+            # If there are source file dependencies, resolve them after all
+            # the PathClass instances of the source files have been created.
+            if SourceFileDependencies[0] != '':
+                PendingSourceFileDependencies[File] = SourceFileDependencies
+
         # add any previously found dependency files to the source list
         if self._DependencyFileList:
             RetVal.extend(self._DependencyFileList)
+
+        # Resolve the dependencies between the PathClass instances.
+        for SourceFile, SourceFileDepList in PendingSourceFileDependencies.items():
+            for SourceFileDepFile in SourceFileDepList:
+                Found = False
+                for Val in RetVal:
+                    if SourceFileDepFile == Val.File:
+                        SourceFile.SourceFileDependencies.append(Val)
+                        Found = True
+                        break
+                if not Found:
+                    EdkLogger.error("build", FILE_NOT_FOUND, ExtraData=SourceFileDepFile)
+
         return RetVal
 
     ## Retrieve library classes employed by this module

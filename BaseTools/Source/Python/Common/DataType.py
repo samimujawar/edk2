@@ -2,7 +2,7 @@
 # This file is used to define common static strings used by INF/DEC/DSC files
 #
 # Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
-# Portions copyright (c) 2011 - 2013, ARM Ltd. All rights reserved.<BR>
+# Portions copyright (c) 2011 - 2020, ARM Ltd. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 
 ##
@@ -19,6 +19,7 @@ TAB_VALUE_SPLIT = '|'
 TAB_COMMA_SPLIT = ','
 TAB_SPACE_SPLIT = ' '
 TAB_SEMI_COLON_SPLIT = ';'
+TAB_COLON_SPLIT = ':'
 TAB_SECTION_START = '['
 TAB_SECTION_END = ']'
 TAB_OPTION_START = '<'

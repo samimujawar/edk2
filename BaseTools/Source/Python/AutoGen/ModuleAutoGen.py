@@ -2,6 +2,7 @@
 # Create makefile for MS nmake and GNU make
 #
 # Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 from __future__ import absolute_import
@@ -875,6 +876,21 @@ class ModuleAutoGen(AutoGen):
 
             if Source != File:
                 CreateDirectory(Source.Dir)
+
+            # The Makefile rule created from with source file dependency must
+            # have an object file as prerequisite.
+            # This gets the ouput format of sources.
+            OutPutSourceFileDependencies = []
+            if Source.SourceFileDependencies:
+                for File in Source.SourceFileDependencies:
+                    if File.Type in self.BuildRules:
+                        DepRuleObject = self.BuildRules[File.Type]
+                        DepTarget = DepRuleObject.Apply(File, self.BuildRuleOrder)
+                        # Files not producing outputs like '.h files don't create a target.
+                        if DepTarget:
+                            OutPutSourceFileDependencies.extend(DepTarget.Outputs)
+
+                Source.SourceFileDependencies = OutPutSourceFileDependencies
 
             if File.IsBinary and File == Source and File in BinaryFileList:
                 # Skip all files that are not binary libraries
