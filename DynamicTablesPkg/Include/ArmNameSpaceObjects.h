@@ -56,6 +56,7 @@ typedef enum ArmObjectID {
   EArmObjDeviceHandleAcpi,             ///< 32 - Device Handle Acpi
   EArmObjDeviceHandlePci,              ///< 33 - Device Handle Pci
   EArmObjGenericInitiatorAffinityInfo, ///< 34 - Generic Initiator Affinity
+  EArmObjSerialPortInfo,               ///< 35 - Generic Serial Port Info
   EArmObjMax
 } EARM_OBJECT_ID;
 
@@ -270,7 +271,8 @@ typedef struct CmArmGicItsInfo {
     Serial Port information for the Platform.
 
     ID: EArmObjSerialConsolePortInfo or
-        EArmObjSerialDebugPortInfo
+        EArmObjSerialDebugPortInfo or
+        EArmObjSerialPortInfo
 */
 typedef struct CmArmSerialPortInfo {
   /// The physical base address for the serial port

@@ -55,6 +55,9 @@ The Dynamic Tables Framework implements the following ACPI table generators:
             the Configuration Manager and builds the PPTT table.
   - SRAT  : The SRAT generator collates the system resource affinity information
             from the Configuration Manager and builds the SRAT table.
+  - SSDT Serial: The SSDT Serial generator collates the Serial port information
+            from the Configuration Manager and patches the SSDT Serial Port
+            template to build the SSDT Serial port table.
 */
 
 /** The ACPI_TABLE_GENERATOR_ID type describes ACPI table generator ID.
@@ -78,6 +81,7 @@ typedef enum StdAcpiTableId {
   EStdAcpiTableIdIort,                          ///< IORT Generator
   EStdAcpiTableIdPptt,                          ///< PPTT Generator
   EStdAcpiTableIdSrat,                          ///< SRAT Generator
+  EStdAcpiTableIdSsdtSerial,                    ///< SSDT Serial Generator
   EStdAcpiTableIdMax
 } ESTD_ACPI_TABLE_ID;
 
