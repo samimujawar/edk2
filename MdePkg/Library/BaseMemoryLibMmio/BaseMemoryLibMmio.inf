@@ -1,0 +1,50 @@
+## @file
+#  Instance of Base Memory Library using Mmio operations.
+#
+#
+#  Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = BaseMemoryLibMmio
+  MODULE_UNI_FILE                = BaseMemoryLibMmio.uni
+  FILE_GUID                      = 5724063D-9855-4B3A-8DEE-1F80ED07E096
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = BaseMemoryLib
+
+#
+#  VALID_ARCHITECTURES           = ARM AARCH64
+#
+
+[Sources]
+  SetMem.c
+  ScanMem64Wrapper.c
+  ScanMem32Wrapper.c
+  ScanMem16Wrapper.c
+  ScanMem8Wrapper.c
+  ZeroMemWrapper.c
+  CompareMemWrapper.c
+  SetMem64Wrapper.c
+  SetMem32Wrapper.c
+  SetMem16Wrapper.c
+  SetMemWrapper.c
+  CopyMemWrapper.c
+  IsZeroBufferWrapper.c
+  MemLibGeneric.c
+  MemLibGuid.c
+  CopyMem.c
+  MemLibInternals.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  BaseLib
+  IoLib
+
