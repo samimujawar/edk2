@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2011-2015, ARM Limited. All rights reserved.
+#  Copyright (c) 2011-2020, ARM Limited. All rights reserved.
 #  Copyright (c) 2014, Linaro Limited. All rights reserved.
 #  Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.
 #
@@ -323,7 +323,11 @@
     <LibraryClasses>
       NULL|ArmVirtPkg/Library/ArmVirtTimerFdtClientLib/ArmVirtTimerFdtClientLib.inf
   }
-  ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
+  ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf {
+    <LibraryClasses>
+      BaseMemoryLib|MdePkg/Library/BaseMemoryLibMmio/BaseMemoryLibMmio.inf
+  }
+
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
 
   #
