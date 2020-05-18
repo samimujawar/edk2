@@ -2,7 +2,7 @@
   Serial I/O Port library functions with no library constructor/destructor
 
   Copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
-  Copyright (c) 2011 - 2019, ARM Ltd. All rights reserved.<BR>
+  Copyright (c) 2011 - 2020, ARM Ltd. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -174,6 +174,14 @@ PL011UartInitializePort (
   //
 
   // If PL011 Integer value has been defined then always ignore the BAUD rate
+#if defined(_MSC_EXTENSIONS)
+  // Suppress 'warning C6326' reported by Visual Studio compiler using
+  // the suppress pragma directive that: 'Pushes the current state of
+  // the pragma on the stack, disables the specified warning for the
+  // next line, and then pops the warning stack so that the pragma state
+  // is reset.'
+#pragma warning(suppress:6326)
+#endif
   if (FixedPcdGet32 (PL011UartInteger) != 0) {
     Integer = FixedPcdGet32 (PL011UartInteger);
     Fractional = FixedPcdGet32 (PL011UartFractional);
