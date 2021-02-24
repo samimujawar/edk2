@@ -57,8 +57,14 @@ GetMemoryPermissions (
     // for other Direct Request calls which are not atomic
     // We therefore check only for Direct Response by the
     // callee.
-    if (GetMemoryPermissionsSvcArgs.Arg0 !=
+    if (GetMemoryPermissionsSvcArgs.Arg0 ==
         ARM_SVC_ID_FFA_MSG_SEND_DIRECT_RESP_AARCH64) {
+      // A Direct Response means FF-A success
+      // Now check the payload for errors
+      // The callee sends back the return value
+      // in Arg3
+      Ret = GetMemoryPermissionsSvcArgs.Arg3;
+    } else {
       // If Arg0 is not a Direct Response, that means we
       // have an FF-A error. We need to check Arg2 for the
       // FF-A error code.
@@ -80,13 +86,6 @@ GetMemoryPermissions (
       case ARM_FFA_SPM_RET_ABORTED:
         return EFI_ABORTED;
       }
-    } else if (GetMemoryPermissionsSvcArgs.Arg0 ==
-               ARM_SVC_ID_FFA_MSG_SEND_DIRECT_RESP_AARCH64) {
-      // A Direct Response means FF-A success
-      // Now check the payload for errors
-      // The callee sends back the return value
-      // in Arg3
-      Ret = GetMemoryPermissionsSvcArgs.Arg3;
     }
   } else {
     Ret = GetMemoryPermissionsSvcArgs.Arg0;
@@ -150,8 +149,14 @@ RequestMemoryPermissionChange (
     // for other Direct Request calls which are not atomic
     // We therefore check only for Direct Response by the
     // callee.
-    if (ChangeMemoryPermissionsSvcArgs.Arg0 !=
+    if (ChangeMemoryPermissionsSvcArgs.Arg0 ==
         ARM_SVC_ID_FFA_MSG_SEND_DIRECT_RESP_AARCH64) {
+      // A Direct Response means FF-A success
+      // Now check the payload for errors
+      // The callee sends back the return value
+      // in Arg3
+      Ret = ChangeMemoryPermissionsSvcArgs.Arg3;
+    } else {
       // If Arg0 is not a Direct Response, that means we
       // have an FF-A error. We need to check Arg2 for the
       // FF-A error code.
@@ -172,13 +177,6 @@ RequestMemoryPermissionChange (
       case ARM_FFA_SPM_RET_ABORTED:
         return EFI_ABORTED;
       }
-    } else if (ChangeMemoryPermissionsSvcArgs.Arg0 ==
-               ARM_SVC_ID_FFA_MSG_SEND_DIRECT_RESP_AARCH64) {
-      // A Direct Response means FF-A success
-      // Now check the payload for errors
-      // The callee sends back the return value
-      // in Arg3
-      Ret = ChangeMemoryPermissionsSvcArgs.Arg3;
     }
   } else {
     Ret = ChangeMemoryPermissionsSvcArgs.Arg0;
