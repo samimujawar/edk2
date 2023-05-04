@@ -106,6 +106,7 @@ QemuFwCfgInitialize (
       InternalQemuFwCfgReadBytes  = DmaReadBytes;
       InternalQemuFwCfgWriteBytes = DmaWriteBytes;
       InternalQemuFwCfgSkipBytes  = DmaSkipBytes;
+      InternalInitIoMmu ();
     }
 
     return RETURN_SUCCESS;
@@ -203,6 +204,8 @@ QemuFwCfgInitialize (
           InternalQemuFwCfgWriteBytes = DmaWriteBytes;
           InternalQemuFwCfgSkipBytes  = DmaSkipBytes;
         }
+
+        InternalInitIoMmu ();
       }
     } else {
       mFwCfgSelectorAddress = 0;
