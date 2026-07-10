@@ -6,8 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef AML_NAMESPACE_H_
-#define AML_NAMESPACE_H_
+#pragma once
 
 #include <AmlNodeDefines.h>
 #include <Stream/AmlStream.h>
@@ -28,8 +27,8 @@
 EFI_STATUS
 EFIAPI
 AmlGetFirstAncestorNameSpaceNode (
-  IN  CONST AML_NODE_HEADER   * Node,
-  OUT       AML_NODE_HEADER  ** OutNode
+  IN  CONST AML_NODE_HEADER  *Node,
+  OUT       AML_NODE_HEADER  **OutNode
   );
 
 /** Build the raw absolute AML pathname to Node and write it to a stream.
@@ -66,9 +65,7 @@ AmlGetFirstAncestorNameSpaceNode (
 EFI_STATUS
 EFIAPI
 AmlGetRawNameSpacePath (
-  IN  CONST AML_NODE_HEADER   * Node,
-  IN        UINT32              InputParent,
-  OUT       AML_STREAM        * RawAbsPathBStream
+  IN  CONST AML_NODE_HEADER  *Node,
+  IN        UINT32           InputParent,
+  OUT       AML_STREAM       *RawAbsPathBStream
   );
-
-#endif // AML_NAMESPACE_H_

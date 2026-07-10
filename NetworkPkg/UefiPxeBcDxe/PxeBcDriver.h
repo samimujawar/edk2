@@ -7,11 +7,10 @@
 
 **/
 
-#ifndef __EFI_PXEBC_DRIVER_H__
-#define __EFI_PXEBC_DRIVER_H__
+#pragma once
 
-extern EFI_COMPONENT_NAME_PROTOCOL  gPxeBcComponentName;
-extern EFI_COMPONENT_NAME2_PROTOCOL gPxeBcComponentName2;
+extern EFI_COMPONENT_NAME_PROTOCOL   gPxeBcComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gPxeBcComponentName2;
 
 /**
   Test to see if this driver supports ControllerHandle. This service
@@ -63,7 +62,6 @@ PxeBcIp4DriverBindingStart (
   IN EFI_HANDLE                   ControllerHandle,
   IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   );
-
 
 /**
   Stop this driver on ControllerHandle. This service is called by the
@@ -171,5 +169,3 @@ PxeBcIp6DriverBindingStop (
   IN UINTN                        NumberOfChildren,
   IN EFI_HANDLE                   *ChildHandleBuffer
   );
-#endif
-

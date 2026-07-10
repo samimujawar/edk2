@@ -26,12 +26,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 TlsSetVersion (
-  IN     VOID                     *Tls,
-  IN     UINT8                    MajorVer,
-  IN     UINT8                    MinorVer
+  IN     VOID   *Tls,
+  IN     UINT8  MajorVer,
+  IN     UINT8  MinorVer
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -51,11 +51,11 @@ TlsSetVersion (
 EFI_STATUS
 EFIAPI
 TlsSetConnectionEnd (
-  IN     VOID                     *Tls,
-  IN     BOOLEAN                  IsServer
+  IN     VOID     *Tls,
+  IN     BOOLEAN  IsServer
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -80,12 +80,12 @@ TlsSetConnectionEnd (
 EFI_STATUS
 EFIAPI
 TlsSetCipherList (
-  IN     VOID                     *Tls,
-  IN     UINT16                   *CipherId,
-  IN     UINTN                    CipherNum
+  IN     VOID    *Tls,
+  IN     UINT16  *CipherId,
+  IN     UINTN   CipherNum
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -104,10 +104,10 @@ TlsSetCipherList (
 EFI_STATUS
 EFIAPI
 TlsSetCompressionMethod (
-  IN     UINT8                    CompMethod
+  IN     UINT8  CompMethod
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -123,14 +123,13 @@ TlsSetCompressionMethod (
 VOID
 EFIAPI
 TlsSetVerify (
-  IN     VOID                     *Tls,
-  IN     UINT32                   VerifyMode
+  IN     VOID    *Tls,
+  IN     UINT32  VerifyMode
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
 }
 
-// MU_CHANGE - Proposed fixes for TCBZ960, invalid domain name (CN) accepted. [BEGIN]
 /**
   Set the specified host name to be verified.
 
@@ -146,16 +145,14 @@ TlsSetVerify (
 EFI_STATUS
 EFIAPI
 TlsSetVerifyHost (
-  IN     VOID                     *Tls,
-  IN     UINT32                   Flags,
-  IN     CHAR8                    *HostName
+  IN     VOID    *Tls,
+  IN     UINT32  Flags,
+  IN     CHAR8   *HostName
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
-
-// MU_CHANGE - Proposed fixes for TCBZ960, invalid domain name (CN) accepted. [END]
 
 /**
   Sets a TLS/SSL session ID to be used during TLS/SSL connect.
@@ -175,12 +172,12 @@ TlsSetVerifyHost (
 EFI_STATUS
 EFIAPI
 TlsSetSessionId (
-  IN     VOID                     *Tls,
-  IN     UINT8                    *SessionId,
-  IN     UINT16                   SessionIdLen
+  IN     VOID    *Tls,
+  IN     UINT8   *SessionId,
+  IN     UINT16  SessionIdLen
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -204,12 +201,12 @@ TlsSetSessionId (
 EFI_STATUS
 EFIAPI
 TlsSetCaCertificate (
-  IN     VOID                     *Tls,
-  IN     VOID                     *Data,
-  IN     UINTN                    DataSize
+  IN     VOID   *Tls,
+  IN     VOID   *Data,
+  IN     UINTN  DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -233,23 +230,54 @@ TlsSetCaCertificate (
 EFI_STATUS
 EFIAPI
 TlsSetHostPublicCert (
-  IN     VOID                     *Tls,
-  IN     VOID                     *Data,
-  IN     UINTN                    DataSize
+  IN     VOID   *Tls,
+  IN     VOID   *Data,
+  IN     UINTN  DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
 /**
   Adds the local private key to the specified TLS object.
 
-  This function adds the local private key (PEM-encoded RSA or PKCS#8 private
+  This function adds the local private key (DER-encoded or PEM-encoded or PKCS#8 private
   key) into the specified TLS object for TLS negotiation.
 
   @param[in]  Tls         Pointer to the TLS object.
-  @param[in]  Data        Pointer to the data buffer of a PEM-encoded RSA
+  @param[in]  Data        Pointer to the data buffer of a DER-encoded or PEM-encoded
+                          or PKCS#8 private key.
+  @param[in]  DataSize    The size of data buffer in bytes.
+  @param[in]  Password    Pointer to NULL-terminated private key password, set it to NULL
+                          if private key not encrypted.
+
+  @retval  EFI_SUCCESS     The operation succeeded.
+  @retval  EFI_UNSUPPORTED This function is not supported.
+  @retval  EFI_ABORTED     Invalid private key data.
+
+**/
+EFI_STATUS
+EFIAPI
+TlsSetHostPrivateKeyEx (
+  IN     VOID   *Tls,
+  IN     VOID   *Data,
+  IN     UINTN  DataSize,
+  IN     VOID   *Password  OPTIONAL
+  )
+{
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Adds the local private key to the specified TLS object.
+
+  This function adds the local private key (DER-encoded or PEM-encoded or PKCS#8 private
+  key) into the specified TLS object for TLS negotiation.
+
+  @param[in]  Tls         Pointer to the TLS object.
+  @param[in]  Data        Pointer to the data buffer of a DER-encoded or PEM-encoded
                           or PKCS#8 private key.
   @param[in]  DataSize    The size of data buffer in bytes.
 
@@ -261,12 +289,12 @@ TlsSetHostPublicCert (
 EFI_STATUS
 EFIAPI
 TlsSetHostPrivateKey (
-  IN     VOID                     *Tls,
-  IN     VOID                     *Data,
-  IN     UINTN                    DataSize
+  IN     VOID   *Tls,
+  IN     VOID   *Data,
+  IN     UINTN  DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -287,11 +315,113 @@ TlsSetHostPrivateKey (
 EFI_STATUS
 EFIAPI
 TlsSetCertRevocationList (
-  IN     VOID                     *Data,
-  IN     UINTN                    DataSize
+  IN     VOID   *Data,
+  IN     UINTN  DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Set the specified server name in Server/Client.
+
+  @param[in]  Tls           Pointer to the TLS object.
+  @param[in]  SslCtx        Pointer to the SSL object.
+  @param[in]  HostName      The specified server name to be set.
+
+  @retval  EFI_SUCCESS      The Server Name was set successfully.
+  @retval  EFI_UNSUPPORTED  Failed to set the Server Name.
+**/
+EFI_STATUS
+EFIAPI
+TlsSetServerName (
+  IN     VOID   *Tls,
+  IN     VOID   *SslCtx,
+  IN     CHAR8  *HostName
+  )
+{
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Set the signature algorithm list to used by the TLS object.
+
+  This function sets the signature algorithms for use by a specified TLS object.
+
+  @param[in]  Tls                Pointer to a TLS object.
+  @param[in]  Data               Array of UINT8 of signature algorithms. The array consists of
+                                 pairs of the hash algorithm and the signature algorithm as defined
+                                 in RFC 5246
+  @param[in]  DataSize           The length the SignatureAlgoList. Must be divisible by 2.
+
+  @retval  EFI_SUCCESS           The signature algorithm list was set successfully.
+  @retval  EFI_INVALID_PARAMETER The parameters are invalid.
+  @retval  EFI_UNSUPPORTED       No supported TLS signature algorithm was found in SignatureAlgoList
+  @retval  EFI_OUT_OF_RESOURCES  Memory allocation failed.
+
+**/
+EFI_STATUS
+EFIAPI
+TlsSetSignatureAlgoList (
+  IN     VOID   *Tls,
+  IN     UINT8  *Data,
+  IN     UINTN  DataSize
+  )
+{
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Set the EC curve to be used for TLS flows
+
+  This function sets the EC curve to be used for TLS flows.
+
+  @param[in]  Tls                Pointer to a TLS object.
+  @param[in]  Data               An EC named curve as defined in section 5.1.1 of RFC 4492.
+  @param[in]  DataSize           Size of Data, it should be sizeof (UINT32)
+
+  @retval  EFI_SUCCESS           The EC curve was set successfully.
+  @retval  EFI_INVALID_PARAMETER The parameters are invalid.
+  @retval  EFI_UNSUPPORTED       The requested TLS EC curve is not supported
+
+**/
+EFI_STATUS
+EFIAPI
+TlsSetEcCurve (
+  IN     VOID   *Tls,
+  IN     UINT8  *Data,
+  IN     UINTN  DataSize
+  )
+{
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Set the Tls security level.
+
+  This function Set the Tls security level.
+  If Tls is NULL, nothing is done.
+
+  @param[in]  Tls                Pointer to the TLS object.
+  @param[in]  Level              Tls Security level need to set.
+
+  @retval  EFI_SUCCESS           The Tls security level was set successfully.
+  @retval  EFI_INVALID_PARAMETER The parameters are invalid.
+  @retval  EFI_UNSUPPORTED       The requested TLS set security level is not supported.
+
+**/
+EFI_STATUS
+EFIAPI
+TlsSetSecurityLevel (
+  IN VOID   *Tls,
+  IN UINT8  Level
+  )
+{
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -311,10 +441,10 @@ TlsSetCertRevocationList (
 UINT16
 EFIAPI
 TlsGetVersion (
-  IN     VOID                     *Tls
+  IN     VOID  *Tls
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return 0;
 }
 
@@ -334,10 +464,10 @@ TlsGetVersion (
 UINT8
 EFIAPI
 TlsGetConnectionEnd (
-  IN     VOID                     *Tls
+  IN     VOID  *Tls
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return 0;
 }
 
@@ -358,11 +488,11 @@ TlsGetConnectionEnd (
 EFI_STATUS
 EFIAPI
 TlsGetCurrentCipher (
-  IN     VOID                     *Tls,
-  IN OUT UINT16                   *CipherId
+  IN     VOID    *Tls,
+  IN OUT UINT16  *CipherId
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -385,11 +515,11 @@ TlsGetCurrentCipher (
 EFI_STATUS
 EFIAPI
 TlsGetCurrentCompressionId (
-  IN     VOID                     *Tls,
-  IN OUT UINT8                    *CompressionId
+  IN     VOID   *Tls,
+  IN OUT UINT8  *CompressionId
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -409,10 +539,10 @@ TlsGetCurrentCompressionId (
 UINT32
 EFIAPI
 TlsGetVerify (
-  IN     VOID                     *Tls
+  IN     VOID  *Tls
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return 0;
 }
 
@@ -434,12 +564,12 @@ TlsGetVerify (
 EFI_STATUS
 EFIAPI
 TlsGetSessionId (
-  IN     VOID                     *Tls,
-  IN OUT UINT8                    *SessionId,
-  IN OUT UINT16                   *SessionIdLen
+  IN     VOID    *Tls,
+  IN OUT UINT8   *SessionId,
+  IN OUT UINT16  *SessionIdLen
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -457,11 +587,11 @@ TlsGetSessionId (
 VOID
 EFIAPI
 TlsGetClientRandom (
-  IN     VOID                     *Tls,
-  IN OUT UINT8                    *ClientRandom
+  IN     VOID   *Tls,
+  IN OUT UINT8  *ClientRandom
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
 }
 
 /**
@@ -478,11 +608,11 @@ TlsGetClientRandom (
 VOID
 EFIAPI
 TlsGetServerRandom (
-  IN     VOID                     *Tls,
-  IN OUT UINT8                    *ServerRandom
+  IN     VOID   *Tls,
+  IN OUT UINT8  *ServerRandom
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
 }
 
 /**
@@ -502,11 +632,11 @@ TlsGetServerRandom (
 EFI_STATUS
 EFIAPI
 TlsGetKeyMaterial (
-  IN     VOID                     *Tls,
-  IN OUT UINT8                    *KeyMaterial
+  IN     VOID   *Tls,
+  IN OUT UINT8  *KeyMaterial
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -529,12 +659,12 @@ TlsGetKeyMaterial (
 EFI_STATUS
 EFIAPI
 TlsGetCaCertificate (
-  IN     VOID                     *Tls,
-  OUT    VOID                     *Data,
-  IN OUT UINTN                    *DataSize
+  IN     VOID   *Tls,
+  OUT    VOID   *Data,
+  IN OUT UINTN  *DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -558,12 +688,12 @@ TlsGetCaCertificate (
 EFI_STATUS
 EFIAPI
 TlsGetHostPublicCert (
-  IN     VOID                     *Tls,
-  OUT    VOID                     *Data,
-  IN OUT UINTN                    *DataSize
+  IN     VOID   *Tls,
+  OUT    VOID   *Data,
+  IN OUT UINTN  *DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -586,12 +716,12 @@ TlsGetHostPublicCert (
 EFI_STATUS
 EFIAPI
 TlsGetHostPrivateKey (
-  IN     VOID                     *Tls,
-  OUT    VOID                     *Data,
-  IN OUT UINTN                    *DataSize
+  IN     VOID   *Tls,
+  OUT    VOID   *Data,
+  IN OUT UINTN  *DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
 
@@ -613,10 +743,43 @@ TlsGetHostPrivateKey (
 EFI_STATUS
 EFIAPI
 TlsGetCertRevocationList (
-  OUT    VOID                     *Data,
-  IN OUT UINTN                    *DataSize
+  OUT    VOID   *Data,
+  IN OUT UINTN  *DataSize
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  Derive keying material from a TLS connection.
+
+  This function exports keying material using the mechanism described in RFC
+  5705.
+
+  @param[in]      Tls          Pointer to the TLS object
+  @param[in]      Label        Description of the key for the PRF function
+  @param[in]      Context      Optional context
+  @param[in]      ContextLen   The length of the context value in bytes
+  @param[out]     KeyBuffer    Buffer to hold the output of the TLS-PRF
+  @param[in]      KeyBufferLen The length of the KeyBuffer
+
+  @retval  EFI_SUCCESS             The operation succeeded.
+  @retval  EFI_INVALID_PARAMETER   The TLS object is invalid.
+  @retval  EFI_PROTOCOL_ERROR      Some other error occurred.
+
+**/
+EFI_STATUS
+EFIAPI
+TlsGetExportKey (
+  IN     VOID        *Tls,
+  IN     CONST VOID  *Label,
+  IN     CONST VOID  *Context,
+  IN     UINTN       ContextLen,
+  OUT    VOID        *KeyBuffer,
+  IN     UINTN       KeyBufferLen
+  )
+{
+  ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }

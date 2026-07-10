@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _CPU_IO2_SMM_H_
-#define _CPU_IO2_SMM_H_
+#pragma once
 
 #include <PiSmm.h>
 
@@ -19,7 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MmServicesTableLib.h>
 #include <Library/BaseMemoryLib.h>
 
-#define MAX_IO_PORT_ADDRESS   0xFFFF
+#define MAX_IO_PORT_ADDRESS  0xFFFF
 
 /**
   Reads memory-mapped registers.
@@ -164,5 +163,3 @@ EFI_STATUS
 CommonCpuIo2Initialize (
   VOID
   );
-
-#endif

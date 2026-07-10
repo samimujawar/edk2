@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_COMPONENT_NAME_H_
-#define _EFI_COMPONENT_NAME_H_
+#pragma once
 
 /**
   Retrieves a Unicode string that is the user readable name of the driver.
@@ -56,7 +55,6 @@ XhciComponentNameGetDriverName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **DriverName
   );
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the controller
@@ -135,6 +133,3 @@ XhciComponentNameGetControllerName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **ControllerName
   );
-
-#endif
-

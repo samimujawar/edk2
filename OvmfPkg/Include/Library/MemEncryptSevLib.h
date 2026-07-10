@@ -8,10 +8,10 @@
 
 **/
 
-#ifndef _MEM_ENCRYPT_SEV_LIB_H_
-#define _MEM_ENCRYPT_SEV_LIB_H_
+#pragma once
 
 #include <Base.h>
+#include <WorkArea.h>
 
 //
 // Define the maximum number of #VCs allowed (e.g. the level of nesting
@@ -20,7 +20,7 @@
 //   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupSize
 // in any FDF file using this PCD.
 //
-#define VMGEXIT_MAXIMUM_VC_COUNT   2
+#define VMGEXIT_MAXIMUM_VC_COUNT  2
 
 //
 // Per-CPU data mapping structure
@@ -29,32 +29,12 @@
 //   writing random data to that area.
 //
 typedef struct {
-  UINT32  Dr7Cached;
-  UINT64  Dr7;
+  UINT32    Dr7Cached;
+  UINT64    Dr7;
 
-  UINTN   VcCount;
-  VOID    *GhcbBackupPages;
+  UINTN     VcCount;
+  VOID      *GhcbBackupPages;
 } SEV_ES_PER_CPU_DATA;
-
-//
-// Internal structure for holding SEV-ES information needed during SEC phase
-// and valid only during SEC phase and early PEI during platform
-// initialization.
-//
-// This structure is also used by assembler files:
-//   OvmfPkg/ResetVector/ResetVector.nasmb
-//   OvmfPkg/ResetVector/Ia32/PageTables64.asm
-//   OvmfPkg/ResetVector/Ia32/Flat32ToFlat64.asm
-// any changes must stay in sync with its usage.
-//
-typedef struct _SEC_SEV_ES_WORK_AREA {
-  UINT8    SevEsEnabled;
-  UINT8    Reserved1[7];
-
-  UINT64   RandomData;
-
-  UINT64   EncryptionMask;
-} SEC_SEV_ES_WORK_AREA;
 
 //
 // Memory encryption address range states.
@@ -65,6 +45,18 @@ typedef enum {
   MemEncryptSevAddressRangeMixed,
   MemEncryptSevAddressRangeError,
 } MEM_ENCRYPT_SEV_ADDRESS_RANGE_STATE;
+
+/**
+  Returns a boolean to indicate whether SEV-SNP is enabled
+
+  @retval TRUE           SEV-SNP is enabled
+  @retval FALSE          SEV-SNP is not enabled
+**/
+BOOLEAN
+EFIAPI
+MemEncryptSevSnpIsEnabled (
+  VOID
+  );
 
 /**
   Returns a boolean to indicate whether SEV-ES is enabled.
@@ -100,8 +92,6 @@ MemEncryptSevIsEnabled (
                                       address of a memory region.
   @param[in]  NumPages                The number of pages from start memory
                                       region.
-  @param[in]  Flush                   Flush the caches before clearing the bit
-                                      (mostly TRUE except MMIO addresses)
 
   @retval RETURN_SUCCESS              The attributes were cleared for the
                                       memory region.
@@ -112,10 +102,9 @@ MemEncryptSevIsEnabled (
 RETURN_STATUS
 EFIAPI
 MemEncryptSevClearPageEncMask (
-  IN PHYSICAL_ADDRESS         Cr3BaseAddress,
-  IN PHYSICAL_ADDRESS         BaseAddress,
-  IN UINTN                    NumPages,
-  IN BOOLEAN                  Flush
+  IN PHYSICAL_ADDRESS  Cr3BaseAddress,
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN             NumPages
   );
 
 /**
@@ -128,8 +117,6 @@ MemEncryptSevClearPageEncMask (
                                       address of a memory region.
   @param[in]  NumPages                The number of pages from start memory
                                       region.
-  @param[in]  Flush                   Flush the caches before setting the bit
-                                      (mostly TRUE except MMIO addresses)
 
   @retval RETURN_SUCCESS              The attributes were set for the memory
                                       region.
@@ -140,12 +127,10 @@ MemEncryptSevClearPageEncMask (
 RETURN_STATUS
 EFIAPI
 MemEncryptSevSetPageEncMask (
-  IN PHYSICAL_ADDRESS         Cr3BaseAddress,
-  IN PHYSICAL_ADDRESS         BaseAddress,
-  IN UINTN                    NumPages,
-  IN BOOLEAN                  Flush
+  IN PHYSICAL_ADDRESS  Cr3BaseAddress,
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN             NumPages
   );
-
 
 /**
   Locate the page range that covers the initial (pre-SMBASE-relocation) SMRAM
@@ -165,8 +150,8 @@ MemEncryptSevSetPageEncMask (
 RETURN_STATUS
 EFIAPI
 MemEncryptSevLocateInitialSmramSaveStateMapPages (
-  OUT UINTN *BaseAddress,
-  OUT UINTN *NumberOfPages
+  OUT UINTN  *BaseAddress,
+  OUT UINTN  *NumberOfPages
   );
 
 /**
@@ -177,6 +162,32 @@ MemEncryptSevLocateInitialSmramSaveStateMapPages (
 UINT64
 EFIAPI
 MemEncryptSevGetEncryptionMask (
+  VOID
+  );
+
+/**
+  Returns a boolean to indicate whether DebugVirtualization is enabled.
+
+  @retval TRUE           DebugVirtualization is enabled
+  @retval FALSE          DebugVirtualization is not enabled
+**/
+BOOLEAN
+EFIAPI
+MemEncryptSevEsDebugVirtualizationIsEnabled (
+  VOID
+  );
+
+/**
+  Returns a boolean to indicate whether the SEV-SNP cache line eviction
+  mitigation is needed.
+
+  @retval TRUE           Cache line eviction mitigation required
+  @retval FALSE          Cache line eviction migigation not required
+
+**/
+BOOLEAN
+EFIAPI
+MemEncryptSevSnpDoCoherencyMitigation (
   VOID
   );
 
@@ -198,9 +209,46 @@ MemEncryptSevGetEncryptionMask (
 MEM_ENCRYPT_SEV_ADDRESS_RANGE_STATE
 EFIAPI
 MemEncryptSevGetAddressRangeState (
-  IN PHYSICAL_ADDRESS         Cr3BaseAddress,
-  IN PHYSICAL_ADDRESS         BaseAddress,
-  IN UINTN                    Length
+  IN PHYSICAL_ADDRESS  Cr3BaseAddress,
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN             Length
   );
 
-#endif // _MEM_ENCRYPT_SEV_LIB_H_
+/**
+  This function clears memory encryption bit for the MMIO region specified by
+  BaseAddress and NumPages.
+
+  @param[in]  Cr3BaseAddress          Cr3 Base Address (if zero then use
+                                      current CR3)
+  @param[in]  BaseAddress             The physical address that is the start
+                                      address of a MMIO region.
+  @param[in]  NumPages                The number of pages from start memory
+                                      region.
+
+  @retval RETURN_SUCCESS              The attributes were cleared for the
+                                      memory region.
+  @retval RETURN_INVALID_PARAMETER    Number of pages is zero.
+  @retval RETURN_UNSUPPORTED          Clearing the memory encryption attribute
+                                      is not supported
+**/
+RETURN_STATUS
+EFIAPI
+MemEncryptSevClearMmioPageEncMask (
+  IN PHYSICAL_ADDRESS  Cr3BaseAddress,
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN             NumPages
+  );
+
+/**
+  Pre-validate the system RAM when SEV-SNP is enabled in the guest VM.
+
+  @param[in]  BaseAddress             Base address
+  @param[in]  NumPages                Number of pages starting from the base address
+
+**/
+VOID
+EFIAPI
+MemEncryptSevSnpPreValidateSystemRam (
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN             NumPages
+  );

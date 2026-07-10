@@ -1,13 +1,12 @@
 /** @file
   Include file for Var Check Hii handler and bin.
 
-Copyright (c) 2015 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2015 - 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _VAR_CHECK_HII_H_
-#define _VAR_CHECK_HII_H_
+#pragma once
 
 #include <Library/VarCheckLib.h>
 #include <Library/BaseLib.h>
@@ -25,17 +24,17 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "InternalVarCheckStructure.h"
 #include "VarCheckHiiGen.h"
 
-//#define DUMP_VAR_CHECK_HII
-//#define DUMP_HII_DATA
+// #define DUMP_VAR_CHECK_HII
+// #define DUMP_HII_DATA
 
 typedef struct {
-  UINT8     HiiOpCode;
-  CHAR8     *HiiOpCodeStr;
+  UINT8    HiiOpCode;
+  CHAR8    *HiiOpCodeStr;
 } VAR_CHECK_HII_OPCODE_STRING;
 
 typedef struct {
-  UINT8     PackageType;
-  CHAR8     *PackageTypeStr;
+  UINT8    PackageType;
+  CHAR8    *PackageTypeStr;
 } VAR_CHECK_HII_PACKAGE_TYPE_STRING;
 
 /**
@@ -51,7 +50,9 @@ DumpVarCheckHii (
   IN UINTN  VarCheckHiiBinSize
   );
 
-extern VAR_CHECK_HII_VARIABLE_HEADER    *mVarCheckHiiBin;
-extern UINTN                            mVarCheckHiiBinSize;
+#define VAR_CHECK_RECEIVED_HII_BIN_HANDLER_GUID \
+  { \
+    0xe63095c7, 0x2b34, 0x4163, { 0x80, 0x3d, 0xc8, 0x3c, 0x2e, 0xd6, 0xa0, 0x37 } \
+  }
 
-#endif
+extern EFI_GUID  gVarCheckReceivedHiiBinHandlerGuid;

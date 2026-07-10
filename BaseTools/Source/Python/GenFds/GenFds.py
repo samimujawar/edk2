@@ -20,7 +20,7 @@ from linecache import getlines
 from io import BytesIO
 
 import Common.LongFilePathOs as os
-from Common.TargetTxtClassObject import TargetTxtDict
+from Common.TargetTxtClassObject import TargetTxtDict,gDefaultTargetTxtFile
 from Common.DataType import *
 import Common.GlobalData as GlobalData
 from Common import EdkLogger
@@ -65,7 +65,6 @@ def resetFdsGlobalVariable():
     # will be FvDir + os.sep + 'Ffs'
     GenFdsGlobalVariable.FfsDir = ''
     GenFdsGlobalVariable.FdfParser = None
-    GenFdsGlobalVariable.LibDir = ''
     GenFdsGlobalVariable.WorkSpace = None
     GenFdsGlobalVariable.WorkSpaceDir = ''
     GenFdsGlobalVariable.ConfDir = ''
@@ -134,7 +133,7 @@ def GenFdsApi(FdsCommandDict, WorkSpaceDataBase=None):
             EdkLogger.error("GenFds", PARAMETER_INVALID, "WORKSPACE is invalid",
                             ExtraData="Please use '-w' switch to pass it or set the WORKSPACE environment variable.")
         else:
-            Workspace = os.path.normcase(FdsCommandDict.get("Workspace",os.environ.get('WORKSPACE')))
+            Workspace = os.path.normpath(FdsCommandDict.get("Workspace",os.environ.get('WORKSPACE')))
             GenFdsGlobalVariable.WorkSpaceDir = Workspace
             if FdsCommandDict.get("debug"):
                 GenFdsGlobalVariable.VerboseLogger("Using Workspace:" + Workspace)
@@ -153,7 +152,7 @@ def GenFdsApi(FdsCommandDict, WorkSpaceDataBase=None):
             FdfFilename = GenFdsGlobalVariable.ReplaceWorkspaceMacro(FdfFilename)
 
             if FdfFilename[0:2] == '..':
-                FdfFilename = os.path.realpath(FdfFilename)
+                FdfFilename = os.path.abspath(FdfFilename)
             if not os.path.isabs(FdfFilename):
                 FdfFilename = mws.join(GenFdsGlobalVariable.WorkSpaceDir, FdfFilename)
             if not os.path.exists(FdfFilename):
@@ -175,7 +174,7 @@ def GenFdsApi(FdsCommandDict, WorkSpaceDataBase=None):
             ActivePlatform = GenFdsGlobalVariable.ReplaceWorkspaceMacro(ActivePlatform)
 
             if ActivePlatform[0:2] == '..':
-                ActivePlatform = os.path.realpath(ActivePlatform)
+                ActivePlatform = os.path.abspath(ActivePlatform)
 
             if not os.path.isabs (ActivePlatform):
                 ActivePlatform = mws.join(GenFdsGlobalVariable.WorkSpaceDir, ActivePlatform)
@@ -200,14 +199,14 @@ def GenFdsApi(FdsCommandDict, WorkSpaceDataBase=None):
                 ConfDirectoryPath = os.path.join(GenFdsGlobalVariable.WorkSpaceDir, ConfDirectoryPath)
         else:
             if "CONF_PATH" in os.environ:
-                ConfDirectoryPath = os.path.normcase(os.environ["CONF_PATH"])
+                ConfDirectoryPath = os.path.normpath(os.environ["CONF_PATH"])
             else:
                 # Get standard WORKSPACE/Conf, use the absolute path to the WORKSPACE/Conf
                 ConfDirectoryPath = mws.join(GenFdsGlobalVariable.WorkSpaceDir, 'Conf')
         GenFdsGlobalVariable.ConfDir = ConfDirectoryPath
         if not GlobalData.gConfDirectory:
             GlobalData.gConfDirectory = GenFdsGlobalVariable.ConfDir
-        BuildConfigurationFile = os.path.normpath(os.path.join(ConfDirectoryPath, "target.txt"))
+        BuildConfigurationFile = os.path.normpath(os.path.join(ConfDirectoryPath, gDefaultTargetTxtFile))
         if os.path.isfile(BuildConfigurationFile) == True:
             # if no build target given in command line, get it from target.txt
             TargetObj = TargetTxtDict()
@@ -299,7 +298,7 @@ def GenFdsApi(FdsCommandDict, WorkSpaceDataBase=None):
         for Key in GenFdsGlobalVariable.OutputDirDict:
             OutputDir = GenFdsGlobalVariable.OutputDirDict[Key]
             if OutputDir[0:2] == '..':
-                OutputDir = os.path.realpath(OutputDir)
+                OutputDir = os.path.abspath(OutputDir)
 
             if OutputDir[1] != ':':
                 OutputDir = os.path.join (GenFdsGlobalVariable.WorkSpaceDir, OutputDir)
@@ -441,7 +440,7 @@ def myOptionParser():
     usage = "%prog [options] -f input_file -a arch_list -b build_target -p active_platform -t tool_chain_tag -D \"MacroName [= MacroValue]\""
     Parser = OptionParser(usage=usage, description=__copyright__, version="%prog " + str(versionNumber))
     Parser.add_option("-f", "--file", dest="filename", type="string", help="Name of FDF file to convert", action="callback", callback=SingleCheckCallback)
-    Parser.add_option("-a", "--arch", dest="archList", help="comma separated list containing one or more of: IA32, X64, IPF, ARM, AARCH64 or EBC which should be built, overrides target.txt?s TARGET_ARCH")
+    Parser.add_option("-a", "--arch", dest="archList", help="comma separated list containing one or more of: IA32, X64, IPF, AARCH64 or EBC which should be built, overrides target.txt?s TARGET_ARCH")
     Parser.add_option("-q", "--quiet", action="store_true", type=None, help="Disable all messages except FATAL ERRORS.")
     Parser.add_option("-v", "--verbose", action="store_true", type=None, help="Turn on verbose output with informational messages printed.")
     Parser.add_option("-d", "--debug", action="store", type="int", help="Enable debug messages at specified level.")
@@ -548,41 +547,6 @@ class GenFds(object):
                 OptRomObj.AddToBuffer(Buffer=None, Flag=True)
 
         return GenFdsGlobalVariable.FfsCmdDict
-
-    ## GetFvBlockSize()
-    #
-    #   @param  FvObj           Whose block size to get
-    #   @retval int             Block size value
-    #
-    @staticmethod
-    def GetFvBlockSize(FvObj):
-        DefaultBlockSize = 0x1
-        FdObj = None
-        if GenFds.OnlyGenerateThisFd is not None and GenFds.OnlyGenerateThisFd.upper() in GenFdsGlobalVariable.FdfParser.Profile.FdDict:
-            FdObj = GenFdsGlobalVariable.FdfParser.Profile.FdDict[GenFds.OnlyGenerateThisFd.upper()]
-        if FdObj is None:
-            for ElementFd in GenFdsGlobalVariable.FdfParser.Profile.FdDict.values():
-                for ElementRegion in ElementFd.RegionList:
-                    if ElementRegion.RegionType == BINARY_FILE_TYPE_FV:
-                        for ElementRegionData in ElementRegion.RegionDataList:
-                            if ElementRegionData is not None and ElementRegionData.upper() == FvObj.UiFvName:
-                                if FvObj.BlockSizeList != []:
-                                    return FvObj.BlockSizeList[0][0]
-                                else:
-                                    return ElementRegion.BlockSizeOfRegion(ElementFd.BlockSizeList)
-            if FvObj.BlockSizeList != []:
-                return FvObj.BlockSizeList[0][0]
-            return DefaultBlockSize
-        else:
-            for ElementRegion in FdObj.RegionList:
-                    if ElementRegion.RegionType == BINARY_FILE_TYPE_FV:
-                        for ElementRegionData in ElementRegion.RegionDataList:
-                            if ElementRegionData is not None and ElementRegionData.upper() == FvObj.UiFvName:
-                                if FvObj.BlockSizeList != []:
-                                    return FvObj.BlockSizeList[0][0]
-                                else:
-                                    return ElementRegion.BlockSizeOfRegion(ElementFd.BlockSizeList)
-            return DefaultBlockSize
 
     ## DisplayFvSpaceInfo()
     #
@@ -733,7 +697,7 @@ class GenFds(object):
                         if not os.path.exists(FfsPath[0]):
                             continue
                         MatchDict = {}
-                        ReFileEnds = compile('\S+(.ui)$|\S+(fv.sec.txt)$|\S+(.pe32.txt)$|\S+(.te.txt)$|\S+(.pic.txt)$|\S+(.raw.txt)$|\S+(.ffs.txt)$')
+                        ReFileEnds = compile(r'\S+(.ui)$|\S+(fv.sec.txt)$|\S+(.pe32.txt)$|\S+(.te.txt)$|\S+(.pic.txt)$|\S+(.raw.txt)$|\S+(.ffs.txt)$')
                         FileList = os.listdir(FfsPath[0])
                         for File in FileList:
                             Match = ReFileEnds.search(File)

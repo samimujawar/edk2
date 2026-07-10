@@ -23,7 +23,7 @@
 **/
 EFI_STATUS
 ShellConnectDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL   *DevicePathToConnect
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePathToConnect
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath;
@@ -36,23 +36,21 @@ ShellConnectDevicePath (
   }
 
   PreviousHandle = NULL;
-  do{
+  do {
     RemainingDevicePath = DevicePathToConnect;
-    Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemainingDevicePath, &Handle);
+    Status              = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemainingDevicePath, &Handle);
 
     if (!EFI_ERROR (Status) && (Handle != NULL)) {
       if (PreviousHandle == Handle) {
         Status = EFI_NOT_FOUND;
       } else {
         PreviousHandle = Handle;
-        Status = gBS->ConnectController (Handle, NULL, RemainingDevicePath, FALSE);
+        Status         = gBS->ConnectController (Handle, NULL, RemainingDevicePath, FALSE);
       }
     }
-
-  } while (!EFI_ERROR (Status) && !IsDevicePathEnd (RemainingDevicePath) );
+  } while (!EFI_ERROR (Status) && !IsDevicePathEnd (RemainingDevicePath));
 
   return Status;
-
 }
 
 /**
@@ -67,20 +65,20 @@ ShellConnectPciRootBridge (
   VOID
   )
 {
-  UINTN               RootBridgeHandleCount;
-  EFI_HANDLE          *RootBridgeHandleBuffer;
-  UINTN               RootBridgeIndex;
-  EFI_STATUS          Status;
+  UINTN       RootBridgeHandleCount;
+  EFI_HANDLE  *RootBridgeHandleBuffer;
+  UINTN       RootBridgeIndex;
+  EFI_STATUS  Status;
 
   RootBridgeHandleCount = 0;
 
   Status = gBS->LocateHandleBuffer (
-              ByProtocol,
-              &gEfiPciRootBridgeIoProtocolGuid,
-              NULL,
-              &RootBridgeHandleCount,
-              &RootBridgeHandleBuffer
-              );
+                  ByProtocol,
+                  &gEfiPciRootBridgeIoProtocolGuid,
+                  NULL,
+                  &RootBridgeHandleCount,
+                  &RootBridgeHandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -93,7 +91,6 @@ ShellConnectPciRootBridge (
 
   return EFI_SUCCESS;
 }
-
 
 /**
   Connect controller(s) and driver(s).
@@ -108,22 +105,22 @@ ShellConnectPciRootBridge (
 **/
 EFI_STATUS
 ConnectControllers (
-  IN CONST EFI_HANDLE ControllerHandle OPTIONAL,
-  IN CONST EFI_HANDLE DriverHandle OPTIONAL,
-  IN CONST BOOLEAN    Recursive,
-  IN CONST BOOLEAN    Output,
-  IN CONST BOOLEAN    AlwaysOutput
+  IN CONST EFI_HANDLE  ControllerHandle OPTIONAL,
+  IN CONST EFI_HANDLE  DriverHandle OPTIONAL,
+  IN CONST BOOLEAN     Recursive,
+  IN CONST BOOLEAN     Output,
+  IN CONST BOOLEAN     AlwaysOutput
   )
 {
-  EFI_STATUS Status;
-  EFI_STATUS Status2;
-  EFI_HANDLE *ControllerHandleList;
-  EFI_HANDLE *DriverHandleList;
-  EFI_HANDLE *HandleWalker;
+  EFI_STATUS  Status;
+  EFI_STATUS  Status2;
+  EFI_HANDLE  *ControllerHandleList;
+  EFI_HANDLE  *DriverHandleList;
+  EFI_HANDLE  *HandleWalker;
 
-  ControllerHandleList  = NULL;
-  Status                = EFI_NOT_FOUND;
-  Status2               = EFI_NOT_FOUND;
+  ControllerHandleList = NULL;
+  Status               = EFI_NOT_FOUND;
+  Status2              = EFI_NOT_FOUND;
 
   //
   // If we have a single handle to connect make that a 'list'
@@ -131,10 +128,11 @@ ConnectControllers (
   if (DriverHandle == NULL) {
     DriverHandleList = NULL;
   } else {
-    DriverHandleList = AllocateZeroPool(2*sizeof(EFI_HANDLE));
+    DriverHandleList = AllocateZeroPool (2*sizeof (EFI_HANDLE));
     if (DriverHandleList == NULL) {
       return (EFI_OUT_OF_RESOURCES);
     }
+
     DriverHandleList[0] = DriverHandle;
     DriverHandleList[1] = NULL;
   }
@@ -144,26 +142,29 @@ ConnectControllers (
   // This is where we call the gBS->ConnectController function.
   //
   if (ControllerHandle == NULL) {
-    ControllerHandleList = GetHandleListByProtocol(&gEfiDevicePathProtocolGuid);
+    ControllerHandleList = GetHandleListByProtocol (&gEfiDevicePathProtocolGuid);
     for (HandleWalker = ControllerHandleList
-      ;  HandleWalker != NULL && *HandleWalker != NULL
-      ;  HandleWalker++
-     ){
-      Status = gBS->ConnectController(*HandleWalker, DriverHandleList, NULL, Recursive);
-      if (!EFI_ERROR(Status)) {
+         ; HandleWalker != NULL && *HandleWalker != NULL
+         ; HandleWalker++
+         )
+    {
+      Status = gBS->ConnectController (*HandleWalker, DriverHandleList, NULL, Recursive);
+      if (!EFI_ERROR (Status)) {
         Status2 = EFI_SUCCESS;
       }
-      if ((Output && !EFI_ERROR(Status)) || AlwaysOutput) {
-        ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN(STR_HANDLE_RESULT), gShellDriver1HiiHandle, L"Connect", ConvertHandleToHandleIndex(*HandleWalker), Status);
+
+      if ((Output && !EFI_ERROR (Status)) || AlwaysOutput) {
+        ShellPrintHiiDefaultEx (STRING_TOKEN (STR_HANDLE_RESULT), gShellDriver1HiiHandle, L"Connect", ConvertHandleToHandleIndex (*HandleWalker), Status);
       }
     }
   } else {
-    Status = gBS->ConnectController(ControllerHandle, DriverHandleList, NULL, Recursive);
-    if (!EFI_ERROR(Status)) {
+    Status = gBS->ConnectController (ControllerHandle, DriverHandleList, NULL, Recursive);
+    if (!EFI_ERROR (Status)) {
       Status2 = EFI_SUCCESS;
     }
-    if ((Output && !EFI_ERROR(Status)) || AlwaysOutput) {
-      ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN(STR_HANDLE_RESULT), gShellDriver1HiiHandle, L"Connect", ConvertHandleToHandleIndex(ControllerHandle), Status);
+
+    if ((Output && !EFI_ERROR (Status)) || AlwaysOutput) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_HANDLE_RESULT), gShellDriver1HiiHandle, L"Connect", ConvertHandleToHandleIndex (ControllerHandle), Status);
     }
   }
 
@@ -171,12 +172,81 @@ ConnectControllers (
   // Free any memory we allocated.
   //
   if (ControllerHandleList != NULL) {
-    FreePool(ControllerHandleList);
+    FreePool (ControllerHandleList);
   }
+
   if (DriverHandleList     != NULL) {
-    FreePool(DriverHandleList);
+    FreePool (DriverHandleList);
   }
+
   return (Status2);
+}
+
+/**
+  Iterate over the Handles that have a gEfiPciIoProtocol
+  and try to connect them to the input Instance of the console variable.
+
+  @param[in] HandleArray            Array of handles having a gEfiPciIoProtocol.
+  @param[in] HandleArrayCount       Number of handles in HandleArray.
+  @param[in] Instance               Instance of the console variable.
+  @param[in] AtLeastOneConnected    asd
+
+  @retval EFI_SUCCESS   The operation was successful.
+**/
+STATIC
+EFI_STATUS
+ConnectConsoles (
+  EFI_HANDLE                *HandleArray,
+  UINTN                     HandleArrayCount,
+  EFI_DEVICE_PATH_PROTOCOL  *Instance,
+  BOOLEAN                   *AtLeastOneConnected
+  )
+{
+  UINTN                Index;
+  UINT8                Class[3];
+  EFI_STATUS           Status;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+
+  ASSERT (HandleArray != NULL);
+  ASSERT (HandleArrayCount != 0);
+  ASSERT (Instance != NULL);
+  ASSERT (AtLeastOneConnected != NULL);
+
+  for (Index = 0; Index < HandleArrayCount; Index++) {
+    Status = gBS->HandleProtocol (
+                    HandleArray[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x09, 3, &Class);
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    if ((PCI_CLASS_SERIAL != Class[2]) ||
+        (PCI_CLASS_SERIAL_USB != Class[1]))
+    {
+      return EFI_NOT_FOUND;
+    }
+
+    Status = gBS->ConnectController (
+                    HandleArray[Index],
+                    NULL,
+                    Instance,
+                    FALSE
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    *AtLeastOneConnected = TRUE;
+  }
+
+  return EFI_SUCCESS;
 }
 
 /**
@@ -188,7 +258,7 @@ ConnectControllers (
 **/
 EFI_STATUS
 ShellConnectFromDevPaths (
-  IN CONST CHAR16 *Key
+  IN CONST CHAR16  *Key
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevPath;
@@ -196,33 +266,32 @@ ShellConnectFromDevPaths (
   EFI_DEVICE_PATH_PROTOCOL  *Instance;
   EFI_DEVICE_PATH_PROTOCOL  *Next;
   UINTN                     Length;
-  UINTN                     Index;
   UINTN                     HandleArrayCount;
   UINTN                     Size;
   EFI_HANDLE                *HandleArray;
   EFI_STATUS                Status;
   BOOLEAN                   AtLeastOneConnected;
-  EFI_PCI_IO_PROTOCOL       *PciIo;
-  UINT8                     Class[3];
 
-  DevPath = NULL;
-  Length  = 0;
+  DevPath             = NULL;
+  Length              = 0;
   AtLeastOneConnected = FALSE;
 
   //
   // Get the DevicePath buffer from the variable...
   //
-  Status = gRT->GetVariable((CHAR16*)Key, (EFI_GUID*)&gEfiGlobalVariableGuid, NULL, &Length, DevPath);
+  Status = gRT->GetVariable ((CHAR16 *)Key, (EFI_GUID *)&gEfiGlobalVariableGuid, NULL, &Length, DevPath);
   if (Status == EFI_BUFFER_TOO_SMALL) {
-    DevPath = AllocateZeroPool(Length);
+    DevPath = AllocateZeroPool (Length);
     if (DevPath == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
-    Status = gRT->GetVariable((CHAR16*)Key, (EFI_GUID*)&gEfiGlobalVariableGuid, NULL, &Length, DevPath);
+
+    Status = gRT->GetVariable ((CHAR16 *)Key, (EFI_GUID *)&gEfiGlobalVariableGuid, NULL, &Length, DevPath);
     if (EFI_ERROR (Status)) {
       if (DevPath != NULL) {
         FreePool (DevPath);
       }
+
       return Status;
     }
   } else if (EFI_ERROR (Status)) {
@@ -244,6 +313,7 @@ ShellConnectFromDevPaths (
       if (DevPath != NULL) {
         FreePool (DevPath);
       }
+
       return EFI_UNSUPPORTED;
     }
 
@@ -256,58 +326,11 @@ ShellConnectFromDevPaths (
     //
     // connect short form device path
     //
-    if ((DevicePathType (Instance) == MESSAGING_DEVICE_PATH) &&
-      ((DevicePathSubType (Instance) == MSG_USB_CLASS_DP)
-      || (DevicePathSubType (Instance) == MSG_USB_WWID_DP)
-      )) {
-
-      Status = ShellConnectPciRootBridge ();
-      if (EFI_ERROR(Status)) {
-        FreePool(Instance);
-        FreePool(DevPath);
-        return Status;
-      }
-
-      Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
-                  &gEfiPciIoProtocolGuid,
-                  NULL,
-                  &HandleArrayCount,
-                  &HandleArray
-                  );
-
-      if (!EFI_ERROR (Status)) {
-        for (Index = 0; Index < HandleArrayCount; Index++) {
-          Status = gBS->HandleProtocol (
-                      HandleArray[Index],
-                      &gEfiPciIoProtocolGuid,
-                      (VOID **)&PciIo
-                      );
-
-          if (!EFI_ERROR (Status)) {
-            Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x09, 3, &Class);
-            if (!EFI_ERROR (Status)) {
-              if ((PCI_CLASS_SERIAL == Class[2]) &&
-                  (PCI_CLASS_SERIAL_USB == Class[1])) {
-                Status = gBS->ConnectController (
-                              HandleArray[Index],
-                              NULL,
-                              Instance,
-                              FALSE
-                              );
-                if (!EFI_ERROR(Status)) {
-                  AtLeastOneConnected = TRUE;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (HandleArray != NULL) {
-        FreePool (HandleArray);
-      }
-    } else {
+    if (!((DevicePathType (Instance) == MESSAGING_DEVICE_PATH) &&
+          (  (DevicePathSubType (Instance) == MSG_USB_CLASS_DP)
+          || (DevicePathSubType (Instance) == MSG_USB_WWID_DP)
+          )))
+    {
       //
       // connect the entire device path
       //
@@ -315,13 +338,45 @@ ShellConnectFromDevPaths (
       if (!EFI_ERROR (Status)) {
         AtLeastOneConnected = TRUE;
       }
-    }
-    FreePool (Instance);
 
+      FreePool (Instance);
+      continue;
+    }
+
+    Status = ShellConnectPciRootBridge ();
+    if (EFI_ERROR (Status)) {
+      FreePool (Instance);
+      FreePool (DevPath);
+      return Status;
+    }
+
+    Status = gBS->LocateHandleBuffer (
+                    ByProtocol,
+                    &gEfiPciIoProtocolGuid,
+                    NULL,
+                    &HandleArrayCount,
+                    &HandleArray
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Status = ConnectConsoles (
+               HandleArray,
+               HandleArrayCount,
+               Instance,
+               &AtLeastOneConnected
+               );
+
+    if (HandleArray != NULL) {
+      FreePool (HandleArray);
+    }
+
+    FreePool (Instance);
   } while (CopyOfDevPath != NULL);
 
   if (DevPath != NULL) {
-    FreePool(DevPath);
+    FreePool (DevPath);
   }
 
   if (AtLeastOneConnected) {
@@ -329,7 +384,6 @@ ShellConnectFromDevPaths (
   } else {
     return EFI_NOT_FOUND;
   }
-
 }
 
 /**
@@ -355,16 +409,17 @@ ConvertAndConnectControllers (
   //
   // if only one is NULL verify it's the proper one...
   //
-  if ( (Handle1 == NULL && Handle2 != NULL)
-    || (Handle1 != NULL && Handle2 == NULL)
-   ){
+  if (  ((Handle1 == NULL) && (Handle2 != NULL))
+     || ((Handle1 != NULL) && (Handle2 == NULL))
+        )
+  {
     //
     // Figure out which one should be NULL and move the handle to the right place.
     // If Handle1 is NULL then test Handle2 and vise versa.
     // The one that DOES has driver binding must be Handle2
     //
     if (Handle1 == NULL) {
-      if (EFI_ERROR(gBS->OpenProtocol(Handle2, &gEfiDriverBindingProtocolGuid, NULL, NULL, gImageHandle, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
+      if (EFI_ERROR (gBS->OpenProtocol (Handle2, &gEfiDriverBindingProtocolGuid, NULL, NULL, gImageHandle, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
         // swap
         Handle1 = Handle2;
         Handle2 = NULL;
@@ -372,7 +427,7 @@ ConvertAndConnectControllers (
         // We're all good...
       }
     } else {
-      if (EFI_ERROR(gBS->OpenProtocol(Handle1, &gEfiDriverBindingProtocolGuid, NULL, NULL, gImageHandle, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
+      if (EFI_ERROR (gBS->OpenProtocol (Handle1, &gEfiDriverBindingProtocolGuid, NULL, NULL, gImageHandle, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
         // We're all good...
       } else {
         // swap
@@ -382,14 +437,153 @@ ConvertAndConnectControllers (
     }
   }
 
-  return (ConnectControllers(Handle1, Handle2, Recursive, Output, (BOOLEAN)(Handle2 != NULL && Handle1 != NULL)));
+  return (ConnectControllers (Handle1, Handle2, Recursive, Output, (BOOLEAN)(Handle2 != NULL && Handle1 != NULL)));
 }
 
-STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
-  {L"-c", TypeFlag},
-  {L"-r", TypeFlag},
-  {NULL, TypeMax}
-  };
+STATIC CONST SHELL_PARAM_ITEM  ParamList[] = {
+  { L"-c", TypeFlag },
+  { L"-r", TypeFlag },
+  { NULL,  TypeMax  }
+};
+
+/** EFI Variable names to connect. */
+STATIC CONST CHAR16  *EfiVariableNames[] = {
+  L"ConInDev",
+  L"ConOutDev",
+  L"ErrOutDev",
+  L"ErrOut",
+  L"ConIn",
+  L"ConOut",
+};
+
+/** Initiate connections for the EFI variables listed in EfiVariableNames.
+ */
+STATIC
+EFI_STATUS
+ConnectFromEfiVariable (
+  VOID
+  )
+{
+  UINTN       Index;
+  EFI_STATUS  Status;
+  EFI_STATUS  RetStatus;
+
+  RetStatus = EFI_SUCCESS;
+
+  for (Index = 0; Index < ARRAY_SIZE (EfiVariableNames); Index++) {
+    Status = ShellConnectFromDevPaths (EfiVariableNames[Index]);
+    if (EFI_ERROR (Status)) {
+      RetStatus = Status;
+    }
+  }
+
+  return RetStatus;
+}
+
+/** Main function of the 'Connect' command.
+
+  @param[in] Package    List of input parameter for the command.
+**/
+STATIC
+SHELL_STATUS
+MainCmdConnect (
+  LIST_ENTRY  *Package
+  )
+{
+  EFI_STATUS    Status;
+  SHELL_STATUS  ShellStatus;
+  CONST CHAR16  *Param1;
+  CONST CHAR16  *Param2;
+  UINTN         Count;
+  EFI_HANDLE    Handle1;
+  EFI_HANDLE    Handle2;
+  UINT64        Intermediate;
+
+  ShellStatus = SHELL_SUCCESS;
+
+  //
+  // if more than 2 'value' parameters (plus the name one) or either -r or -c with any value parameters we have too many parameters
+  //
+  Count = (gInReconnect ? 0x4 : 0x3);
+  if ((ShellCommandLineGetCount (Package) > Count) ||
+      (ShellCommandLineGetFlag (Package, L"-c") && (ShellCommandLineGetCount (Package) > 1)) ||
+      (ShellCommandLineGetFlag (Package, L"-r") && (ShellCommandLineGetCount (Package) > 2)) ||
+      (ShellCommandLineGetFlag (Package, L"-r") && ShellCommandLineGetFlag (Package, L"-c")))
+  {
+    //
+    // error for too many parameters
+    //
+    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_TOO_MANY), gShellDriver1HiiHandle, L"connect");
+    return SHELL_INVALID_PARAMETER;
+  }
+
+  if (ShellCommandLineGetFlag (Package, L"-c")) {
+    //
+    // do the conin and conout from EFI variables
+    // if the first fails dont 'loose' the error
+    //
+    Status = ConnectFromEfiVariable ();
+    if (EFI_ERROR (Status)) {
+      ShellStatus = SHELL_DEVICE_ERROR;
+    }
+
+    return ShellStatus;
+  }
+
+  //
+  // 0, 1, or 2 specific handles and possibly recursive
+  //
+  Param1 = ShellCommandLineGetRawValue (Package, 1);
+  Param2 = ShellCommandLineGetRawValue (Package, 2);
+  Count  = ShellCommandLineGetCount (Package);
+
+  if (Param1 != NULL) {
+    Status = ShellConvertStringToUint64 (Param1, &Intermediate, TRUE, FALSE);
+    if (EFI_ERROR (Status)) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param1);
+      return SHELL_INVALID_PARAMETER;
+    }
+
+    Handle1 = ConvertHandleIndexToHandle ((UINTN)Intermediate);
+  } else {
+    Handle1 = NULL;
+  }
+
+  if (Param2 != NULL) {
+    Status = ShellConvertStringToUint64 (Param2, &Intermediate, TRUE, FALSE);
+    if (!EFI_ERROR (Status)) {
+      Handle2 = ConvertHandleIndexToHandle ((UINTN)Intermediate);
+    } else {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
+      ShellStatus = SHELL_INVALID_PARAMETER;
+    }
+  } else {
+    Handle2 = NULL;
+  }
+
+  if (ShellStatus != SHELL_SUCCESS) {
+    return ShellStatus;
+  }
+
+  if ((Param1 != NULL) && (Handle1 == NULL)) {
+    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param1);
+    ShellStatus = SHELL_INVALID_PARAMETER;
+  } else if ((Param2 != NULL) && (Handle2 == NULL)) {
+    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
+    ShellStatus = SHELL_INVALID_PARAMETER;
+  } else if ((Handle2 != NULL) && (Handle1 != NULL) && EFI_ERROR (gBS->OpenProtocol (Handle2, &gEfiDriverBindingProtocolGuid, NULL, gImageHandle, NULL, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
+    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
+    ShellStatus = SHELL_INVALID_PARAMETER;
+  } else {
+    Status = ConvertAndConnectControllers (Handle1, Handle2, ShellCommandLineGetFlag (Package, L"-r"), (BOOLEAN)(Count != 0));
+    if (EFI_ERROR (Status)) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_CONNECT_NONE), gShellDriver1HiiHandle);
+      ShellStatus = SHELL_DEVICE_ERROR;
+    }
+  }
+
+  return ShellStatus;
+}
 
 /**
   Function for 'connect' command.
@@ -404,140 +598,40 @@ ShellCommandRunConnect (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS          Status;
-  LIST_ENTRY          *Package;
-  CHAR16              *ProblemParam;
-  SHELL_STATUS        ShellStatus;
-  CONST CHAR16        *Param1;
-  CONST CHAR16        *Param2;
-  UINTN               Count;
-  EFI_HANDLE          Handle1;
-  EFI_HANDLE          Handle2;
-  UINT64              Intermediate;
+  EFI_STATUS    Status;
+  LIST_ENTRY    *Package;
+  CHAR16        *ProblemParam;
+  SHELL_STATUS  ShellStatus;
 
-  ShellStatus         = SHELL_SUCCESS;
+  ShellStatus = SHELL_SUCCESS;
   //
   // initialize the shell lib (we must be in non-auto-init...)
   //
-  Status = ShellInitialize();
-  ASSERT_EFI_ERROR(Status);
+  Status = ShellInitialize ();
+  ASSERT_EFI_ERROR (Status);
 
-  Status = CommandInit();
-  ASSERT_EFI_ERROR(Status);
+  Status = CommandInit ();
+  ASSERT_EFI_ERROR (Status);
 
   //
   // parse the command line
   //
   Status = ShellCommandLineParse (ParamList, &Package, &ProblemParam, TRUE);
-  if (EFI_ERROR(Status)) {
-    if (Status == EFI_VOLUME_CORRUPTED && ProblemParam != NULL) {
-      ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_PROBLEM), gShellDriver1HiiHandle, L"connect", ProblemParam);
-      FreePool(ProblemParam);
+  if (EFI_ERROR (Status)) {
+    if ((Status == EFI_VOLUME_CORRUPTED) && (ProblemParam != NULL)) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_PROBLEM), gShellDriver1HiiHandle, L"connect", ProblemParam);
+      FreePool (ProblemParam);
       ShellStatus = SHELL_INVALID_PARAMETER;
     } else {
-      ASSERT(FALSE);
-    }
-  } else {
-    //
-    // if more than 2 'value' parameters (plus the name one) or either -r or -c with any value parameters we have too many parameters
-    //
-    Count = (gInReconnect?0x4:0x3);
-    if ((ShellCommandLineGetCount(Package) > Count)
-      ||(ShellCommandLineGetFlag(Package, L"-c") && ShellCommandLineGetCount(Package)>1)
-      ||(ShellCommandLineGetFlag(Package, L"-r") && ShellCommandLineGetCount(Package)>2)
-      ||(ShellCommandLineGetFlag(Package, L"-r") && ShellCommandLineGetFlag(Package, L"-c") )
-    ){
-      //
-      // error for too many parameters
-      //
-      ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_TOO_MANY), gShellDriver1HiiHandle, L"connect");
-      ShellStatus = SHELL_INVALID_PARAMETER;
-    } else if (ShellCommandLineGetFlag(Package, L"-c")) {
-      //
-      // do the conin and conout from EFI variables
-      // if the first fails dont 'loose' the error
-      //
-      Status = ShellConnectFromDevPaths(L"ConInDev");
-      if (EFI_ERROR(Status)) {
-        ShellConnectFromDevPaths(L"ConOutDev");
-      } else {
-        Status = ShellConnectFromDevPaths(L"ConOutDev");
-      }
-      if (EFI_ERROR(Status)) {
-        ShellConnectFromDevPaths(L"ErrOutDev");
-      } else {
-        Status = ShellConnectFromDevPaths(L"ErrOutDev");
-      }
-      if (EFI_ERROR(Status)) {
-        ShellConnectFromDevPaths(L"ErrOut");
-      } else {
-        Status = ShellConnectFromDevPaths(L"ErrOut");
-      }
-      if (EFI_ERROR(Status)) {
-        ShellConnectFromDevPaths(L"ConIn");
-      } else {
-        Status = ShellConnectFromDevPaths(L"ConIn");
-      }
-      if (EFI_ERROR(Status)) {
-        ShellConnectFromDevPaths(L"ConOut");
-      } else {
-        Status = ShellConnectFromDevPaths(L"ConOut");
-      }
-      if (EFI_ERROR(Status)) {
-        ShellStatus = SHELL_DEVICE_ERROR;
-      }
-    } else {
-      //
-      // 0, 1, or 2 specific handles and possibly recursive
-      //
-      Param1  = ShellCommandLineGetRawValue(Package, 1);
-      Param2  = ShellCommandLineGetRawValue(Package, 2);
-      Count   = ShellCommandLineGetCount(Package);
-
-      if (Param1 != NULL) {
-        Status  = ShellConvertStringToUint64(Param1, &Intermediate, TRUE, FALSE);
-        Handle1 = ConvertHandleIndexToHandle((UINTN)Intermediate);
-        if (EFI_ERROR(Status)) {
-          ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param1);
-          ShellStatus = SHELL_INVALID_PARAMETER;
-        }
-      } else {
-        Handle1 = NULL;
-      }
-
-      if (Param2 != NULL) {
-        Status  = ShellConvertStringToUint64(Param2, &Intermediate, TRUE, FALSE);
-        Handle2 = ConvertHandleIndexToHandle((UINTN)Intermediate);
-        if (EFI_ERROR(Status)) {
-          ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
-          ShellStatus = SHELL_INVALID_PARAMETER;
-        }
-      } else {
-        Handle2 = NULL;
-      }
-
-      if (ShellStatus == SHELL_SUCCESS) {
-        if (Param1 != NULL && Handle1 == NULL){
-          ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param1);
-          ShellStatus = SHELL_INVALID_PARAMETER;
-        } else if (Param2 != NULL && Handle2 == NULL) {
-          ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
-          ShellStatus = SHELL_INVALID_PARAMETER;
-        } else if (Handle2 != NULL && Handle1 != NULL && EFI_ERROR(gBS->OpenProtocol(Handle2, &gEfiDriverBindingProtocolGuid, NULL, gImageHandle, NULL, EFI_OPEN_PROTOCOL_TEST_PROTOCOL))) {
-          ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_INV_HANDLE), gShellDriver1HiiHandle, L"connect", Param2);
-          ShellStatus = SHELL_INVALID_PARAMETER;
-        } else {
-          Status = ConvertAndConnectControllers(Handle1, Handle2, ShellCommandLineGetFlag(Package, L"-r"), (BOOLEAN)(Count!=0));
-          if (EFI_ERROR(Status)) {
-            ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_CONNECT_NONE), gShellDriver1HiiHandle);
-            ShellStatus = SHELL_DEVICE_ERROR;
-          }
-        }
-      }
+      ASSERT (FALSE);
     }
 
-    ShellCommandLineFreeVarList (Package);
+    return ShellStatus;
   }
+
+  ShellStatus = MainCmdConnect (Package);
+
+  ShellCommandLineFreeVarList (Package);
+
   return (ShellStatus);
 }
-

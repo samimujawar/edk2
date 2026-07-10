@@ -8,8 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _LOCK_BOX_LIB_H_
-#define _LOCK_BOX_LIB_H_
+#pragma once
 
 /**
   This function will save confidential information to lockbox.
@@ -29,9 +28,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 RETURN_STATUS
 EFIAPI
 SaveLockBox (
-  IN  GUID                        *Guid,
-  IN  VOID                        *Buffer,
-  IN  UINTN                       Length
+  IN  GUID   *Guid,
+  IN  VOID   *Buffer,
+  IN  UINTN  Length
   );
 
 /**
@@ -50,22 +49,22 @@ SaveLockBox (
 RETURN_STATUS
 EFIAPI
 SetLockBoxAttributes (
-  IN  GUID                        *Guid,
-  IN  UINT64                      Attributes
+  IN  GUID    *Guid,
+  IN  UINT64  Attributes
   );
 
 //
 // With this flag, this LockBox can be restored to this Buffer
 // with RestoreAllLockBoxInPlace()
 //
-#define LOCK_BOX_ATTRIBUTE_RESTORE_IN_PLACE     BIT0
+#define LOCK_BOX_ATTRIBUTE_RESTORE_IN_PLACE  BIT0
 //
 // With this flag, this LockBox can be restored in S3 resume only.
 // This LockBox can not be restored after SmmReadyToLock in normal boot
 // and after EndOfS3Resume in S3 resume.
 // It can not be set together with LOCK_BOX_ATTRIBUTE_RESTORE_IN_PLACE.
 //
-#define LOCK_BOX_ATTRIBUTE_RESTORE_IN_S3_ONLY   BIT1
+#define LOCK_BOX_ATTRIBUTE_RESTORE_IN_S3_ONLY  BIT1
 
 /**
   This function will update confidential information to lockbox.
@@ -89,10 +88,10 @@ SetLockBoxAttributes (
 RETURN_STATUS
 EFIAPI
 UpdateLockBox (
-  IN  GUID                        *Guid,
-  IN  UINTN                       Offset,
-  IN  VOID                        *Buffer,
-  IN  UINTN                       Length
+  IN  GUID   *Guid,
+  IN  UINTN  Offset,
+  IN  VOID   *Buffer,
+  IN  UINTN  Length
   );
 
 /**
@@ -116,9 +115,9 @@ UpdateLockBox (
 RETURN_STATUS
 EFIAPI
 RestoreLockBox (
-  IN  GUID                        *Guid,
-  IN  VOID                        *Buffer, OPTIONAL
-  IN  OUT UINTN                   *Length  OPTIONAL
+  IN  GUID       *Guid,
+  IN  VOID       *Buffer  OPTIONAL,
+  IN  OUT UINTN  *Length  OPTIONAL
   );
 
 /**
@@ -133,5 +132,3 @@ EFIAPI
 RestoreAllLockBoxInPlace (
   VOID
   );
-
-#endif

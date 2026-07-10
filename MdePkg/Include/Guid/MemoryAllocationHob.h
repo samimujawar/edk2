@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __MEMORY_ALLOCATION_GUID_H__
-#define __MEMORY_ALLOCATION_GUID_H__
+#pragma once
 
 #define EFI_HOB_MEMORY_ALLOC_BSP_STORE_GUID  \
   {0x564b33cd, 0xc92a, 0x4593, {0x90, 0xbf, 0x24, 0x73, 0xe4, 0x3c, 0x63, 0x22} };
@@ -21,8 +20,6 @@
 #define EFI_HOB_MEMORY_ALLOC_MODULE_GUID  \
   {0xf8e21975, 0x899, 0x4f58, {0xa4, 0xbe, 0x55, 0x25, 0xa9, 0xc6, 0xd7, 0x7a} }
 
-extern EFI_GUID gEfiHobMemoryAllocBspStoreGuid;
-extern EFI_GUID gEfiHobMemoryAllocStackGuid;
-extern EFI_GUID gEfiHobMemoryAllocModuleGuid;
-
-#endif
+extern EFI_GUID  gEfiHobMemoryAllocBspStoreGuid;
+extern EFI_GUID  gEfiHobMemoryAllocStackGuid;
+extern EFI_GUID  gEfiHobMemoryAllocModuleGuid;

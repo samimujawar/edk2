@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _IP6_CONFIGNV_H_
-#define _IP6_CONFIGNV_H_
+#pragma once
 
 #include "Ip6NvData.h"
 #include "Ip6ConfigImpl.h"
@@ -16,10 +15,10 @@
 extern UINT8  Ip6ConfigBin[];
 extern UINT8  Ip6DxeStrings[];
 
-#define IP6_ETHERNET              L"Ethernet"
-#define IP6_EXPERIMENTAL_ETHERNET L"Experimental Ethernet"
-#define IP6_ADDRESS_DELIMITER     L' '
-#define IP6_LINK_LOCAL_PREFIX     L"FE80::"
+#define IP6_ETHERNET               L"Ethernet"
+#define IP6_EXPERIMENTAL_ETHERNET  L"Experimental Ethernet"
+#define IP6_ADDRESS_DELIMITER      L' '
+#define IP6_LINK_LOCAL_PREFIX      L"FE80::"
 
 typedef enum {
   Ip6InterfaceTypeEthernet = 1,
@@ -45,7 +44,7 @@ typedef enum {
 **/
 EFI_STATUS
 Ip6ConfigFormInit (
-  IN OUT IP6_CONFIG_INSTANCE     *Instance
+  IN OUT IP6_CONFIG_INSTANCE  *Instance
   );
 
 /**
@@ -56,7 +55,5 @@ Ip6ConfigFormInit (
 **/
 VOID
 Ip6ConfigFormUnload (
-  IN OUT IP6_CONFIG_INSTANCE     *Instance
+  IN OUT IP6_CONFIG_INSTANCE  *Instance
   );
-
-#endif

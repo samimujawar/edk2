@@ -6,10 +6,9 @@
 
 **/
 
-#ifndef __DEBUG_COMMUNICATION_LIB_H__
-#define __DEBUG_COMMUNICATION_LIB_H__
+#pragma once
 
-typedef VOID *    DEBUG_PORT_HANDLE;
+typedef VOID *DEBUG_PORT_HANDLE;
 
 /**
   Caller provided function to be invoked at the end of DebugPortInitialize().
@@ -22,7 +21,7 @@ typedef VOID *    DEBUG_PORT_HANDLE;
 **/
 typedef
 VOID
-(EFIAPI * DEBUG_PORT_CONTINUE)(
+(EFIAPI *DEBUG_PORT_CONTINUE)(
   IN VOID                *Context,
   IN DEBUG_PORT_HANDLE   DebugPortHandle
   );
@@ -70,9 +69,8 @@ DebugPortInitialize (
   IN DEBUG_PORT_CONTINUE  Function
   );
 
-
 /**
-  Read data from debug device and save the datas in buffer.
+  Read data from debug device and save the data in a buffer.
 
   Reads NumberOfBytes data bytes from a debug device into the buffer
   specified by Buffer. The number of bytes actually read is returned.
@@ -91,12 +89,11 @@ DebugPortInitialize (
 UINTN
 EFIAPI
 DebugPortReadBuffer (
-  IN DEBUG_PORT_HANDLE     Handle,
-  IN UINT8                 *Buffer,
-  IN UINTN                 NumberOfBytes,
-  IN UINTN                 Timeout
+  IN DEBUG_PORT_HANDLE  Handle,
+  IN UINT8              *Buffer,
+  IN UINTN              NumberOfBytes,
+  IN UINTN              Timeout
   );
-
 
 /**
   Write data from buffer to debug device.
@@ -118,9 +115,9 @@ DebugPortReadBuffer (
 UINTN
 EFIAPI
 DebugPortWriteBuffer (
-  IN DEBUG_PORT_HANDLE     Handle,
-  IN UINT8                 *Buffer,
-  IN UINTN                 NumberOfBytes
+  IN DEBUG_PORT_HANDLE  Handle,
+  IN UINT8              *Buffer,
+  IN UINTN              NumberOfBytes
   );
 
 /**
@@ -139,8 +136,5 @@ DebugPortWriteBuffer (
 BOOLEAN
 EFIAPI
 DebugPortPollBuffer (
-  IN DEBUG_PORT_HANDLE     Handle
+  IN DEBUG_PORT_HANDLE  Handle
   );
-
-#endif
-

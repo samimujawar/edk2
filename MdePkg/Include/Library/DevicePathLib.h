@@ -9,10 +9,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __DEVICE_PATH_LIB_H__
-#define __DEVICE_PATH_LIB_H__
+#pragma once
 
-#define END_DEVICE_PATH_LENGTH               (sizeof (EFI_DEVICE_PATH_PROTOCOL))
+#define END_DEVICE_PATH_LENGTH  (sizeof (EFI_DEVICE_PATH_PROTOCOL))
 
 /**
   Determine whether a given device path is valid.
@@ -33,8 +32,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 BOOLEAN
 EFIAPI
 IsDevicePathValid (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL *DevicePath,
-  IN       UINTN                    MaxSize
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN       UINTN                     MaxSize
   );
 
 /**
@@ -292,7 +291,7 @@ DuplicateDevicePath (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 AppendDevicePath (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *FirstDevicePath,  OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *FirstDevicePath   OPTIONAL,
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *SecondDevicePath  OPTIONAL
   );
 
@@ -324,7 +323,7 @@ AppendDevicePath (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 AppendDevicePathNode (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,     OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathNode  OPTIONAL
   );
 
@@ -333,7 +332,7 @@ AppendDevicePathNode (
   path.
 
   This function creates a new device path by appending a copy of the device path instance specified
-  by DevicePathInstance to a copy of the device path secified by DevicePath in a allocated buffer.
+  by DevicePathInstance to a copy of the device path specified by DevicePath in a allocated buffer.
   The end-of-device-path device node is moved after the end of the appended device path instance
   and a new end-of-device-path-instance node is inserted between.
   If DevicePath is NULL, then a copy if DevicePathInstance is returned.
@@ -352,7 +351,7 @@ AppendDevicePathNode (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 AppendDevicePathInstance (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,        OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath         OPTIONAL,
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
   );
 
@@ -384,8 +383,8 @@ AppendDevicePathInstance (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 GetNextDevicePathInstance (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath,
-  OUT UINTN                          *Size
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT UINTN                        *Size
   );
 
 /**
@@ -409,9 +408,9 @@ GetNextDevicePathInstance (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 CreateDeviceNode (
-  IN UINT8                           NodeType,
-  IN UINT8                           NodeSubType,
-  IN UINT16                          NodeLength
+  IN UINT8   NodeType,
+  IN UINT8   NodeSubType,
+  IN UINT16  NodeLength
   );
 
 /**
@@ -447,7 +446,7 @@ IsDevicePathMultiInstance (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 DevicePathFromHandle (
-  IN EFI_HANDLE                      Handle
+  IN EFI_HANDLE  Handle
   );
 
 /**
@@ -474,8 +473,8 @@ DevicePathFromHandle (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 FileDevicePath (
-  IN EFI_HANDLE                      Device,     OPTIONAL
-  IN CONST CHAR16                    *FileName
+  IN EFI_HANDLE    Device      OPTIONAL,
+  IN CONST CHAR16  *FileName
   );
 
 /**
@@ -496,9 +495,9 @@ FileDevicePath (
 CHAR16 *
 EFIAPI
 ConvertDevicePathToText (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
-  IN BOOLEAN                          DisplayOnly,
-  IN BOOLEAN                          AllowShortcuts
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN BOOLEAN                         DisplayOnly,
+  IN BOOLEAN                         AllowShortcuts
   );
 
 /**
@@ -538,7 +537,7 @@ ConvertDeviceNodeToText (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 ConvertTextToDeviceNode (
-  IN CONST CHAR16 *TextDeviceNode
+  IN CONST CHAR16  *TextDeviceNode
   );
 
 /**
@@ -555,7 +554,5 @@ ConvertTextToDeviceNode (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 ConvertTextToDevicePath (
-  IN CONST CHAR16 *TextDevicePath
+  IN CONST CHAR16  *TextDevicePath
   );
-
-#endif

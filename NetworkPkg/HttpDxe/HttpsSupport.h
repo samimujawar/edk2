@@ -2,16 +2,16 @@
   The header files of miscellaneous routines specific to Https for HttpDxe driver.
 
 Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_HTTPS_SUPPORT_H__
-#define __EFI_HTTPS_SUPPORT_H__
+#pragma once
 
-#define HTTPS_DEFAULT_PORT       443
+#define HTTPS_DEFAULT_PORT  443
 
-#define HTTPS_FLAG               "https://"
+#define HTTPS_FLAG  "https://"
 
 /**
   Check whether the Url is from Https.
@@ -24,27 +24,24 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 BOOLEAN
 IsHttpsUrl (
-  IN CHAR8    *Url
+  IN CHAR8  *Url
   );
 
 /**
   Creates a Tls child handle, open EFI_TLS_PROTOCOL and EFI_TLS_CONFIGURATION_PROTOCOL.
 
-  @param[in]  ImageHandle           The firmware allocated handle for the UEFI image.
-  @param[out] TlsSb                 Pointer to the TLS SERVICE_BINDING_PROTOCOL.
-  @param[out] TlsProto              Pointer to the EFI_TLS_PROTOCOL instance.
-  @param[out] TlsConfiguration      Pointer to the EFI_TLS_CONFIGURATION_PROTOCOL instance.
+  @param[in]  HttpInstance  Pointer to HTTP_PROTOCOL structure.
 
-  @return  The child handle with opened EFI_TLS_PROTOCOL and EFI_TLS_CONFIGURATION_PROTOCOL.
+  @return  EFI_SUCCESS        TLS child handle is returned in HttpInstance->TlsChildHandle
+                              with opened EFI_TLS_PROTOCOL and EFI_TLS_CONFIGURATION_PROTOCOL.
+           EFI_DEVICE_ERROR   TLS service binding protocol is not found.
+           Otherwise          Fail to create TLS chile handle.
 
 **/
-EFI_HANDLE
+EFI_STATUS
 EFIAPI
 TlsCreateChild (
-  IN  EFI_HANDLE                     ImageHandle,
-  OUT EFI_SERVICE_BINDING_PROTOCOL   **TlsSb,
-  OUT EFI_TLS_PROTOCOL               **TlsProto,
-  OUT EFI_TLS_CONFIGURATION_PROTOCOL **TlsConfiguration
+  IN  HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -60,7 +57,7 @@ TlsCreateChild (
 EFI_STATUS
 EFIAPI
 TlsCreateTxRxEvent (
-  IN OUT HTTP_PROTOCOL      *HttpInstance
+  IN OUT HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -72,7 +69,7 @@ TlsCreateTxRxEvent (
 VOID
 EFIAPI
 TlsCloseTxRxEvent (
-  IN  HTTP_PROTOCOL        *HttpInstance
+  IN  HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -88,7 +85,7 @@ TlsCloseTxRxEvent (
 **/
 EFI_STATUS
 TlsConfigCertificate (
-  IN OUT HTTP_PROTOCOL      *HttpInstance
+  IN OUT HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -103,7 +100,7 @@ TlsConfigCertificate (
 EFI_STATUS
 EFIAPI
 TlsConfigureSession (
-  IN OUT HTTP_PROTOCOL      *HttpInstance
+  IN OUT HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -122,8 +119,8 @@ TlsConfigureSession (
 EFI_STATUS
 EFIAPI
 TlsCommonTransmit (
-  IN OUT HTTP_PROTOCOL      *HttpInstance,
-  IN     NET_BUF            *Packet
+  IN OUT HTTP_PROTOCOL  *HttpInstance,
+  IN     NET_BUF        *Packet
   );
 
 /**
@@ -143,9 +140,9 @@ TlsCommonTransmit (
 EFI_STATUS
 EFIAPI
 TlsCommonReceive (
-  IN OUT HTTP_PROTOCOL      *HttpInstance,
-  IN     NET_BUF            *Packet,
-  IN     EFI_EVENT          Timeout
+  IN OUT HTTP_PROTOCOL  *HttpInstance,
+  IN     NET_BUF        *Packet,
+  IN     EFI_EVENT      Timeout
   );
 
 /**
@@ -166,9 +163,9 @@ TlsCommonReceive (
 EFI_STATUS
 EFIAPI
 TlsReceiveOnePdu (
-  IN OUT HTTP_PROTOCOL      *HttpInstance,
-     OUT NET_BUF            **Pdu,
-  IN     EFI_EVENT          Timeout
+  IN OUT HTTP_PROTOCOL  *HttpInstance,
+  OUT NET_BUF           **Pdu,
+  IN     EFI_EVENT      Timeout
   );
 
 /**
@@ -186,8 +183,8 @@ TlsReceiveOnePdu (
 EFI_STATUS
 EFIAPI
 TlsConnectSession (
-  IN  HTTP_PROTOCOL            *HttpInstance,
-  IN  EFI_EVENT                Timeout
+  IN  HTTP_PROTOCOL  *HttpInstance,
+  IN  EFI_EVENT      Timeout
   );
 
 /**
@@ -204,7 +201,7 @@ TlsConnectSession (
 EFI_STATUS
 EFIAPI
 TlsCloseSession (
-  IN  HTTP_PROTOCOL            *HttpInstance
+  IN  HTTP_PROTOCOL  *HttpInstance
   );
 
 /**
@@ -233,11 +230,11 @@ TlsCloseSession (
 EFI_STATUS
 EFIAPI
 TlsProcessMessage (
-  IN     HTTP_PROTOCOL            *HttpInstance,
-  IN     UINT8                    *Message,
-  IN     UINTN                    MessageSize,
-  IN     EFI_TLS_CRYPT_MODE       ProcessMode,
-  IN OUT NET_FRAGMENT             *Fragment
+  IN     HTTP_PROTOCOL       *HttpInstance,
+  IN     UINT8               *Message,
+  IN     UINTN               MessageSize,
+  IN     EFI_TLS_CRYPT_MODE  ProcessMode,
+  IN OUT NET_FRAGMENT        *Fragment
   );
 
 /**
@@ -256,10 +253,7 @@ TlsProcessMessage (
 EFI_STATUS
 EFIAPI
 HttpsReceive (
-  IN     HTTP_PROTOCOL         *HttpInstance,
-  IN OUT NET_FRAGMENT          *Fragment,
-  IN     EFI_EVENT             Timeout
+  IN     HTTP_PROTOCOL  *HttpInstance,
+  IN OUT NET_FRAGMENT   *Fragment,
+  IN     EFI_EVENT      Timeout
   );
-
-#endif
-

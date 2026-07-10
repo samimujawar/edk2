@@ -5,8 +5,7 @@
 
 **/
 
-#ifndef _EDKII_NVME_PASS_THRU_PPI_H_
-#define _EDKII_NVME_PASS_THRU_PPI_H_
+#pragma once
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/NvmExpressPassthru.h>
@@ -22,7 +21,7 @@
 //
 // Forward declaration for the EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI.
 //
-typedef struct _EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI  EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI;
+typedef struct _EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI;
 
 //
 // Revision The revision to which the Nvme Pass Thru PPI interface adheres.
@@ -50,7 +49,7 @@ typedef struct _EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI  EDKII_PEI_NVM_EXPRESS_PASS_
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_NVME_PASS_THRU_GET_DEVICE_PATH) (
+(EFIAPI *EDKII_PEI_NVME_PASS_THRU_GET_DEVICE_PATH)(
   IN  EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI   *This,
   OUT UINTN                                 *DevicePathLength,
   OUT EFI_DEVICE_PATH_PROTOCOL              **DevicePath
@@ -99,7 +98,6 @@ EFI_STATUS
   IN OUT UINT32                                *NamespaceId
   );
 
-
 /**
   Sends an NVM Express Command Packet to an NVM Express controller or namespace. This function only
   supports blocking execution of the command.
@@ -133,7 +131,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_NVME_PASS_THRU_PASSTHRU) (
+(EFIAPI *EDKII_PEI_NVME_PASS_THRU_PASSTHRU)(
   IN     EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI               *This,
   IN     UINT32                                            NamespaceId,
   IN OUT EFI_NVM_EXPRESS_PASS_THRU_COMMAND_PACKET          *Packet
@@ -144,13 +142,11 @@ EFI_STATUS
 // to a mass storage device.
 //
 struct _EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI {
-  UINT64                                           Revision;
-  EFI_NVM_EXPRESS_PASS_THRU_MODE                   *Mode;
-  EDKII_PEI_NVME_PASS_THRU_GET_DEVICE_PATH         GetDevicePath;
-  EDKII_PEI_NVME_PASS_THRU_GET_NEXT_NAMESPACE      GetNextNameSpace;
-  EDKII_PEI_NVME_PASS_THRU_PASSTHRU                PassThru;
+  UINT64                                         Revision;
+  EFI_NVM_EXPRESS_PASS_THRU_MODE                 *Mode;
+  EDKII_PEI_NVME_PASS_THRU_GET_DEVICE_PATH       GetDevicePath;
+  EDKII_PEI_NVME_PASS_THRU_GET_NEXT_NAMESPACE    GetNextNameSpace;
+  EDKII_PEI_NVME_PASS_THRU_PASSTHRU              PassThru;
 };
 
-extern EFI_GUID gEdkiiPeiNvmExpressPassThruPpiGuid;
-
-#endif
+extern EFI_GUID  gEdkiiPeiNvmExpressPassThruPpiGuid;

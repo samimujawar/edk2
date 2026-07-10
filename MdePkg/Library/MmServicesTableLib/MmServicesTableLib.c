@@ -12,7 +12,7 @@
 #include <Library/MmServicesTableLib.h>
 #include <Library/DebugLib.h>
 
-EFI_MM_SYSTEM_TABLE   *gMmst             = NULL;
+EFI_MM_SYSTEM_TABLE  *gMmst = NULL;
 
 /**
   The constructor function caches the pointer of the MM Services Table.
@@ -30,14 +30,14 @@ MmServicesTableLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS              Status;
-  EFI_MM_BASE_PROTOCOL    *InternalMmBase;
+  EFI_STATUS            Status;
+  EFI_MM_BASE_PROTOCOL  *InternalMmBase;
 
   InternalMmBase = NULL;
   //
   // Retrieve MM Base Protocol,  Do not use gBS from UefiBootServicesTableLib on purpose
   // to prevent inclusion of gBS, gST, and gImageHandle from SMM Drivers unless the
-  // MM driver explicity declares that dependency.
+  // MM driver explicitly declares that dependency.
   //
   Status = SystemTable->BootServices->LocateProtocol (
                                         &gEfiMmBaseProtocolGuid,

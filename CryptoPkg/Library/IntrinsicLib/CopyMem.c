@@ -10,21 +10,40 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Base.h>
 #include <Library/BaseMemoryLib.h>
 
-#if defined(__clang__) && !defined(__APPLE__)
+typedef UINTN size_t;
+
+#if defined (__clang__) && !defined (__APPLE__)
 
 /* Copies bytes between buffers */
-static __attribute__((__used__))
-void * __memcpy (void *dest, const void *src, unsigned int count)
+static __attribute__ ((__used__))
+void *
+__memcpy (
+  void        *dest,
+  const void  *src,
+  size_t      count
+  )
 {
-  return CopyMem (dest, src, (UINTN)count);
+  return CopyMem (dest, src, count);
 }
-__attribute__((__alias__("__memcpy")))
-void * memcpy (void *dest, const void *src, unsigned int count);
+
+__attribute__ ((__alias__ ("__memcpy")))
+void *
+memcpy (
+  void          *dest,
+  const void    *src,
+  unsigned int  count
+  );
 
 #else
 /* Copies bytes between buffers */
-void * memcpy (void *dest, const void *src, unsigned int count)
+void *
+memcpy (
+  void        *dest,
+  const void  *src,
+  size_t      count
+  )
 {
-  return CopyMem (dest, src, (UINTN)count);
+  return CopyMem (dest, src, count);
 }
+
 #endif

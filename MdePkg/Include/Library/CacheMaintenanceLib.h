@@ -9,8 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __CACHE_MAINTENANCE_LIB__
-#define __CACHE_MAINTENANCE_LIB__
+#pragma once
 
 /**
   Invalidates the entire instruction cache in cache coherency domain of the
@@ -51,8 +50,8 @@ InvalidateInstructionCache (
 VOID *
 EFIAPI
 InvalidateInstructionCacheRange (
-  IN      VOID                      *Address,
-  IN      UINTN                     Length
+  IN      VOID   *Address,
+  IN      UINTN  Length
   );
 
 /**
@@ -100,8 +99,8 @@ WriteBackInvalidateDataCache (
 VOID *
 EFIAPI
 WriteBackInvalidateDataCacheRange (
-  IN      VOID                      *Address,
-  IN      UINTN                     Length
+  IN      VOID   *Address,
+  IN      UINTN  Length
   );
 
 /**
@@ -148,8 +147,8 @@ WriteBackDataCache (
 VOID *
 EFIAPI
 WriteBackDataCacheRange (
-  IN      VOID                      *Address,
-  IN      UINTN                     Length
+  IN      VOID   *Address,
+  IN      UINTN  Length
   );
 
 /**
@@ -199,8 +198,6 @@ InvalidateDataCache (
 VOID *
 EFIAPI
 InvalidateDataCacheRange (
-  IN      VOID                      *Address,
-  IN      UINTN                     Length
+  IN      VOID   *Address,
+  IN      UINTN  Length
   );
-
-#endif

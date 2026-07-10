@@ -7,13 +7,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _PEI_USB_BOT_PEIM_H_
-#define _PEI_USB_BOT_PEIM_H_
+#pragma once
 
 #include <PiPei.h>
 
 #include <Ppi/UsbIo.h>
-#include <Ppi/UsbHostController.h>
 #include <Ppi/BlockIo.h>
 #include <Ppi/BlockIo2.h>
 
@@ -46,9 +44,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 BotGetNumberOfBlockDevices (
-  IN  EFI_PEI_SERVICES                         **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI            *This,
-  OUT UINTN                                    *NumberBlockDevices
+  IN  EFI_PEI_SERVICES               **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI  *This,
+  OUT UINTN                          *NumberBlockDevices
   );
 
 /**
@@ -81,10 +79,10 @@ BotGetNumberOfBlockDevices (
 EFI_STATUS
 EFIAPI
 BotGetMediaInfo (
-  IN  EFI_PEI_SERVICES                          **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI             *This,
-  IN  UINTN                                     DeviceIndex,
-  OUT EFI_PEI_BLOCK_IO_MEDIA                    *MediaInfo
+  IN  EFI_PEI_SERVICES               **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI  *This,
+  IN  UINTN                          DeviceIndex,
+  OUT EFI_PEI_BLOCK_IO_MEDIA         *MediaInfo
   );
 
 /**
@@ -124,12 +122,12 @@ BotGetMediaInfo (
 EFI_STATUS
 EFIAPI
 BotReadBlocks (
-  IN  EFI_PEI_SERVICES                          **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI             *This,
-  IN  UINTN                                     DeviceIndex,
-  IN  EFI_PEI_LBA                               StartLBA,
-  IN  UINTN                                     BufferSize,
-  OUT VOID                                      *Buffer
+  IN  EFI_PEI_SERVICES               **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO_PPI  *This,
+  IN  UINTN                          DeviceIndex,
+  IN  EFI_PEI_LBA                    StartLBA,
+  IN  UINTN                          BufferSize,
+  OUT VOID                           *Buffer
   );
 
 /**
@@ -154,9 +152,9 @@ BotReadBlocks (
 EFI_STATUS
 EFIAPI
 BotGetNumberOfBlockDevices2 (
-  IN  EFI_PEI_SERVICES                         **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI           *This,
-  OUT UINTN                                    *NumberBlockDevices
+  IN  EFI_PEI_SERVICES                **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI  *This,
+  OUT UINTN                           *NumberBlockDevices
   );
 
 /**
@@ -189,10 +187,10 @@ BotGetNumberOfBlockDevices2 (
 EFI_STATUS
 EFIAPI
 BotGetMediaInfo2 (
-  IN  EFI_PEI_SERVICES                          **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI            *This,
-  IN  UINTN                                     DeviceIndex,
-  OUT EFI_PEI_BLOCK_IO2_MEDIA                   *MediaInfo
+  IN  EFI_PEI_SERVICES                **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI  *This,
+  IN  UINTN                           DeviceIndex,
+  OUT EFI_PEI_BLOCK_IO2_MEDIA         *MediaInfo
   );
 
 /**
@@ -232,12 +230,12 @@ BotGetMediaInfo2 (
 EFI_STATUS
 EFIAPI
 BotReadBlocks2 (
-  IN  EFI_PEI_SERVICES                          **PeiServices,
-  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI            *This,
-  IN  UINTN                                     DeviceIndex,
-  IN  EFI_PEI_LBA                               StartLBA,
-  IN  UINTN                                     BufferSize,
-  OUT VOID                                      *Buffer
+  IN  EFI_PEI_SERVICES                **PeiServices,
+  IN  EFI_PEI_RECOVERY_BLOCK_IO2_PPI  *This,
+  IN  UINTN                           DeviceIndex,
+  IN  EFI_PEI_LBA                     StartLBA,
+  IN  UINTN                           BufferSize,
+  OUT VOID                            *Buffer
   );
 
 /**
@@ -256,9 +254,9 @@ BotReadBlocks2 (
 EFI_STATUS
 EFIAPI
 NotifyOnUsbIoPpi (
-  IN  EFI_PEI_SERVICES                              **PeiServices,
-  IN  EFI_PEI_NOTIFY_DESCRIPTOR                     *NotifyDesc,
-  IN  VOID                                          *InvokePpi
+  IN  EFI_PEI_SERVICES           **PeiServices,
+  IN  EFI_PEI_NOTIFY_DESCRIPTOR  *NotifyDesc,
+  IN  VOID                       *InvokePpi
   );
 
 /**
@@ -274,11 +272,11 @@ NotifyOnUsbIoPpi (
 **/
 EFI_STATUS
 InitUsbBot (
-  IN  EFI_PEI_SERVICES                          **PeiServices,
-  IN  PEI_USB_IO_PPI                            *UsbIoPpi
+  IN  EFI_PEI_SERVICES  **PeiServices,
+  IN  PEI_USB_IO_PPI    *UsbIoPpi
   );
 
-#define USBCDROM    1 // let the device type value equal to USBCDROM, which is defined by PI spec.
+#define USBCDROM  1   // let the device type value equal to USBCDROM, which is defined by PI spec.
                       // Therefore the CdExpressPei module can do recovery on UsbCdrom.
 #define USBFLOPPY   2 // for those that use ReadCapacity(0x25) command to retrieve media capacity
 #define USBFLOPPY2  3 // for those that use ReadFormatCapacity(0x23) command to retrieve media capacity
@@ -288,24 +286,24 @@ InitUsbBot (
 //
 #define PEI_BOT_DEVICE_SIGNATURE  SIGNATURE_32 ('U', 'B', 'O', 'T')
 typedef struct {
-  UINTN                           Signature;
-  EFI_PEI_RECOVERY_BLOCK_IO_PPI   BlkIoPpi;
-  EFI_PEI_RECOVERY_BLOCK_IO2_PPI  BlkIo2Ppi;
-  EFI_PEI_PPI_DESCRIPTOR          BlkIoPpiList;
-  EFI_PEI_PPI_DESCRIPTOR          BlkIo2PpiList;
-  EFI_PEI_BLOCK_IO_MEDIA          Media;
-  EFI_PEI_BLOCK_IO2_MEDIA         Media2;
-  PEI_USB_IO_PPI                  *UsbIoPpi;
-  EFI_USB_INTERFACE_DESCRIPTOR    *BotInterface;
-  EFI_USB_ENDPOINT_DESCRIPTOR     *BulkInEndpoint;
-  EFI_USB_ENDPOINT_DESCRIPTOR     *BulkOutEndpoint;
-  UINTN                           AllocateAddress;
-  UINTN                           DeviceType;
-  ATAPI_REQUEST_SENSE_DATA        *SensePtr;
+  UINTN                             Signature;
+  EFI_PEI_RECOVERY_BLOCK_IO_PPI     BlkIoPpi;
+  EFI_PEI_RECOVERY_BLOCK_IO2_PPI    BlkIo2Ppi;
+  EFI_PEI_PPI_DESCRIPTOR            BlkIoPpiList;
+  EFI_PEI_PPI_DESCRIPTOR            BlkIo2PpiList;
+  EFI_PEI_BLOCK_IO_MEDIA            Media;
+  EFI_PEI_BLOCK_IO2_MEDIA           Media2;
+  PEI_USB_IO_PPI                    *UsbIoPpi;
+  EFI_USB_INTERFACE_DESCRIPTOR      *BotInterface;
+  EFI_USB_ENDPOINT_DESCRIPTOR       *BulkInEndpoint;
+  EFI_USB_ENDPOINT_DESCRIPTOR       *BulkOutEndpoint;
+  UINTN                             AllocateAddress;
+  UINTN                             DeviceType;
+  ATAPI_REQUEST_SENSE_DATA          *SensePtr;
 } PEI_BOT_DEVICE;
 
-#define PEI_BOT_DEVICE_FROM_THIS(a) CR (a, PEI_BOT_DEVICE, BlkIoPpi, PEI_BOT_DEVICE_SIGNATURE)
-#define PEI_BOT_DEVICE2_FROM_THIS(a) CR (a, PEI_BOT_DEVICE, BlkIo2Ppi, PEI_BOT_DEVICE_SIGNATURE)
+#define PEI_BOT_DEVICE_FROM_THIS(a)   CR (a, PEI_BOT_DEVICE, BlkIoPpi, PEI_BOT_DEVICE_SIGNATURE)
+#define PEI_BOT_DEVICE2_FROM_THIS(a)  CR (a, PEI_BOT_DEVICE, BlkIo2Ppi, PEI_BOT_DEVICE_SIGNATURE)
 
 /**
   Send ATAPI command using BOT protocol.
@@ -326,14 +324,12 @@ typedef struct {
 **/
 EFI_STATUS
 PeiAtapiCommand (
-  IN  EFI_PEI_SERVICES            **PeiServices,
-  IN  PEI_BOT_DEVICE              *PeiBotDev,
-  IN  VOID                        *Command,
-  IN  UINT8                       CommandSize,
-  IN  VOID                        *DataBuffer,
-  IN  UINT32                      BufferLength,
-  IN  EFI_USB_DATA_DIRECTION      Direction,
-  IN  UINT16                      TimeOutInMilliSeconds
+  IN  EFI_PEI_SERVICES        **PeiServices,
+  IN  PEI_BOT_DEVICE          *PeiBotDev,
+  IN  VOID                    *Command,
+  IN  UINT8                   CommandSize,
+  IN  VOID                    *DataBuffer,
+  IN  UINT32                  BufferLength,
+  IN  EFI_USB_DATA_DIRECTION  Direction,
+  IN  UINT16                  TimeOutInMilliSeconds
   );
-
-#endif

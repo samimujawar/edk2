@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef __ARCH_PROTOCOL_TIMER_H__
-#define __ARCH_PROTOCOL_TIMER_H__
+#pragma once
 
 ///
 /// Global ID for the Timer Architectural Protocol
@@ -20,7 +19,7 @@
 ///
 /// Declare forward reference for the Timer Architectural Protocol
 ///
-typedef struct _EFI_TIMER_ARCH_PROTOCOL   EFI_TIMER_ARCH_PROTOCOL;
+typedef struct _EFI_TIMER_ARCH_PROTOCOL EFI_TIMER_ARCH_PROTOCOL;
 
 /**
   This function of this type is called when a timer interrupt fires.  This
@@ -76,7 +75,7 @@ EFI_STATUS
 (EFIAPI *EFI_TIMER_REGISTER_HANDLER)(
   IN EFI_TIMER_ARCH_PROTOCOL    *This,
   IN EFI_TIMER_NOTIFY           NotifyFunction
-);
+  );
 
 /**
   This function adjusts the period of timer interrupts to the value specified
@@ -153,7 +152,6 @@ EFI_STATUS
   IN EFI_TIMER_ARCH_PROTOCOL    *This
   );
 
-
 ///
 /// This protocol provides the services to initialize a periodic timer
 /// interrupt, and to register a handler that is called each time the timer
@@ -163,12 +161,10 @@ EFI_STATUS
 /// interrupt.
 ///
 struct _EFI_TIMER_ARCH_PROTOCOL {
-  EFI_TIMER_REGISTER_HANDLER          RegisterHandler;
-  EFI_TIMER_SET_TIMER_PERIOD          SetTimerPeriod;
-  EFI_TIMER_GET_TIMER_PERIOD          GetTimerPeriod;
-  EFI_TIMER_GENERATE_SOFT_INTERRUPT   GenerateSoftInterrupt;
+  EFI_TIMER_REGISTER_HANDLER           RegisterHandler;
+  EFI_TIMER_SET_TIMER_PERIOD           SetTimerPeriod;
+  EFI_TIMER_GET_TIMER_PERIOD           GetTimerPeriod;
+  EFI_TIMER_GENERATE_SOFT_INTERRUPT    GenerateSoftInterrupt;
 };
 
-extern EFI_GUID gEfiTimerArchProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiTimerArchProtocolGuid;

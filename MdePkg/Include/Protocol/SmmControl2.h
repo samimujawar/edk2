@@ -16,20 +16,16 @@
 
 **/
 
-#ifndef _SMM_CONTROL2_H_
-#define _SMM_CONTROL2_H_
+#pragma once
 
 #include <Protocol/MmControl.h>
 
-#define EFI_SMM_CONTROL2_PROTOCOL_GUID EFI_MM_CONTROL_PROTOCOL_GUID
+#define EFI_SMM_CONTROL2_PROTOCOL_GUID  EFI_MM_CONTROL_PROTOCOL_GUID
 
 typedef EFI_MM_CONTROL_PROTOCOL  EFI_SMM_CONTROL2_PROTOCOL;
-typedef EFI_MM_PERIOD  EFI_SMM_PERIOD;
+typedef EFI_MM_PERIOD            EFI_SMM_PERIOD;
 
 typedef EFI_MM_ACTIVATE EFI_SMM_ACTIVATE2;
 
 typedef EFI_MM_DEACTIVATE EFI_SMM_DEACTIVATE2;
-extern EFI_GUID gEfiSmmControl2ProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmmControl2ProtocolGuid;

@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2018, ARM Limited. All rights reserved.
+  Copyright (c) 2018 - 2022, Arm Limited. All rights reserved.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -10,8 +10,7 @@
     - Std or STD - Standard
 **/
 
-#ifndef IORT_GENERATOR_H_
-#define IORT_GENERATOR_H_
+#pragma once
 
 #pragma pack(1)
 
@@ -22,23 +21,24 @@ typedef struct IortNodeIndexer {
   /// Index token for the Node
   CM_OBJECT_TOKEN    Token;
   /// Pointer to the node
-  VOID             * Object;
+  VOID               *Object;
   /// Node offset from the start of the IORT table
   UINT32             Offset;
+
+  /// Unique identifier for the Node
+  UINT32             Identifier;
 } IORT_NODE_INDEXER;
 
 typedef struct AcpiIortGenerator {
   /// ACPI Table generator header
-  ACPI_TABLE_GENERATOR  Header;
+  ACPI_TABLE_GENERATOR    Header;
 
   // IORT Generator private data
 
   /// IORT node count
-  UINT32                IortNodeCount;
+  UINT32                  IortNodeCount;
   /// Pointer to the node indexer array
-  IORT_NODE_INDEXER   * NodeIndexer;
+  IORT_NODE_INDEXER       *NodeIndexer;
 } ACPI_IORT_GENERATOR;
 
 #pragma pack()
-
-#endif // IORT_GENERATOR_H_

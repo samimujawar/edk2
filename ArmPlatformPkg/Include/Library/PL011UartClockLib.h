@@ -1,13 +1,12 @@
 /** @file
-*
-*  Copyright 2018 NXP
-*
-*  SPDX-License-Identifier: BSD-2-Clause-Patent
-*
+
+  Copyright 2018 NXP
+
+  SPDX-License-Identifier: BSD-2-Clause-Patent
+
 **/
 
-#ifndef __PL011UARTCLOCKLIB_H__
-#define __PL011UARTCLOCKLIB_H__
+#pragma once
 
 /**
 
@@ -21,5 +20,3 @@ EFIAPI
 PL011UartClockGetFreq (
   VOID
   );
-
-#endif

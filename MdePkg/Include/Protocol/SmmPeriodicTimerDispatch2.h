@@ -12,13 +12,12 @@
 
 **/
 
-#ifndef _SMM_PERIODIC_TIMER_DISPATCH2_H_
-#define _SMM_PERIODIC_TIMER_DISPATCH2_H_
+#pragma once
 
 #include <Pi/PiSmmCis.h>
 #include <Protocol/MmPeriodicTimerDispatch.h>
 
-#define EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL_GUID EFI_MM_PERIODIC_TIMER_DISPATCH_PROTOCOL_GUID
+#define EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL_GUID  EFI_MM_PERIODIC_TIMER_DISPATCH_PROTOCOL_GUID
 
 ///
 /// Example: A chipset supports periodic SMIs on every 64ms or 2 seconds.
@@ -44,13 +43,13 @@ typedef struct {
   /// The minimum period of time in 100 nanosecond units that the child gets called. The
   /// child will be called back after a time greater than the time Period.
   ///
-  UINT64  Period;
+  UINT64    Period;
   ///
   /// The period of time interval between SMIs. Children of this interface should use this
   /// field when registering for periodic timer intervals when a finer granularity periodic
   /// SMI is desired.
   ///
-  UINT64  SmiTickInterval;
+  UINT64    SmiTickInterval;
 } EFI_SMM_PERIODIC_TIMER_REGISTER_CONTEXT;
 
 ///
@@ -60,7 +59,7 @@ typedef struct {
 ///
 typedef EFI_MM_PERIODIC_TIMER_CONTEXT EFI_SMM_PERIODIC_TIMER_CONTEXT;
 
-typedef struct _EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL  EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL;
+typedef struct _EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL;
 
 /**
   Register a child SMI source dispatch function for SMM periodic timer.
@@ -145,12 +144,9 @@ EFI_STATUS
 /// This protocol provides the parent dispatch service for the periodical timer SMI source generator.
 ///
 struct _EFI_SMM_PERIODIC_TIMER_DISPATCH2_PROTOCOL {
-  EFI_SMM_PERIODIC_TIMER_REGISTER2    Register;
-  EFI_SMM_PERIODIC_TIMER_UNREGISTER2  UnRegister;
-  EFI_SMM_PERIODIC_TIMER_INTERVAL2    GetNextShorterInterval;
+  EFI_SMM_PERIODIC_TIMER_REGISTER2      Register;
+  EFI_SMM_PERIODIC_TIMER_UNREGISTER2    UnRegister;
+  EFI_SMM_PERIODIC_TIMER_INTERVAL2      GetNextShorterInterval;
 };
 
-extern EFI_GUID gEfiSmmPeriodicTimerDispatch2ProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmmPeriodicTimerDispatch2ProtocolGuid;

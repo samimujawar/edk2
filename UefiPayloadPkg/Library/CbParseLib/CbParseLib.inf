@@ -1,7 +1,7 @@
 ## @file
 #  Coreboot Table Parse Library.
 #
-#  Copyright (c) 2014, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2014 - 2021, Intel Corporation. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
@@ -34,6 +34,7 @@
   IoLib
   DebugLib
   PcdLib
+  PrintLib
 
 [Pcd]
-  gUefiPayloadPkgTokenSpaceGuid.PcdPayloadStackTop
+  gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter

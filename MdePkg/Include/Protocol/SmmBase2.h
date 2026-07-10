@@ -9,15 +9,14 @@
 
 **/
 
-#ifndef _SMM_BASE2_H_
-#define _SMM_BASE2_H_
+#pragma once
 
 #include <Pi/PiSmmCis.h>
 #include <Protocol/MmBase.h>
 
 #define EFI_SMM_BASE2_PROTOCOL_GUID  EFI_MM_BASE_PROTOCOL_GUID
 
-typedef struct _EFI_SMM_BASE2_PROTOCOL  EFI_SMM_BASE2_PROTOCOL;
+typedef struct _EFI_SMM_BASE2_PROTOCOL EFI_SMM_BASE2_PROTOCOL;
 
 /**
   Service to indicate whether the driver is currently executing in the SMM Initialization phase.
@@ -69,11 +68,8 @@ EFI_STATUS
 /// services and determine whether the driver is being invoked inside SMRAM or outside of SMRAM.
 ///
 struct _EFI_SMM_BASE2_PROTOCOL {
-  EFI_SMM_INSIDE_OUT2         InSmm;
-  EFI_SMM_GET_SMST_LOCATION2  GetSmstLocation;
+  EFI_SMM_INSIDE_OUT2           InSmm;
+  EFI_SMM_GET_SMST_LOCATION2    GetSmstLocation;
 };
 
-extern EFI_GUID gEfiSmmBase2ProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmmBase2ProtocolGuid;

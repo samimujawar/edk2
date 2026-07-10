@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __OEM_HOOK_STATUSCODE_LIB__
-#define __OEM_HOOK_STATUSCODE_LIB__
+#pragma once
 
 /**
 
@@ -62,12 +61,9 @@ OemHookStatusCodeInitialize (
 EFI_STATUS
 EFIAPI
 OemHookStatusCodeReport (
-  IN EFI_STATUS_CODE_TYPE     CodeType,
-  IN EFI_STATUS_CODE_VALUE    Value,
-  IN UINT32                   Instance,
-  IN EFI_GUID                 *CallerId, OPTIONAL
-  IN EFI_STATUS_CODE_DATA     *Data      OPTIONAL
+  IN EFI_STATUS_CODE_TYPE   CodeType,
+  IN EFI_STATUS_CODE_VALUE  Value,
+  IN UINT32                 Instance,
+  IN EFI_GUID               *CallerId  OPTIONAL,
+  IN EFI_STATUS_CODE_DATA   *Data      OPTIONAL
   );
-
-#endif // __OEM_HOOK_STATUSCODE_LIB__
-

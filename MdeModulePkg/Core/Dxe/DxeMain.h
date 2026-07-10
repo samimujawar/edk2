@@ -7,10 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _DXE_MAIN_H_
-#define _DXE_MAIN_H_
-
-
+#pragma once
 
 #include <PiDxe.h>
 
@@ -47,6 +44,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/HiiPackageList.h>
 #include <Protocol/SmmBase2.h>
 #include <Protocol/PeCoffImageEmulator.h>
+#include <Protocol/MemoryAttribute.h>
 #include <Guid/MemoryTypeInformation.h>
 #include <Guid/FirmwareFileSystem2.h>
 #include <Guid/FirmwareFileSystem3.h>
@@ -86,7 +84,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DxeServicesLib.h>
 #include <Library/DebugAgentLib.h>
 #include <Library/CpuExceptionHandlerLib.h>
+#include <Library/OrderedCollectionLib.h>
 
+#include <MemoryBin.h>
 
 //
 // attributes for reserved memory before it is promoted to system memory
@@ -99,7 +99,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // range for memory mapped port I/O on IPF
 //
 #define EFI_MEMORY_PORT_IO  0x4000000000000000ULL
-
 
 ///
 /// EFI_DEP_REPLACE_TRUE - Used to dynamically patch the dependency expression
@@ -117,11 +116,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define DEPEX_STACK_SIZE_INCREMENT  0x1000
 
 typedef struct {
-  EFI_GUID                    *ProtocolGuid;
-  VOID                        **Protocol;
-  EFI_EVENT                   Event;
-  VOID                        *Registration;
-  BOOLEAN                     Present;
+  EFI_GUID     *ProtocolGuid;
+  VOID         **Protocol;
+  EFI_EVENT    Event;
+  VOID         *Registration;
+  BOOLEAN      Present;
 } EFI_CORE_PROTOCOL_NOTIFY_ENTRY;
 
 //
@@ -130,170 +129,152 @@ typedef struct {
 
 #define KNOWN_HANDLE_SIGNATURE  SIGNATURE_32('k','n','o','w')
 typedef struct {
-  UINTN           Signature;
-  LIST_ENTRY      Link;         // mFvHandleList
-  EFI_HANDLE      Handle;
-  EFI_GUID        FvNameGuid;
+  UINTN         Signature;
+  LIST_ENTRY    Link;           // mFvHandleList
+  EFI_HANDLE    Handle;
+  EFI_GUID      FvNameGuid;
 } KNOWN_HANDLE;
 
-
-#define EFI_CORE_DRIVER_ENTRY_SIGNATURE SIGNATURE_32('d','r','v','r')
+#define EFI_CORE_DRIVER_ENTRY_SIGNATURE  SIGNATURE_32('d','r','v','r')
 typedef struct {
-  UINTN                           Signature;
-  LIST_ENTRY                      Link;             // mDriverList
+  UINTN                            Signature;
+  LIST_ENTRY                       Link;            // mDriverList
 
-  LIST_ENTRY                      ScheduledLink;    // mScheduledQueue
+  LIST_ENTRY                       ScheduledLink;   // mScheduledQueue
 
-  EFI_HANDLE                      FvHandle;
-  EFI_GUID                        FileName;
-  EFI_DEVICE_PATH_PROTOCOL        *FvFileDevicePath;
-  EFI_FIRMWARE_VOLUME2_PROTOCOL   *Fv;
+  EFI_HANDLE                       FvHandle;
+  EFI_GUID                         FileName;
+  EFI_DEVICE_PATH_PROTOCOL         *FvFileDevicePath;
+  EFI_FIRMWARE_VOLUME2_PROTOCOL    *Fv;
 
-  VOID                            *Depex;
-  UINTN                           DepexSize;
+  VOID                             *Depex;
+  UINTN                            DepexSize;
 
-  BOOLEAN                         Before;
-  BOOLEAN                         After;
-  EFI_GUID                        BeforeAfterGuid;
+  BOOLEAN                          Before;
+  BOOLEAN                          After;
+  EFI_GUID                         BeforeAfterGuid;
 
-  BOOLEAN                         Dependent;
-  BOOLEAN                         Unrequested;
-  BOOLEAN                         Scheduled;
-  BOOLEAN                         Untrusted;
-  BOOLEAN                         Initialized;
-  BOOLEAN                         DepexProtocolError;
+  BOOLEAN                          Dependent;
+  BOOLEAN                          Unrequested;
+  BOOLEAN                          Scheduled;
+  BOOLEAN                          Untrusted;
+  BOOLEAN                          Initialized;
+  BOOLEAN                          DepexProtocolError;
 
-  EFI_HANDLE                      ImageHandle;
-  BOOLEAN                         IsFvImage;
-
+  EFI_HANDLE                       ImageHandle;
+  BOOLEAN                          IsFvImage;
 } EFI_CORE_DRIVER_ENTRY;
 
 //
-//The data structure of GCD memory map entry
+// The data structure of GCD memory map entry
 //
 #define EFI_GCD_MAP_SIGNATURE  SIGNATURE_32('g','c','d','m')
 typedef struct {
-  UINTN                 Signature;
-  LIST_ENTRY            Link;
-  EFI_PHYSICAL_ADDRESS  BaseAddress;
-  UINT64                EndAddress;
-  UINT64                Capabilities;
-  UINT64                Attributes;
-  EFI_GCD_MEMORY_TYPE   GcdMemoryType;
-  EFI_GCD_IO_TYPE       GcdIoType;
-  EFI_HANDLE            ImageHandle;
-  EFI_HANDLE            DeviceHandle;
+  UINTN                   Signature;
+  LIST_ENTRY              Link;
+  EFI_PHYSICAL_ADDRESS    BaseAddress;
+  UINT64                  EndAddress;
+  UINT64                  Capabilities;
+  UINT64                  Attributes;
+  EFI_GCD_MEMORY_TYPE     GcdMemoryType;
+  EFI_GCD_IO_TYPE         GcdIoType;
+  EFI_HANDLE              ImageHandle;
+  EFI_HANDLE              DeviceHandle;
 } EFI_GCD_MAP_ENTRY;
 
-
-#define LOADED_IMAGE_PRIVATE_DATA_SIGNATURE   SIGNATURE_32('l','d','r','i')
+#define LOADED_IMAGE_PRIVATE_DATA_SIGNATURE  SIGNATURE_32('l','d','r','i')
 
 typedef struct {
-  UINTN                       Signature;
+  UINTN                                   Signature;
   /// Image handle
-  EFI_HANDLE                  Handle;
+  EFI_HANDLE                              Handle;
   /// Image type
-  UINTN                       Type;
+  UINTN                                   Type;
   /// If entrypoint has been called
-  BOOLEAN                     Started;
+  BOOLEAN                                 Started;
   /// The image's entry point
-  EFI_IMAGE_ENTRY_POINT       EntryPoint;
+  EFI_IMAGE_ENTRY_POINT                   EntryPoint;
   /// loaded image protocol
-  EFI_LOADED_IMAGE_PROTOCOL   Info;
+  EFI_LOADED_IMAGE_PROTOCOL               Info;
   /// Location in memory
-  EFI_PHYSICAL_ADDRESS        ImageBasePage;
+  EFI_PHYSICAL_ADDRESS                    ImageBasePage;
   /// Number of pages
-  UINTN                       NumberOfPages;
+  UINTN                                   NumberOfPages;
   /// Original fixup data
-  CHAR8                       *FixupData;
+  CHAR8                                   *FixupData;
   /// Tpl of started image
-  EFI_TPL                     Tpl;
+  EFI_TPL                                 Tpl;
   /// Status returned by started image
-  EFI_STATUS                  Status;
+  EFI_STATUS                              Status;
   /// Size of ExitData from started image
-  UINTN                       ExitDataSize;
+  UINTN                                   ExitDataSize;
   /// Pointer to exit data from started image
-  VOID                        *ExitData;
+  VOID                                    *ExitData;
   /// Pointer to pool allocation for context save/restore
-  VOID                        *JumpBuffer;
+  VOID                                    *JumpBuffer;
   /// Pointer to buffer for context save/restore
-  BASE_LIBRARY_JUMP_BUFFER    *JumpContext;
+  BASE_LIBRARY_JUMP_BUFFER                *JumpContext;
   /// Machine type from PE image
-  UINT16                      Machine;
+  UINT16                                  Machine;
   /// PE/COFF Image Emulator Protocol pointer
-  EDKII_PECOFF_IMAGE_EMULATOR_PROTOCOL  *PeCoffEmu;
+  EDKII_PECOFF_IMAGE_EMULATOR_PROTOCOL    *PeCoffEmu;
   /// Runtime image list
-  EFI_RUNTIME_IMAGE_ENTRY     *RuntimeData;
+  EFI_RUNTIME_IMAGE_ENTRY                 *RuntimeData;
   /// Pointer to Loaded Image Device Path Protocol
-  EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL                *LoadedImageDevicePath;
   /// PeCoffLoader ImageContext
-  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+  PE_COFF_LOADER_IMAGE_CONTEXT            ImageContext;
   /// Status returned by LoadImage() service.
-  EFI_STATUS                  LoadImageStatus;
+  EFI_STATUS                              LoadImageStatus;
 } LOADED_IMAGE_PRIVATE_DATA;
 
 #define LOADED_IMAGE_PRIVATE_DATA_FROM_THIS(a) \
           CR(a, LOADED_IMAGE_PRIVATE_DATA, Info, LOADED_IMAGE_PRIVATE_DATA_SIGNATURE)
 
-#define IMAGE_PROPERTIES_RECORD_CODE_SECTION_SIGNATURE SIGNATURE_32 ('I','P','R','C')
-
-typedef struct {
-  UINT32                 Signature;
-  LIST_ENTRY             Link;
-  EFI_PHYSICAL_ADDRESS   CodeSegmentBase;
-  UINT64                 CodeSegmentSize;
-} IMAGE_PROPERTIES_RECORD_CODE_SECTION;
-
-#define IMAGE_PROPERTIES_RECORD_SIGNATURE SIGNATURE_32 ('I','P','R','D')
-
-typedef struct {
-  UINT32                 Signature;
-  LIST_ENTRY             Link;
-  EFI_PHYSICAL_ADDRESS   ImageBase;
-  UINT64                 ImageSize;
-  UINTN                  CodeSegmentCount;
-  LIST_ENTRY             CodeSegmentList;
-} IMAGE_PROPERTIES_RECORD;
-
 //
 // DXE Core Global Variables
 //
-extern EFI_SYSTEM_TABLE                         *gDxeCoreST;
-extern EFI_RUNTIME_SERVICES                     *gDxeCoreRT;
-extern EFI_DXE_SERVICES                         *gDxeCoreDS;
-extern EFI_HANDLE                               gDxeCoreImageHandle;
+extern EFI_SYSTEM_TABLE      *gDxeCoreST;
+extern EFI_RUNTIME_SERVICES  *gDxeCoreRT;
+extern EFI_DXE_SERVICES      *gDxeCoreDS;
+extern EFI_HANDLE            gDxeCoreImageHandle;
 
-extern BOOLEAN                                  gMemoryMapTerminated;
+extern BOOLEAN  gMemoryMapTerminated;
 
-extern EFI_DECOMPRESS_PROTOCOL                  gEfiDecompress;
+extern EFI_DECOMPRESS_PROTOCOL  gEfiDecompress;
 
-extern EFI_RUNTIME_ARCH_PROTOCOL                *gRuntime;
-extern EFI_CPU_ARCH_PROTOCOL                    *gCpu;
-extern EFI_WATCHDOG_TIMER_ARCH_PROTOCOL         *gWatchdogTimer;
-extern EFI_METRONOME_ARCH_PROTOCOL              *gMetronome;
-extern EFI_TIMER_ARCH_PROTOCOL                  *gTimer;
-extern EFI_SECURITY_ARCH_PROTOCOL               *gSecurity;
-extern EFI_SECURITY2_ARCH_PROTOCOL              *gSecurity2;
-extern EFI_BDS_ARCH_PROTOCOL                    *gBds;
-extern EFI_SMM_BASE2_PROTOCOL                   *gSmmBase2;
+extern EFI_RUNTIME_ARCH_PROTOCOL         *gRuntime;
+extern EFI_CPU_ARCH_PROTOCOL             *gCpu;
+extern EFI_WATCHDOG_TIMER_ARCH_PROTOCOL  *gWatchdogTimer;
+extern EFI_METRONOME_ARCH_PROTOCOL       *gMetronome;
+extern EFI_TIMER_ARCH_PROTOCOL           *gTimer;
+extern EFI_SECURITY_ARCH_PROTOCOL        *gSecurity;
+extern EFI_SECURITY2_ARCH_PROTOCOL       *gSecurity2;
+extern EFI_BDS_ARCH_PROTOCOL             *gBds;
+extern EFI_SMM_BASE2_PROTOCOL            *gSmmBase2;
+extern EFI_MEMORY_ATTRIBUTE_PROTOCOL     *gMemoryAttributeProtocol;
 
-extern EFI_TPL                                  gEfiCurrentTpl;
+extern EFI_TPL  gEfiCurrentTpl;
 
-extern EFI_GUID                                 *gDxeCoreFileName;
-extern EFI_LOADED_IMAGE_PROTOCOL                *gDxeCoreLoadedImage;
+extern EFI_GUID                   *gDxeCoreFileName;
+extern EFI_LOADED_IMAGE_PROTOCOL  *gDxeCoreLoadedImage;
 
-extern EFI_MEMORY_TYPE_INFORMATION              gMemoryTypeInformation[EfiMaxMemoryType + 1];
+extern EFI_MEMORY_TYPE_INFORMATION  gMemoryTypeInformation[EfiMaxMemoryType + 1];
+extern BOOLEAN                      mMemoryTypeInformationInitialized;
+extern EFI_MEMORY_TYPE_STATISTICS   mMemoryTypeStatistics[EfiMaxMemoryType + 1];
+extern EFI_PHYSICAL_ADDRESS         mDefaultMaximumAddress;
+extern EFI_PHYSICAL_ADDRESS         mDefaultBaseAddress;
 
-extern BOOLEAN                                  gDispatcherRunning;
-extern EFI_RUNTIME_ARCH_PROTOCOL                gRuntimeTemplate;
+extern BOOLEAN                    gDispatcherRunning;
+extern EFI_RUNTIME_ARCH_PROTOCOL  gRuntimeTemplate;
 
-extern EFI_LOAD_FIXED_ADDRESS_CONFIGURATION_TABLE    gLoadModuleAtFixAddressConfigurationTable;
-extern BOOLEAN                                       gLoadFixedAddressCodeMemoryReady;
+extern BOOLEAN  gMemoryAttributesTableForwardCfi;
+
+extern EFI_LOAD_FIXED_ADDRESS_CONFIGURATION_TABLE  gLoadModuleAtFixAddressConfigurationTable;
+extern BOOLEAN                                     gLoadFixedAddressCodeMemoryReady;
 //
 // Service Initialization Functions
 //
-
-
 
 /**
   Called to initialize the pool.
@@ -303,7 +284,6 @@ VOID
 CoreInitializePool (
   VOID
   );
-
 
 /**
   Called to initialize the memory map and add descriptors to
@@ -328,7 +308,6 @@ CoreAddMemoryDescriptor (
   IN UINT64                Attribute
   );
 
-
 /**
   Release memory lock on mGcdMemorySpaceLock.
 
@@ -338,7 +317,6 @@ CoreReleaseGcdMemoryLock (
   VOID
   );
 
-
 /**
   Acquire memory lock on mGcdMemorySpaceLock.
 
@@ -347,7 +325,6 @@ VOID
 CoreAcquireGcdMemoryLock (
   VOID
   );
-
 
 /**
   External function. Initializes memory services based on the memory
@@ -371,8 +348,6 @@ CoreInitializeMemoryServices (
   OUT UINT64                *MemoryLength
   );
 
-
-
 /**
   External function. Initializes the GCD and memory services based on the memory
   descriptor HOBs.  This function is responsible for priming the GCD map and the
@@ -394,7 +369,6 @@ CoreInitializeGcdServices (
   IN UINT64                MemoryLength
   );
 
-
 /**
   Initializes "event" support.
 
@@ -405,7 +379,6 @@ EFI_STATUS
 CoreInitializeEventServices (
   VOID
   );
-
 
 /**
   Add the Image Services to EFI Boot Services Table and install the protocol
@@ -418,9 +391,8 @@ CoreInitializeEventServices (
 **/
 EFI_STATUS
 CoreInitializeImageServices (
-  IN  VOID *HobStart
+  IN  VOID  *HobStart
   );
-
 
 /**
   Creates an event that is fired everytime a Protocol of a specific type is installed.
@@ -430,7 +402,6 @@ VOID
 CoreNotifyOnProtocolInstallation (
   VOID
   );
-
 
 /**
   Return TRUE if all AP services are available.
@@ -444,7 +415,6 @@ CoreAllEfiServicesAvailable (
   VOID
   );
 
-
 /**
   Calcualte the 32-bit CRC in a EFI table using the service provided by the
   gRuntime service.
@@ -454,9 +424,8 @@ CoreAllEfiServicesAvailable (
 **/
 VOID
 CalculateEfiHdrCrc (
-  IN  OUT EFI_TABLE_HEADER    *Hdr
+  IN  OUT EFI_TABLE_HEADER  *Hdr
   );
-
 
 /**
   Called by the platform code to process a tick.
@@ -468,9 +437,8 @@ CalculateEfiHdrCrc (
 VOID
 EFIAPI
 CoreTimerTick (
-  IN UINT64   Duration
+  IN UINT64  Duration
   );
-
 
 /**
   Initialize the dispatcher. Initialize the notification function that runs when
@@ -481,7 +449,6 @@ VOID
 CoreInitializeDispatcher (
   VOID
   );
-
 
 /**
   This is the POSTFIX version of the dependency evaluator.  This code does
@@ -498,9 +465,8 @@ CoreInitializeDispatcher (
 **/
 BOOLEAN
 CoreIsSchedulable (
-  IN  EFI_CORE_DRIVER_ENTRY   *DriverEntry
+  IN  EFI_CORE_DRIVER_ENTRY  *DriverEntry
   );
-
 
 /**
   Preprocess dependency expression and update DriverEntry to reflect the
@@ -516,10 +482,8 @@ CoreIsSchedulable (
 **/
 EFI_STATUS
 CorePreProcessDepex (
-  IN  EFI_CORE_DRIVER_ENTRY   *DriverEntry
+  IN  EFI_CORE_DRIVER_ENTRY  *DriverEntry
   );
-
-
 
 /**
   Terminates all boot services.
@@ -534,10 +498,9 @@ CorePreProcessDepex (
 EFI_STATUS
 EFIAPI
 CoreExitBootServices (
-  IN EFI_HANDLE   ImageHandle,
-  IN UINTN        MapKey
+  IN EFI_HANDLE  ImageHandle,
+  IN UINTN       MapKey
   );
-
 
 /**
   Make sure the memory map is following all the construction rules,
@@ -552,9 +515,8 @@ CoreExitBootServices (
 **/
 EFI_STATUS
 CoreTerminateMemoryMap (
-  IN UINTN          MapKey
+  IN UINTN  MapKey
   );
-
 
 /**
   Signals all events in the EventGroup.
@@ -564,10 +526,8 @@ CoreTerminateMemoryMap (
 **/
 VOID
 CoreNotifySignalList (
-  IN EFI_GUID     *EventGroup
+  IN EFI_GUID  *EventGroup
   );
-
-
 
 /**
   Boot Service called to add, modify, or remove a system configuration table from
@@ -587,11 +547,9 @@ CoreNotifySignalList (
 EFI_STATUS
 EFIAPI
 CoreInstallConfigurationTable (
-  IN EFI_GUID *Guid,
-  IN VOID     *Table
+  IN EFI_GUID  *Guid,
+  IN VOID      *Table
   );
-
-
 
 /**
   Raise the task priority level to the new level.
@@ -605,10 +563,8 @@ CoreInstallConfigurationTable (
 EFI_TPL
 EFIAPI
 CoreRaiseTpl (
-  IN EFI_TPL      NewTpl
+  IN EFI_TPL  NewTpl
   );
-
-
 
 /**
   Lowers the task priority to the previous value.   If the new
@@ -620,10 +576,8 @@ CoreRaiseTpl (
 VOID
 EFIAPI
 CoreRestoreTpl (
-  IN EFI_TPL NewTpl
+  IN EFI_TPL  NewTpl
   );
-
-
 
 /**
   Introduces a fine-grained stall.
@@ -638,10 +592,8 @@ CoreRestoreTpl (
 EFI_STATUS
 EFIAPI
 CoreStall (
-  IN UINTN            Microseconds
+  IN UINTN  Microseconds
   );
-
-
 
 /**
   Sets the system's watchdog timer.
@@ -668,13 +620,11 @@ CoreStall (
 EFI_STATUS
 EFIAPI
 CoreSetWatchdogTimer (
-  IN UINTN    Timeout,
-  IN UINT64   WatchdogCode,
-  IN UINTN    DataSize,
-  IN CHAR16   *WatchdogData OPTIONAL
+  IN UINTN   Timeout,
+  IN UINT64  WatchdogCode,
+  IN UINTN   DataSize,
+  IN CHAR16  *WatchdogData OPTIONAL
   );
-
-
 
 /**
   Wrapper function to CoreInstallProtocolInterfaceNotify.  This is the public API which
@@ -693,12 +643,11 @@ CoreSetWatchdogTimer (
 EFI_STATUS
 EFIAPI
 CoreInstallProtocolInterface (
-  IN OUT EFI_HANDLE     *UserHandle,
-  IN EFI_GUID           *Protocol,
-  IN EFI_INTERFACE_TYPE InterfaceType,
-  IN VOID               *Interface
+  IN OUT EFI_HANDLE      *UserHandle,
+  IN EFI_GUID            *Protocol,
+  IN EFI_INTERFACE_TYPE  InterfaceType,
+  IN VOID                *Interface
   );
-
 
 /**
   Installs a protocol interface into the boot services environment.
@@ -719,14 +668,12 @@ CoreInstallProtocolInterface (
 **/
 EFI_STATUS
 CoreInstallProtocolInterfaceNotify (
-  IN OUT EFI_HANDLE     *UserHandle,
-  IN EFI_GUID           *Protocol,
-  IN EFI_INTERFACE_TYPE InterfaceType,
-  IN VOID               *Interface,
-  IN BOOLEAN            Notify
+  IN OUT EFI_HANDLE      *UserHandle,
+  IN EFI_GUID            *Protocol,
+  IN EFI_INTERFACE_TYPE  InterfaceType,
+  IN VOID                *Interface,
+  IN BOOLEAN             Notify
   );
-
-
 
 /**
   Installs a list of protocol interface into the boot services environment.
@@ -752,11 +699,9 @@ CoreInstallProtocolInterfaceNotify (
 EFI_STATUS
 EFIAPI
 CoreInstallMultipleProtocolInterfaces (
-  IN OUT EFI_HANDLE           *Handle,
+  IN OUT EFI_HANDLE  *Handle,
   ...
   );
-
-
 
 /**
   Uninstalls a list of protocol interface in the boot services environment.
@@ -775,11 +720,9 @@ CoreInstallMultipleProtocolInterfaces (
 EFI_STATUS
 EFIAPI
 CoreUninstallMultipleProtocolInterfaces (
-  IN EFI_HANDLE           Handle,
+  IN EFI_HANDLE  Handle,
   ...
   );
-
-
 
 /**
   Reinstall a protocol interface on a device handle.  The OldInterface for Protocol is replaced by the NewInterface.
@@ -798,13 +741,11 @@ CoreUninstallMultipleProtocolInterfaces (
 EFI_STATUS
 EFIAPI
 CoreReinstallProtocolInterface (
-  IN EFI_HANDLE     UserHandle,
-  IN EFI_GUID       *Protocol,
-  IN VOID           *OldInterface,
-  IN VOID           *NewInterface
+  IN EFI_HANDLE  UserHandle,
+  IN EFI_GUID    *Protocol,
+  IN VOID        *OldInterface,
+  IN VOID        *NewInterface
   );
-
-
 
 /**
   Uninstalls all instances of a protocol:interfacer from a handle.
@@ -822,12 +763,10 @@ CoreReinstallProtocolInterface (
 EFI_STATUS
 EFIAPI
 CoreUninstallProtocolInterface (
-  IN EFI_HANDLE       UserHandle,
-  IN EFI_GUID         *Protocol,
-  IN VOID             *Interface
+  IN EFI_HANDLE  UserHandle,
+  IN EFI_GUID    *Protocol,
+  IN VOID        *Interface
   );
-
-
 
 /**
   Queries a handle to determine if it supports a specified protocol.
@@ -843,12 +782,10 @@ CoreUninstallProtocolInterface (
 EFI_STATUS
 EFIAPI
 CoreHandleProtocol (
-  IN EFI_HANDLE       UserHandle,
-  IN EFI_GUID         *Protocol,
-  OUT VOID            **Interface
+  IN EFI_HANDLE  UserHandle,
+  IN EFI_GUID    *Protocol,
+  OUT VOID       **Interface
   );
-
-
 
 /**
   Locates the installed protocol handler for the handle, and
@@ -873,15 +810,13 @@ CoreHandleProtocol (
 EFI_STATUS
 EFIAPI
 CoreOpenProtocol (
-  IN  EFI_HANDLE                UserHandle,
-  IN  EFI_GUID                  *Protocol,
-  OUT VOID                      **Interface OPTIONAL,
-  IN  EFI_HANDLE                ImageHandle,
-  IN  EFI_HANDLE                ControllerHandle,
-  IN  UINT32                    Attributes
+  IN  EFI_HANDLE  UserHandle,
+  IN  EFI_GUID    *Protocol,
+  OUT VOID        **Interface OPTIONAL,
+  IN  EFI_HANDLE  ImageHandle,
+  IN  EFI_HANDLE  ControllerHandle,
+  IN  UINT32      Attributes
   );
-
-
 
 /**
   Return information about Opened protocols in the system
@@ -897,13 +832,11 @@ CoreOpenProtocol (
 EFI_STATUS
 EFIAPI
 CoreOpenProtocolInformation (
-  IN  EFI_HANDLE                          UserHandle,
-  IN  EFI_GUID                            *Protocol,
-  OUT EFI_OPEN_PROTOCOL_INFORMATION_ENTRY **EntryBuffer,
-  OUT UINTN                               *EntryCount
+  IN  EFI_HANDLE                           UserHandle,
+  IN  EFI_GUID                             *Protocol,
+  OUT EFI_OPEN_PROTOCOL_INFORMATION_ENTRY  **EntryBuffer,
+  OUT UINTN                                *EntryCount
   );
-
-
 
 /**
   Closes a protocol on a handle that was opened using OpenProtocol().
@@ -933,13 +866,11 @@ CoreOpenProtocolInformation (
 EFI_STATUS
 EFIAPI
 CoreCloseProtocol (
-  IN  EFI_HANDLE                UserHandle,
-  IN  EFI_GUID                  *Protocol,
-  IN  EFI_HANDLE                AgentHandle,
-  IN  EFI_HANDLE                ControllerHandle
+  IN  EFI_HANDLE  UserHandle,
+  IN  EFI_GUID    *Protocol,
+  IN  EFI_HANDLE  AgentHandle,
+  IN  EFI_HANDLE  ControllerHandle
   );
-
-
 
 /**
   Retrieves the list of protocol interface GUIDs that are installed on a handle in a buffer allocated
@@ -967,12 +898,10 @@ CoreCloseProtocol (
 EFI_STATUS
 EFIAPI
 CoreProtocolsPerHandle (
-  IN EFI_HANDLE       UserHandle,
-  OUT EFI_GUID        ***ProtocolBuffer,
-  OUT UINTN           *ProtocolBufferCount
+  IN EFI_HANDLE  UserHandle,
+  OUT EFI_GUID   ***ProtocolBuffer,
+  OUT UINTN      *ProtocolBufferCount
   );
-
-
 
 /**
   Add a new protocol notification record for the request protocol.
@@ -990,11 +919,10 @@ CoreProtocolsPerHandle (
 EFI_STATUS
 EFIAPI
 CoreRegisterProtocolNotify (
-  IN EFI_GUID       *Protocol,
-  IN EFI_EVENT      Event,
-  OUT  VOID         **Registration
+  IN EFI_GUID   *Protocol,
+  IN EFI_EVENT  Event,
+  OUT  VOID     **Registration
   );
-
 
 /**
   Removes all the events in the protocol database that match Event.
@@ -1007,9 +935,8 @@ CoreRegisterProtocolNotify (
 **/
 EFI_STATUS
 CoreUnregisterProtocolNotify (
-  IN EFI_EVENT      Event
+  IN EFI_EVENT  Event
   );
-
 
 /**
   Locates the requested handle(s) and returns them in Buffer.
@@ -1032,14 +959,12 @@ CoreUnregisterProtocolNotify (
 EFI_STATUS
 EFIAPI
 CoreLocateHandle (
-  IN EFI_LOCATE_SEARCH_TYPE   SearchType,
-  IN EFI_GUID                 *Protocol   OPTIONAL,
-  IN VOID                     *SearchKey  OPTIONAL,
-  IN OUT UINTN                *BufferSize,
-  OUT EFI_HANDLE              *Buffer
+  IN EFI_LOCATE_SEARCH_TYPE  SearchType,
+  IN EFI_GUID                *Protocol   OPTIONAL,
+  IN VOID                    *SearchKey  OPTIONAL,
+  IN OUT UINTN               *BufferSize,
+  OUT EFI_HANDLE             *Buffer
   );
-
-
 
 /**
   Locates the handle to a device on the device path that best matches the specified protocol.
@@ -1059,12 +984,10 @@ CoreLocateHandle (
 EFI_STATUS
 EFIAPI
 CoreLocateDevicePath (
-  IN EFI_GUID                       *Protocol,
-  IN OUT EFI_DEVICE_PATH_PROTOCOL   **DevicePath,
-  OUT EFI_HANDLE                    *Device
+  IN EFI_GUID                      *Protocol,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT EFI_HANDLE                   *Device
   );
-
-
 
 /**
   Function returns an array of handles that support the requested protocol
@@ -1091,14 +1014,12 @@ CoreLocateDevicePath (
 EFI_STATUS
 EFIAPI
 CoreLocateHandleBuffer (
-  IN EFI_LOCATE_SEARCH_TYPE       SearchType,
-  IN EFI_GUID                     *Protocol OPTIONAL,
-  IN VOID                         *SearchKey OPTIONAL,
-  IN OUT UINTN                    *NumberHandles,
-  OUT EFI_HANDLE                  **Buffer
+  IN EFI_LOCATE_SEARCH_TYPE  SearchType,
+  IN EFI_GUID                *Protocol OPTIONAL,
+  IN VOID                    *SearchKey OPTIONAL,
+  IN OUT UINTN               *NumberHandles,
+  OUT EFI_HANDLE             **Buffer
   );
-
-
 
 /**
   Return the first Protocol Interface that matches the Protocol GUID. If
@@ -1124,7 +1045,6 @@ CoreLocateProtocol (
   OUT VOID      **Interface
   );
 
-
 /**
   return handle database key.
 
@@ -1137,7 +1057,6 @@ CoreGetHandleDatabaseKey (
   VOID
   );
 
-
 /**
   Go connect any handles that were created or modified while a image executed.
 
@@ -1149,8 +1068,6 @@ VOID
 CoreConnectHandlesByKey (
   UINT64  Key
   );
-
-
 
 /**
   Connects one or more drivers to a controller.
@@ -1186,8 +1103,6 @@ CoreConnectController (
   IN  EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath  OPTIONAL,
   IN  BOOLEAN                   Recursive
   );
-
-
 
 /**
   Disonnects a controller from a driver
@@ -1229,8 +1144,6 @@ CoreDisconnectController (
   IN  EFI_HANDLE  ChildHandle        OPTIONAL
   );
 
-
-
 /**
   Allocates pages from the memory map.
 
@@ -1252,9 +1165,9 @@ CoreDisconnectController (
 EFI_STATUS
 EFIAPI
 CoreAllocatePages (
-  IN EFI_ALLOCATE_TYPE      Type,
-  IN EFI_MEMORY_TYPE        MemoryType,
-  IN UINTN                  NumberOfPages,
+  IN EFI_ALLOCATE_TYPE         Type,
+  IN EFI_MEMORY_TYPE           MemoryType,
+  IN UINTN                     NumberOfPages,
   IN OUT EFI_PHYSICAL_ADDRESS  *Memory
   );
 
@@ -1272,8 +1185,8 @@ CoreAllocatePages (
 EFI_STATUS
 EFIAPI
 CoreFreePages (
-  IN EFI_PHYSICAL_ADDRESS   Memory,
-  IN UINTN                  NumberOfPages
+  IN EFI_PHYSICAL_ADDRESS  Memory,
+  IN UINTN                 NumberOfPages
   );
 
 /**
@@ -1315,8 +1228,6 @@ CoreGetMemoryMap (
   OUT UINTN                     *DescriptorSize,
   OUT UINT32                    *DescriptorVersion
   );
-
-
 
 /**
   Allocate pool of a particular type.
@@ -1372,7 +1283,7 @@ CoreInternalAllocatePool (
 EFI_STATUS
 EFIAPI
 CoreFreePool (
-  IN VOID        *Buffer
+  IN VOID  *Buffer
   );
 
 /**
@@ -1388,8 +1299,8 @@ CoreFreePool (
 EFI_STATUS
 EFIAPI
 CoreInternalFreePool (
-  IN VOID               *Buffer,
-  OUT EFI_MEMORY_TYPE   *PoolType OPTIONAL
+  IN VOID              *Buffer,
+  OUT EFI_MEMORY_TYPE  *PoolType OPTIONAL
   );
 
 /**
@@ -1429,15 +1340,13 @@ CoreInternalFreePool (
 EFI_STATUS
 EFIAPI
 CoreLoadImage (
-  IN BOOLEAN                    BootPolicy,
-  IN EFI_HANDLE                 ParentImageHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL   *FilePath,
-  IN VOID                       *SourceBuffer   OPTIONAL,
-  IN UINTN                      SourceSize,
-  OUT EFI_HANDLE                *ImageHandle
+  IN BOOLEAN                   BootPolicy,
+  IN EFI_HANDLE                ParentImageHandle,
+  IN EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  IN VOID                      *SourceBuffer   OPTIONAL,
+  IN UINTN                     SourceSize,
+  OUT EFI_HANDLE               *ImageHandle
   );
-
-
 
 /**
   Unloads an image.
@@ -1456,8 +1365,6 @@ EFIAPI
 CoreUnloadImage (
   IN EFI_HANDLE  ImageHandle
   );
-
-
 
 /**
   Transfer control to a loaded image's entry point.
@@ -1485,8 +1392,6 @@ CoreStartImage (
   OUT UINTN      *ExitDataSize,
   OUT CHAR16     **ExitData  OPTIONAL
   );
-
-
 
 /**
   Terminates the currently loaded EFI image and returns control to boot services.
@@ -1520,8 +1425,6 @@ CoreExit (
   IN CHAR16      *ExitData  OPTIONAL
   );
 
-
-
 /**
   Creates an event.
 
@@ -1543,14 +1446,12 @@ CoreExit (
 EFI_STATUS
 EFIAPI
 CoreCreateEvent (
-  IN UINT32                   Type,
-  IN EFI_TPL                  NotifyTpl,
-  IN EFI_EVENT_NOTIFY         NotifyFunction, OPTIONAL
-  IN VOID                     *NotifyContext, OPTIONAL
-  OUT EFI_EVENT               *Event
+  IN UINT32            Type,
+  IN EFI_TPL           NotifyTpl,
+  IN EFI_EVENT_NOTIFY  NotifyFunction  OPTIONAL,
+  IN VOID              *NotifyContext  OPTIONAL,
+  OUT EFI_EVENT        *Event
   );
-
-
 
 /**
   Creates an event in a group.
@@ -1575,12 +1476,12 @@ CoreCreateEvent (
 EFI_STATUS
 EFIAPI
 CoreCreateEventEx (
-  IN UINT32                   Type,
-  IN EFI_TPL                  NotifyTpl,
-  IN EFI_EVENT_NOTIFY         NotifyFunction, OPTIONAL
-  IN CONST VOID               *NotifyContext, OPTIONAL
-  IN CONST EFI_GUID           *EventGroup,    OPTIONAL
-  OUT EFI_EVENT               *Event
+  IN UINT32            Type,
+  IN EFI_TPL           NotifyTpl,
+  IN EFI_EVENT_NOTIFY  NotifyFunction  OPTIONAL,
+  IN CONST VOID        *NotifyContext  OPTIONAL,
+  IN CONST EFI_GUID    *EventGroup     OPTIONAL,
+  OUT EFI_EVENT        *Event
   );
 
 /**
@@ -1606,12 +1507,12 @@ CoreCreateEventEx (
 EFI_STATUS
 EFIAPI
 CoreCreateEventInternal (
-  IN UINT32                   Type,
-  IN EFI_TPL                  NotifyTpl,
-  IN EFI_EVENT_NOTIFY         NotifyFunction, OPTIONAL
-  IN CONST VOID               *NotifyContext, OPTIONAL
-  IN CONST EFI_GUID           *EventGroup,    OPTIONAL
-  OUT EFI_EVENT               *Event
+  IN UINT32            Type,
+  IN EFI_TPL           NotifyTpl,
+  IN EFI_EVENT_NOTIFY  NotifyFunction  OPTIONAL,
+  IN CONST VOID        *NotifyContext  OPTIONAL,
+  IN CONST EFI_GUID    *EventGroup     OPTIONAL,
+  OUT EFI_EVENT        *Event
   );
 
 /**
@@ -1632,12 +1533,10 @@ CoreCreateEventInternal (
 EFI_STATUS
 EFIAPI
 CoreSetTimer (
-  IN EFI_EVENT            UserEvent,
-  IN EFI_TIMER_DELAY      Type,
-  IN UINT64               TriggerTime
+  IN EFI_EVENT        UserEvent,
+  IN EFI_TIMER_DELAY  Type,
+  IN UINT64           TriggerTime
   );
-
-
 
 /**
   Signals the event.  Queues the event to be notified if needed.
@@ -1651,10 +1550,8 @@ CoreSetTimer (
 EFI_STATUS
 EFIAPI
 CoreSignalEvent (
-  IN EFI_EVENT    UserEvent
+  IN EFI_EVENT  UserEvent
   );
-
-
 
 /**
   Stops execution until an event is signaled.
@@ -1673,12 +1570,10 @@ CoreSignalEvent (
 EFI_STATUS
 EFIAPI
 CoreWaitForEvent (
-  IN UINTN        NumberOfEvents,
-  IN EFI_EVENT    *UserEvents,
-  OUT UINTN       *UserIndex
+  IN UINTN      NumberOfEvents,
+  IN EFI_EVENT  *UserEvents,
+  OUT UINTN     *UserIndex
   );
-
-
 
 /**
   Closes an event and frees the event structure.
@@ -1692,10 +1587,8 @@ CoreWaitForEvent (
 EFI_STATUS
 EFIAPI
 CoreCloseEvent (
-  IN EFI_EVENT    UserEvent
+  IN EFI_EVENT  UserEvent
   );
-
-
 
 /**
   Check the status of an event.
@@ -1710,9 +1603,8 @@ CoreCloseEvent (
 EFI_STATUS
 EFIAPI
 CoreCheckEvent (
-  IN EFI_EVENT        UserEvent
+  IN EFI_EVENT  UserEvent
   );
-
 
 /**
   Adds reserved memory, system memory, or memory-mapped I/O resources to the
@@ -1734,7 +1626,6 @@ CoreAddMemorySpace (
   IN UINT64                Length,
   IN UINT64                Capabilities
   );
-
 
 /**
   Allocates nonexistent memory, reserved memory, system memory, or memorymapped
@@ -1765,7 +1656,6 @@ CoreAllocateMemorySpace (
   IN     EFI_HANDLE             DeviceHandle OPTIONAL
   );
 
-
 /**
   Frees nonexistent memory, reserved memory, system memory, or memory-mapped
   I/O resources from the global coherency domain of the processor.
@@ -1782,7 +1672,6 @@ CoreFreeMemorySpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
   );
-
 
 /**
   Removes reserved memory, system memory, or memory-mapped I/O resources from
@@ -1801,7 +1690,6 @@ CoreRemoveMemorySpace (
   IN UINT64                Length
   );
 
-
 /**
   Retrieves the descriptor for a memory region containing a specified address.
 
@@ -1818,7 +1706,6 @@ CoreGetMemorySpaceDescriptor (
   IN  EFI_PHYSICAL_ADDRESS             BaseAddress,
   OUT EFI_GCD_MEMORY_SPACE_DESCRIPTOR  *Descriptor
   );
-
 
 /**
   Modifies the attributes for a memory region in the global coherency domain of the
@@ -1850,7 +1737,6 @@ CoreSetMemorySpaceAttributes (
   IN UINT64                Attributes
   );
 
-
 /**
   Modifies the capabilities for a memory region in the global coherency domain of the
   processor.
@@ -1876,7 +1762,6 @@ CoreSetMemorySpaceCapabilities (
   IN UINT64                Capabilities
   );
 
-
 /**
   Returns a map of the memory resources in the global coherency domain of the
   processor.
@@ -1896,7 +1781,6 @@ CoreGetMemorySpaceMap (
   OUT EFI_GCD_MEMORY_SPACE_DESCRIPTOR  **MemorySpaceMap
   );
 
-
 /**
   Adds reserved I/O or I/O resources to the global coherency domain of the processor.
 
@@ -1915,7 +1799,6 @@ CoreAddIoSpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
   );
-
 
 /**
   Allocates nonexistent I/O, reserved I/O, or I/O resources from the global coherency
@@ -1946,7 +1829,6 @@ CoreAllocateIoSpace (
   IN     EFI_HANDLE             DeviceHandle OPTIONAL
   );
 
-
 /**
   Frees nonexistent I/O, reserved I/O, or I/O resources from the global coherency
   domain of the processor.
@@ -1963,7 +1845,6 @@ CoreFreeIoSpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
   );
-
 
 /**
   Removes reserved I/O or I/O resources from the global coherency domain of the
@@ -1982,7 +1863,6 @@ CoreRemoveIoSpace (
   IN UINT64                Length
   );
 
-
 /**
   Retrieves the descriptor for an I/O region containing a specified address.
 
@@ -1999,7 +1879,6 @@ CoreGetIoSpaceDescriptor (
   IN  EFI_PHYSICAL_ADDRESS         BaseAddress,
   OUT EFI_GCD_IO_SPACE_DESCRIPTOR  *Descriptor
   );
-
 
 /**
   Returns a map of the I/O resources in the global coherency domain of the processor.
@@ -2018,7 +1897,6 @@ CoreGetIoSpaceMap (
   OUT UINTN                        *NumberOfDescriptors,
   OUT EFI_GCD_IO_SPACE_DESCRIPTOR  **IoSpaceMap
   );
-
 
 /**
   This is the main Dispatcher for DXE and it exits when there are no more
@@ -2061,7 +1939,6 @@ CoreSchedule (
   IN  EFI_GUID    *DriverName
   );
 
-
 /**
   Convert a driver from the Untrused back to the Scheduled state.
 
@@ -2081,7 +1958,6 @@ CoreTrust (
   IN  EFI_GUID    *DriverName
   );
 
-
 /**
   This routine is the driver initialization entry point.  It initializes the
   libraries, and registers two notification functions.  These notification
@@ -2096,10 +1972,9 @@ CoreTrust (
 EFI_STATUS
 EFIAPI
 FwVolDriverInit (
-  IN EFI_HANDLE                   ImageHandle,
-  IN EFI_SYSTEM_TABLE             *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
 
 /**
   Entry point of the section extraction code. Initializes an instance of the
@@ -2115,10 +1990,9 @@ FwVolDriverInit (
 EFI_STATUS
 EFIAPI
 InitializeSectionExtraction (
-  IN EFI_HANDLE                   ImageHandle,
-  IN EFI_SYSTEM_TABLE             *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
 
 /**
   This DXE service routine is used to process a firmware volume. In
@@ -2140,13 +2014,13 @@ InitializeSectionExtraction (
 EFI_STATUS
 EFIAPI
 CoreProcessFirmwareVolume (
-  IN VOID                             *FvHeader,
-  IN UINTN                            Size,
-  OUT EFI_HANDLE                      *FVProtocolHandle
+  IN VOID         *FvHeader,
+  IN UINTN        Size,
+  OUT EFI_HANDLE  *FVProtocolHandle
   );
 
 //
-//Functions used during debug buils
+// Functions used during debug buils
 //
 
 /**
@@ -2159,7 +2033,6 @@ CoreDisplayMissingArchProtocols (
   VOID
   );
 
-
 /**
   Traverse the discovered list for any drivers that were discovered but not loaded
   because the dependency experessions evaluated to false.
@@ -2169,8 +2042,6 @@ VOID
 CoreDisplayDiscoveredNotDispatched (
   VOID
   );
-
-
 
 /**
   Place holder function until all the Boot Services and Runtime Services are
@@ -2184,9 +2055,8 @@ CoreDisplayDiscoveredNotDispatched (
 EFI_STATUS
 EFIAPI
 CoreEfiNotAvailableYetArg1 (
-  UINTN Arg1
+  UINTN  Arg1
   );
-
 
 /**
   Place holder function until all the Boot Services and Runtime Services are available.
@@ -2200,10 +2070,9 @@ CoreEfiNotAvailableYetArg1 (
 EFI_STATUS
 EFIAPI
 CoreEfiNotAvailableYetArg2 (
-  UINTN Arg1,
-  UINTN Arg2
+  UINTN  Arg1,
+  UINTN  Arg2
   );
-
 
 /**
   Place holder function until all the Boot Services and Runtime Services are available.
@@ -2218,11 +2087,10 @@ CoreEfiNotAvailableYetArg2 (
 EFI_STATUS
 EFIAPI
 CoreEfiNotAvailableYetArg3 (
-  UINTN Arg1,
-  UINTN Arg2,
-  UINTN Arg3
+  UINTN  Arg1,
+  UINTN  Arg2,
+  UINTN  Arg3
   );
-
 
 /**
   Place holder function until all the Boot Services and Runtime Services are available.
@@ -2238,12 +2106,11 @@ CoreEfiNotAvailableYetArg3 (
 EFI_STATUS
 EFIAPI
 CoreEfiNotAvailableYetArg4 (
-  UINTN Arg1,
-  UINTN Arg2,
-  UINTN Arg3,
-  UINTN Arg4
+  UINTN  Arg1,
+  UINTN  Arg2,
+  UINTN  Arg3,
+  UINTN  Arg4
   );
-
 
 /**
   Place holder function until all the Boot Services and Runtime Services are available.
@@ -2260,13 +2127,12 @@ CoreEfiNotAvailableYetArg4 (
 EFI_STATUS
 EFIAPI
 CoreEfiNotAvailableYetArg5 (
-  UINTN Arg1,
-  UINTN Arg2,
-  UINTN Arg3,
-  UINTN Arg4,
-  UINTN Arg5
+  UINTN  Arg1,
+  UINTN  Arg2,
+  UINTN  Arg3,
+  UINTN  Arg4,
+  UINTN  Arg5
   );
-
 
 /**
   Given a compressed source buffer, this function retrieves the size of the
@@ -2310,13 +2176,12 @@ CoreEfiNotAvailableYetArg5 (
 EFI_STATUS
 EFIAPI
 DxeMainUefiDecompressGetInfo (
-  IN EFI_DECOMPRESS_PROTOCOL            *This,
-  IN   VOID                             *Source,
-  IN   UINT32                           SourceSize,
-  OUT  UINT32                           *DestinationSize,
-  OUT  UINT32                           *ScratchSize
+  IN EFI_DECOMPRESS_PROTOCOL  *This,
+  IN   VOID                   *Source,
+  IN   UINT32                 SourceSize,
+  OUT  UINT32                 *DestinationSize,
+  OUT  UINT32                 *ScratchSize
   );
-
 
 /**
   Decompresses a compressed source buffer.
@@ -2355,13 +2220,13 @@ DxeMainUefiDecompressGetInfo (
 EFI_STATUS
 EFIAPI
 DxeMainUefiDecompress (
-  IN     EFI_DECOMPRESS_PROTOCOL          *This,
-  IN     VOID                             *Source,
-  IN     UINT32                           SourceSize,
-  IN OUT VOID                             *Destination,
-  IN     UINT32                           DestinationSize,
-  IN OUT VOID                             *Scratch,
-  IN     UINT32                           ScratchSize
+  IN     EFI_DECOMPRESS_PROTOCOL  *This,
+  IN     VOID                     *Source,
+  IN     UINT32                   SourceSize,
+  IN OUT VOID                     *Destination,
+  IN     UINT32                   DestinationSize,
+  IN OUT VOID                     *Scratch,
+  IN     UINT32                   ScratchSize
   );
 
 /**
@@ -2382,12 +2247,10 @@ DxeMainUefiDecompress (
 EFI_STATUS
 EFIAPI
 OpenSectionStream (
-  IN     UINTN                                     SectionStreamLength,
-  IN     VOID                                      *SectionStream,
-     OUT UINTN                                     *SectionStreamHandle
+  IN     UINTN  SectionStreamLength,
+  IN     VOID   *SectionStream,
+  OUT UINTN     *SectionStreamHandle
   );
-
-
 
 /**
   SEP member function.  Retrieves requested section from section stream.
@@ -2450,16 +2313,15 @@ OpenSectionStream (
 EFI_STATUS
 EFIAPI
 GetSection (
-  IN UINTN                                              SectionStreamHandle,
-  IN EFI_SECTION_TYPE                                   *SectionType,
-  IN EFI_GUID                                           *SectionDefinitionGuid,
-  IN UINTN                                              SectionInstance,
-  IN VOID                                               **Buffer,
-  IN OUT UINTN                                          *BufferSize,
-  OUT UINT32                                            *AuthenticationStatus,
-  IN BOOLEAN                                            IsFfs3Fv
+  IN UINTN             SectionStreamHandle,
+  IN EFI_SECTION_TYPE  *SectionType,
+  IN EFI_GUID          *SectionDefinitionGuid,
+  IN UINTN             SectionInstance,
+  IN VOID              **Buffer,
+  IN OUT UINTN         *BufferSize,
+  OUT UINT32           *AuthenticationStatus,
+  IN BOOLEAN           IsFfs3Fv
   );
-
 
 /**
   SEP member function.  Deletes an existing section stream
@@ -2477,8 +2339,8 @@ GetSection (
 EFI_STATUS
 EFIAPI
 CloseSectionStream (
-  IN  UINTN                                     StreamHandleToClose,
-  IN  BOOLEAN                                   FreeStreamBuffer
+  IN  UINTN    StreamHandleToClose,
+  IN  BOOLEAN  FreeStreamBuffer
   );
 
 /**
@@ -2497,7 +2359,6 @@ CoreInitializeDebugImageInfoTable (
   VOID
   );
 
-
 /**
   Update the CRC32 in the Debug Table.
   Since the CRC32 service is made available by the Runtime driver, we have to
@@ -2511,7 +2372,6 @@ CoreUpdateDebugTableCrc32 (
   VOID
   );
 
-
 /**
   Adds a new DebugImageInfo structure to the DebugImageInfo Table.  Re-Allocates
   the table if it's not large enough to accomidate another entry.
@@ -2524,11 +2384,10 @@ CoreUpdateDebugTableCrc32 (
 **/
 VOID
 CoreNewDebugImageInfoEntry (
-  IN  UINT32                      ImageInfoType,
-  IN  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN  EFI_HANDLE                  ImageHandle
+  IN  UINT32                     ImageInfoType,
+  IN  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN  EFI_HANDLE                 ImageHandle
   );
-
 
 /**
   Removes and frees an entry from the DebugImageInfo Table.
@@ -2538,9 +2397,8 @@ CoreNewDebugImageInfoEntry (
 **/
 VOID
 CoreRemoveDebugImageInfoEntry (
-  EFI_HANDLE ImageHandle
+  EFI_HANDLE  ImageHandle
   );
-
 
 /**
   This routine consumes FV hobs and produces instances of FW_VOL_BLOCK_PROTOCOL as appropriate.
@@ -2555,8 +2413,8 @@ CoreRemoveDebugImageInfoEntry (
 EFI_STATUS
 EFIAPI
 FwVolBlockDriverInit (
-  IN EFI_HANDLE                 ImageHandle,
-  IN EFI_SYSTEM_TABLE           *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 /**
@@ -2570,7 +2428,7 @@ FwVolBlockDriverInit (
 **/
 UINT32
 GetFvbAuthenticationStatus (
-  IN EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL     *FvbProtocol
+  IN EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *FvbProtocol
   );
 
 /**
@@ -2594,13 +2452,12 @@ GetFvbAuthenticationStatus (
 **/
 EFI_STATUS
 ProduceFVBProtocolOnBuffer (
-  IN EFI_PHYSICAL_ADDRESS   BaseAddress,
-  IN UINT64                 Length,
-  IN EFI_HANDLE             ParentHandle,
-  IN UINT32                 AuthenticationStatus,
-  OUT EFI_HANDLE            *FvProtocol  OPTIONAL
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length,
+  IN EFI_HANDLE            ParentHandle,
+  IN UINT32                AuthenticationStatus,
+  OUT EFI_HANDLE           *FvProtocol  OPTIONAL
   );
-
 
 /**
   Raising to the task priority level of the mutual exclusion
@@ -2615,7 +2472,6 @@ VOID
 CoreAcquireLock (
   IN EFI_LOCK  *Lock
   );
-
 
 /**
   Initialize a basic mutual exclusion lock.   Each lock
@@ -2634,7 +2490,6 @@ EFI_STATUS
 CoreAcquireLockOrFail (
   IN EFI_LOCK  *Lock
   );
-
 
 /**
   Releases ownership of the mutual exclusion lock, and
@@ -2669,11 +2524,11 @@ CoreReleaseLock (
 **/
 EFI_STATUS
 ReadFvbData (
-  IN     EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL     *Fvb,
-  IN OUT EFI_LBA                                *StartLba,
-  IN OUT UINTN                                  *Offset,
-  IN     UINTN                                  DataSize,
-  OUT    UINT8                                  *Data
+  IN     EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *Fvb,
+  IN OUT EFI_LBA                             *StartLba,
+  IN OUT UINTN                               *Offset,
+  IN     UINTN                               DataSize,
+  OUT    UINT8                               *Data
   );
 
 /**
@@ -2694,8 +2549,8 @@ ReadFvbData (
 **/
 EFI_STATUS
 GetFwVolHeader (
-  IN     EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL     *Fvb,
-  OUT    EFI_FIRMWARE_VOLUME_HEADER             **FwVolHeader
+  IN     EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL  *Fvb,
+  OUT    EFI_FIRMWARE_VOLUME_HEADER          **FwVolHeader
   );
 
 /**
@@ -2709,7 +2564,7 @@ GetFwVolHeader (
 **/
 BOOLEAN
 VerifyFvHeaderChecksum (
-  IN EFI_FIRMWARE_VOLUME_HEADER *FvHeader
+  IN EFI_FIRMWARE_VOLUME_HEADER  *FvHeader
   );
 
 /**
@@ -2720,7 +2575,7 @@ VerifyFvHeaderChecksum (
 **/
 VOID
 MemoryProfileInit (
-  IN VOID   *HobStart
+  IN VOID  *HobStart
   );
 
 /**
@@ -2840,7 +2695,7 @@ CoreInitializeMemoryProtection (
 **/
 VOID
 InstallMemoryAttributesTableOnMemoryAllocation (
-  IN EFI_MEMORY_TYPE    MemoryType
+  IN EFI_MEMORY_TYPE  MemoryType
   );
 
 /**
@@ -2871,8 +2726,8 @@ RemoveImageRecord (
 **/
 VOID
 ProtectUefiImage (
-  IN EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath
+  IN EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath
   );
 
 /**
@@ -2883,8 +2738,8 @@ ProtectUefiImage (
 **/
 VOID
 UnprotectUefiImage (
-  IN EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath
+  IN EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath
   );
 
 /**
@@ -2937,4 +2792,13 @@ MergeMemoryMap (
   IN UINTN                      DescriptorSize
   );
 
-#endif
+/**
+  Initializes "handle" support.
+
+  @return Status code.
+
++**/
+EFI_STATUS
+CoreInitializeHandleServices (
+  VOID
+  );

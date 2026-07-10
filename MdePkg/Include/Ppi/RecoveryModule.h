@@ -40,8 +40,7 @@
 
 **/
 
-#ifndef __PEI_RECOVERY_MODULE_PPI_H__
-#define __PEI_RECOVERY_MODULE_PPI_H__
+#pragma once
 
 #define EFI_PEI_RECOVERY_MODULE_PPI_GUID \
   { \
@@ -73,9 +72,7 @@ EFI_STATUS
 ///  Finds and loads the recovery files.
 ///
 struct _EFI_PEI_RECOVERY_MODULE_PPI {
-  EFI_PEI_LOAD_RECOVERY_CAPSULE LoadRecoveryCapsule;  ///< Loads a DXE binary capsule into memory.
+  EFI_PEI_LOAD_RECOVERY_CAPSULE    LoadRecoveryCapsule; ///< Loads a DXE binary capsule into memory.
 };
 
-extern EFI_GUID gEfiPeiRecoveryModulePpiGuid;
-
-#endif
+extern EFI_GUID  gEfiPeiRecoveryModulePpiGuid;

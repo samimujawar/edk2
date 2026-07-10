@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _SMM_STM_H_
-#define _SMM_STM_H_
+#pragma once
 
 #include <Protocol/SmMonitorInit.h>
 
@@ -21,7 +20,7 @@
 **/
 VOID
 StmGen4GPageTable (
-  IN UINTN              PageTableBase
+  IN UINTN  PageTableBase
   );
 
 /**
@@ -42,9 +41,8 @@ StmGen4GPageTable (
 UINT32
 EFIAPI
 SmmStmExceptionHandler (
-  IN OUT STM_PROTECTION_EXCEPTION_STACK_FRAME Context
+  IN OUT STM_PROTECTION_EXCEPTION_STACK_FRAME  Context
   );
-
 
 /**
 
@@ -73,8 +71,8 @@ GetMonitorState (
 EFI_STATUS
 EFIAPI
 LoadMonitor (
-  IN EFI_PHYSICAL_ADDRESS StmImage,
-  IN UINTN                StmImageSize
+  IN EFI_PHYSICAL_ADDRESS  StmImage,
+  IN UINTN                 StmImageSize
   );
 
 /**
@@ -86,7 +84,7 @@ LoadMonitor (
                        If 0, list must be terminated by END_OF_RESOURCES.
 
   @retval EFI_SUCCESS            If resources are added
-  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failer
+  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failure
   @retval EFI_OUT_OF_RESOURCES   If nested procedure returned it and we cannot allocate more areas.
 
 **/
@@ -94,7 +92,7 @@ EFI_STATUS
 EFIAPI
 AddPiResource (
   IN  STM_RSC  *ResourceList,
-  IN  UINT32    NumEntries OPTIONAL
+  IN  UINT32   NumEntries OPTIONAL
   );
 
 /**
@@ -107,14 +105,14 @@ AddPiResource (
                        If 0, list must be terminated by END_OF_RESOURCES.
 
   @retval EFI_SUCCESS            If resources are deleted
-  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failer
+  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failure
 
 **/
 EFI_STATUS
 EFIAPI
 DeletePiResource (
-  IN  STM_RSC    *ResourceList,
-  IN  UINT32      NumEntries OPTIONAL
+  IN  STM_RSC  *ResourceList,
+  IN  UINT32   NumEntries OPTIONAL
   );
 
 /**
@@ -133,8 +131,8 @@ DeletePiResource (
 EFI_STATUS
 EFIAPI
 GetPiResource (
-  OUT    STM_RSC *ResourceList,
-  IN OUT UINT32  *ResourceSize
+  OUT    STM_RSC  *ResourceList,
+  IN OUT UINT32   *ResourceSize
   );
 
 /**
@@ -153,7 +151,7 @@ StmSmmConfigurationTableInit (
 **/
 VOID
 NotifyStmResourceChange (
-  IN VOID *StmResource
+  IN VOID  *StmResource
   );
 
 /**
@@ -174,6 +172,4 @@ GetStmResource (
 VOID
 EFIAPI
 SmmCpuFeaturesLibStmSmiEntryFixupAddress (
- );
-
-#endif
+  );

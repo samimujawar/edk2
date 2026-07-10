@@ -1,7 +1,7 @@
 /** @file
   ACPI Sdt Protocol Driver
 
-  Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved. <BR>
+  Copyright (c) 2010 - 2021, Intel Corporation. All rights reserved. <BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -50,10 +50,10 @@ FindTableByBuffer (
   IN VOID  *Buffer
   )
 {
-  EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance;
-  LIST_ENTRY                *CurrentLink;
-  EFI_ACPI_TABLE_LIST       *CurrentTableList;
-  LIST_ENTRY                *StartLink;
+  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance;
+  LIST_ENTRY               *CurrentLink;
+  EFI_ACPI_TABLE_LIST      *CurrentTableList;
+  LIST_ENTRY               *StartLink;
 
   //
   // Get the instance of the ACPI Table
@@ -69,7 +69,8 @@ FindTableByBuffer (
   while (CurrentLink != StartLink) {
     CurrentTableList = EFI_ACPI_TABLE_LIST_FROM_LINK (CurrentLink);
     if (((UINTN)CurrentTableList->Table <= (UINTN)Buffer) &&
-        ((UINTN)CurrentTableList->Table + CurrentTableList->TableSize > (UINTN)Buffer)) {
+        ((UINTN)CurrentTableList->Table + CurrentTableList->TableSize > (UINTN)Buffer))
+    {
       //
       // Good! Found Table.
       //
@@ -96,7 +97,7 @@ SdtUpdateAmlChecksum (
   IN VOID  *Buffer
   )
 {
-  EFI_ACPI_TABLE_LIST       *CurrentTableList;
+  EFI_ACPI_TABLE_LIST  *CurrentTableList;
 
   CurrentTableList = FindTableByBuffer (Buffer);
   if (CurrentTableList == NULL) {
@@ -123,11 +124,11 @@ SdtUpdateAmlChecksum (
 **/
 EFI_STATUS
 SdtGetMaxAmlBufferSize (
-  IN  VOID  *Buffer,
-  OUT UINTN *MaxSize
+  IN  VOID   *Buffer,
+  OUT UINTN  *MaxSize
   )
 {
-  EFI_ACPI_TABLE_LIST       *CurrentTableList;
+  EFI_ACPI_TABLE_LIST  *CurrentTableList;
 
   CurrentTableList = FindTableByBuffer (Buffer);
   if (CurrentTableList == NULL) {
@@ -147,16 +148,16 @@ SdtGetMaxAmlBufferSize (
 **/
 VOID
 SdtNotifyAcpiList (
-  IN EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance,
-  IN EFI_ACPI_TABLE_VERSION    Version,
-  IN UINTN                     Handle
+  IN EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance,
+  IN EFI_ACPI_TABLE_VERSION   Version,
+  IN UINTN                    Handle
   )
 {
-  EFI_ACPI_NOTIFY_LIST      *CurrentNotifyList;
-  LIST_ENTRY                *CurrentLink;
-  LIST_ENTRY                *StartLink;
-  EFI_ACPI_TABLE_LIST       *Table;
-  EFI_STATUS                Status;
+  EFI_ACPI_NOTIFY_LIST  *CurrentNotifyList;
+  LIST_ENTRY            *CurrentLink;
+  LIST_ENTRY            *StartLink;
+  EFI_ACPI_TABLE_LIST   *Table;
+  EFI_STATUS            Status;
 
   //
   // We should not use Table buffer, because it is user input buffer.
@@ -185,7 +186,80 @@ SdtNotifyAcpiList (
     CurrentLink = CurrentLink->ForwardLink;
   }
 
-  return ;
+  return;
+}
+
+/**
+  Returns a requested ACPI table.
+
+  The following structures are not considered elements in the list of
+  ACPI tables:
+  - Root System Description Pointer (RSD_PTR)
+  - Root System Description Table (RSDT)
+  - Extended System Description Table (XSDT)
+  Version is updated with a bit map containing all the versions of ACPI of which the table is a
+  member. For tables installed via the EFI_ACPI_TABLE_PROTOCOL.InstallAcpiTable() interface,
+  the function returns the value of EFI_ACPI_STD_PROTOCOL.AcpiVersion.
+
+  @param[in]    AcpiTableInstance  ACPI table Instance.
+  @param[in]    Index              The zero-based index of the table to retrieve.
+  @param[out]   Table              Pointer for returning the table buffer.
+  @param[out]   Version            On return, updated with the ACPI versions to which this table belongs. Type
+                                   EFI_ACPI_TABLE_VERSION is defined in "Related Definitions" in the
+                                   EFI_ACPI_SDT_PROTOCOL.
+  @param[out]   TableKey           On return, points to the table key for the specified ACPI system definition table.
+                                   This is identical to the table key used in the EFI_ACPI_TABLE_PROTOCOL.
+                                   The TableKey can be passed to EFI_ACPI_TABLE_PROTOCOL.UninstallAcpiTable()
+                                   to uninstall the table.
+  @retval EFI_SUCCESS              The function completed successfully.
+  @retval EFI_NOT_FOUND            The requested index is too large and a table was not found.
+**/
+EFI_STATUS
+SdtGetAcpiTable (
+  IN  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance,
+  IN  UINTN                    Index,
+  OUT EFI_ACPI_SDT_HEADER      **Table,
+  OUT EFI_ACPI_TABLE_VERSION   *Version,
+  OUT UINTN                    *TableKey
+  )
+{
+  UINTN                TableIndex;
+  LIST_ENTRY           *CurrentLink;
+  LIST_ENTRY           *StartLink;
+  EFI_ACPI_TABLE_LIST  *CurrentTable;
+
+  //
+  // Find the table
+  //
+  StartLink   = &AcpiTableInstance->TableList;
+  CurrentLink = StartLink->ForwardLink;
+  TableIndex  = 0;
+
+  while (CurrentLink != StartLink) {
+    if (TableIndex == Index) {
+      break;
+    }
+
+    //
+    // Next one
+    //
+    CurrentLink = CurrentLink->ForwardLink;
+    TableIndex++;
+  }
+
+  if ((TableIndex != Index) || (CurrentLink == StartLink)) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Get handle and version
+  //
+  CurrentTable = EFI_ACPI_TABLE_LIST_FROM_LINK (CurrentLink);
+  *TableKey    = CurrentTable->Handle;
+  *Version     = CurrentTable->Version;
+  *Table       = (EFI_ACPI_SDT_HEADER *)CurrentTable->Table;
+
+  return EFI_SUCCESS;
 }
 
 /**
@@ -216,17 +290,13 @@ SdtNotifyAcpiList (
 EFI_STATUS
 EFIAPI
 GetAcpiTable2 (
-  IN  UINTN                               Index,
-  OUT EFI_ACPI_SDT_HEADER                 **Table,
-  OUT EFI_ACPI_TABLE_VERSION              *Version,
-  OUT UINTN                               *TableKey
+  IN  UINTN                   Index,
+  OUT EFI_ACPI_SDT_HEADER     **Table,
+  OUT EFI_ACPI_TABLE_VERSION  *Version,
+  OUT UINTN                   *TableKey
   )
 {
-  EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance;
-  UINTN                     TableIndex;
-  LIST_ENTRY                *CurrentLink;
-  LIST_ENTRY                *StartLink;
-  EFI_ACPI_TABLE_LIST       *CurrentTable;
+  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance;
 
   ASSERT (Table != NULL);
   ASSERT (Version != NULL);
@@ -237,37 +307,7 @@ GetAcpiTable2 (
   //
   AcpiTableInstance = SdtGetAcpiTableInstance ();
 
-  //
-  // Find the table
-  //
-  StartLink   = &AcpiTableInstance->TableList;
-  CurrentLink = StartLink->ForwardLink;
-  TableIndex = 0;
-
-  while (CurrentLink != StartLink) {
-    if (TableIndex == Index) {
-      break;
-    }
-    //
-    // Next one
-    //
-    CurrentLink = CurrentLink->ForwardLink;
-    TableIndex ++;
-  }
-
-  if ((TableIndex != Index) || (CurrentLink == StartLink)) {
-    return EFI_NOT_FOUND;
-  }
-
-  //
-  // Get handle and version
-  //
-  CurrentTable  = EFI_ACPI_TABLE_LIST_FROM_LINK (CurrentLink);
-  *TableKey     = CurrentTable->Handle;
-  *Version      = CurrentTable->Version;
-  *Table        = (EFI_ACPI_SDT_HEADER *)CurrentTable->Table;
-
-  return EFI_SUCCESS;
+  return SdtGetAcpiTable (AcpiTableInstance, Index, Table, Version, TableKey);
 }
 
 /**
@@ -279,11 +319,11 @@ GetAcpiTable2 (
 **/
 VOID
 SdtRegisterNotify (
-  IN EFI_ACPI_NOTIFICATION_FN   Notification
+  IN EFI_ACPI_NOTIFICATION_FN  Notification
   )
 {
-  EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance;
-  EFI_ACPI_NOTIFY_LIST      *CurrentNotifyList;
+  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance;
+  EFI_ACPI_NOTIFY_LIST     *CurrentNotifyList;
 
   //
   // Get the instance of the ACPI Table
@@ -294,7 +334,11 @@ SdtRegisterNotify (
   // Create a new list entry
   //
   CurrentNotifyList = AllocatePool (sizeof (EFI_ACPI_NOTIFY_LIST));
-  ASSERT (CurrentNotifyList != NULL);
+  if (CurrentNotifyList == NULL) {
+    ASSERT (CurrentNotifyList != NULL);
+    DEBUG ((DEBUG_ERROR, "%a Failed to allocate pool\n", __func__));
+    return;
+  }
 
   //
   // Initialize the table contents
@@ -307,7 +351,7 @@ SdtRegisterNotify (
   //
   InsertTailList (&AcpiTableInstance->NotifyList, &CurrentNotifyList->Link);
 
-  return ;
+  return;
 }
 
 /**
@@ -322,13 +366,13 @@ SdtRegisterNotify (
 **/
 EFI_STATUS
 SdtUnregisterNotify (
-  IN EFI_ACPI_NOTIFICATION_FN   Notification
+  IN EFI_ACPI_NOTIFICATION_FN  Notification
   )
 {
-  EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance;
-  EFI_ACPI_NOTIFY_LIST      *CurrentNotifyList;
-  LIST_ENTRY                *CurrentLink;
-  LIST_ENTRY                *StartLink;
+  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance;
+  EFI_ACPI_NOTIFY_LIST     *CurrentNotifyList;
+  LIST_ENTRY               *CurrentLink;
+  LIST_ENTRY               *StartLink;
 
   //
   // Get the instance of the ACPI Table
@@ -380,8 +424,8 @@ SdtUnregisterNotify (
 EFI_STATUS
 EFIAPI
 RegisterNotify (
-  IN BOOLEAN                    Register,
-  IN EFI_ACPI_NOTIFICATION_FN   Notification
+  IN BOOLEAN                   Register,
+  IN EFI_ACPI_NOTIFICATION_FN  Notification
   )
 {
   //
@@ -416,14 +460,14 @@ RegisterNotify (
 **/
 EFI_STATUS
 SdtOpenSdtTable (
-  IN    UINTN           TableKey,
-  OUT   EFI_ACPI_HANDLE *Handle
+  IN    UINTN            TableKey,
+  OUT   EFI_ACPI_HANDLE  *Handle
   )
 {
-  EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance;
-  EFI_STATUS                Status;
-  EFI_ACPI_TABLE_LIST       *Table;
-  EFI_AML_HANDLE            *AmlHandle;
+  EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance;
+  EFI_STATUS               Status;
+  EFI_ACPI_TABLE_LIST      *Table;
+  EFI_AML_HANDLE           *AmlHandle;
 
   //
   // Get the instance of the ACPI Table
@@ -442,11 +486,15 @@ SdtOpenSdtTable (
     return EFI_NOT_FOUND;
   }
 
-  AmlHandle = AllocatePool (sizeof(*AmlHandle));
-  ASSERT (AmlHandle != NULL);
+  AmlHandle = AllocatePool (sizeof (*AmlHandle));
+  if (AmlHandle == NULL) {
+    ASSERT (AmlHandle != NULL);
+    return EFI_NOT_FOUND;
+  }
+
   AmlHandle->Signature       = EFI_AML_ROOT_HANDLE_SIGNATURE;
-  AmlHandle->Buffer          = (VOID *)((UINTN)Table->Table + sizeof(EFI_ACPI_SDT_HEADER));
-  AmlHandle->Size            = Table->Table->Length - sizeof(EFI_ACPI_SDT_HEADER);
+  AmlHandle->Buffer          = (VOID *)((UINTN)Table->Table + sizeof (EFI_ACPI_SDT_HEADER));
+  AmlHandle->Size            = Table->Table->Length - sizeof (EFI_ACPI_SDT_HEADER);
   AmlHandle->AmlByteEncoding = NULL;
   AmlHandle->Modified        = FALSE;
 
@@ -470,8 +518,8 @@ SdtOpenSdtTable (
 EFI_STATUS
 EFIAPI
 OpenSdt (
-  IN    UINTN           TableKey,
-  OUT   EFI_ACPI_HANDLE *Handle
+  IN    UINTN            TableKey,
+  OUT   EFI_ACPI_HANDLE  *Handle
   )
 {
   if (Handle == NULL) {
@@ -491,17 +539,18 @@ OpenSdt (
   @retval   EFI_SUCCESS             Success
   @retval   EFI_INVALID_PARAMETER   Buffer is NULL or Handle is NULL or Buffer points to an
                                     invalid opcode.
+  @retval   EFI_OUT_OF_RESOURCES    Could not allocate a required resource.
 
 **/
 EFI_STATUS
 SdtOpenEx (
-  IN    VOID            *Buffer,
-  IN    UINTN           BufferSize,
-  OUT   EFI_ACPI_HANDLE *Handle
+  IN    VOID             *Buffer,
+  IN    UINTN            BufferSize,
+  OUT   EFI_ACPI_HANDLE  *Handle
   )
 {
-  AML_BYTE_ENCODING   *AmlByteEncoding;
-  EFI_AML_HANDLE      *AmlHandle;
+  AML_BYTE_ENCODING  *AmlByteEncoding;
+  EFI_AML_HANDLE     *AmlHandle;
 
   AmlByteEncoding = AmlSearchByOpByte (Buffer);
   if (AmlByteEncoding == NULL) {
@@ -518,8 +567,11 @@ SdtOpenEx (
   //
   // Good, find it
   //
-  AmlHandle = AllocatePool (sizeof(*AmlHandle));
-  ASSERT (AmlHandle != NULL);
+  AmlHandle = AllocatePool (sizeof (*AmlHandle));
+  if (AmlHandle == NULL) {
+    ASSERT (AmlHandle != NULL);
+    return EFI_OUT_OF_RESOURCES;
+  }
 
   AmlHandle->Signature       = EFI_AML_HANDLE_SIGNATURE;
   AmlHandle->Buffer          = Buffer;
@@ -551,19 +603,19 @@ SdtOpenEx (
 EFI_STATUS
 EFIAPI
 Open (
-  IN    VOID            *Buffer,
-  OUT   EFI_ACPI_HANDLE *Handle
+  IN    VOID             *Buffer,
+  OUT   EFI_ACPI_HANDLE  *Handle
   )
 {
-  EFI_STATUS          Status;
-  UINTN               MaxSize;
+  EFI_STATUS  Status;
+  UINTN       MaxSize;
 
   MaxSize = 0;
 
   //
   // Check for invalid input parameters
   //
-  if (Buffer == NULL || Handle == NULL) {
+  if ((Buffer == NULL) || (Handle == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -586,11 +638,11 @@ Open (
 EFI_STATUS
 EFIAPI
 Close (
-  IN EFI_ACPI_HANDLE Handle
+  IN EFI_ACPI_HANDLE  Handle
   )
 {
-  EFI_AML_HANDLE      *AmlHandle;
-  EFI_STATUS          Status;
+  EFI_AML_HANDLE  *AmlHandle;
+  EFI_STATUS      Status;
 
   //
   // Check for invalid input parameters
@@ -601,7 +653,8 @@ Close (
 
   AmlHandle = (EFI_AML_HANDLE *)Handle;
   if ((AmlHandle->Signature != EFI_AML_ROOT_HANDLE_SIGNATURE) &&
-      (AmlHandle->Signature != EFI_AML_HANDLE_SIGNATURE)) {
+      (AmlHandle->Signature != EFI_AML_HANDLE_SIGNATURE))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -644,9 +697,9 @@ GetOption (
   OUT       UINTN               *DataSize
   )
 {
-  EFI_AML_HANDLE      *AmlHandle;
-  AML_BYTE_ENCODING   *AmlByteEncoding;
-  EFI_STATUS          Status;
+  EFI_AML_HANDLE     *AmlHandle;
+  AML_BYTE_ENCODING  *AmlByteEncoding;
+  EFI_STATUS         Status;
 
   ASSERT (DataType != NULL);
   ASSERT (Data != NULL);
@@ -702,10 +755,10 @@ GetOption (
 EFI_STATUS
 EFIAPI
 SetOption (
-  IN        EFI_ACPI_HANDLE Handle,
-  IN        UINTN           Index,
-  IN CONST  VOID            *Data,
-  IN        UINTN           DataSize
+  IN        EFI_ACPI_HANDLE  Handle,
+  IN        UINTN            Index,
+  IN CONST  VOID             *Data,
+  IN        UINTN            DataSize
   )
 {
   EFI_AML_HANDLE      *AmlHandle;
@@ -731,6 +784,7 @@ SetOption (
   if (AmlHandle->Signature != EFI_AML_HANDLE_SIGNATURE) {
     return EFI_INVALID_PARAMETER;
   }
+
   AmlByteEncoding = AmlHandle->AmlByteEncoding;
 
   if (Index > AmlByteEncoding->MaxIndex) {
@@ -744,6 +798,7 @@ SetOption (
   if (EFI_ERROR (Status)) {
     return EFI_INVALID_PARAMETER;
   }
+
   if (DataType == EFI_ACPI_DATA_TYPE_NONE) {
     return EFI_INVALID_PARAMETER;
   }
@@ -775,14 +830,14 @@ SetOption (
 EFI_STATUS
 EFIAPI
 GetChild (
-  IN EFI_ACPI_HANDLE        ParentHandle,
-  IN OUT EFI_ACPI_HANDLE    *Handle
+  IN EFI_ACPI_HANDLE      ParentHandle,
+  IN OUT EFI_ACPI_HANDLE  *Handle
   )
 {
-  EFI_AML_HANDLE      *AmlParentHandle;
-  EFI_AML_HANDLE      *AmlHandle;
-  VOID                *Buffer;
-  EFI_STATUS          Status;
+  EFI_AML_HANDLE  *AmlParentHandle;
+  EFI_AML_HANDLE  *AmlHandle;
+  VOID            *Buffer;
+  EFI_STATUS      Status;
 
   ASSERT (Handle != NULL);
 
@@ -793,7 +848,7 @@ GetChild (
     return EFI_INVALID_PARAMETER;
   }
 
-  AmlHandle       = *Handle;
+  AmlHandle = *Handle;
   if ((AmlHandle != NULL) && (AmlHandle->Signature != EFI_AML_HANDLE_SIGNATURE)) {
     return EFI_INVALID_PARAMETER;
   }
@@ -819,10 +874,12 @@ GetChild (
   if (EFI_ERROR (Status)) {
     return EFI_INVALID_PARAMETER;
   }
+
   if (Buffer == NULL) {
     *Handle = NULL;
     return EFI_SUCCESS;
   }
+
   return SdtOpenEx (Buffer, (UINTN)AmlParentHandle->Buffer + AmlParentHandle->Size - (UINTN)Buffer, Handle);
 }
 
@@ -839,16 +896,16 @@ GetChild (
 **/
 EFI_STATUS
 SdtFindPathFromNonRoot (
-  IN    EFI_ACPI_HANDLE HandleIn,
-  IN    UINT8           *AmlPath,
-  OUT   EFI_ACPI_HANDLE *HandleOut
+  IN    EFI_ACPI_HANDLE  HandleIn,
+  IN    UINT8            *AmlPath,
+  OUT   EFI_ACPI_HANDLE  *HandleOut
   )
 {
-  EFI_AML_HANDLE      *AmlHandle;
-  VOID                *Buffer;
-  EFI_STATUS          Status;
+  EFI_AML_HANDLE  *AmlHandle;
+  VOID            *Buffer;
+  EFI_STATUS      Status;
 
-  Buffer = NULL;
+  Buffer    = NULL;
   AmlHandle = (EFI_AML_HANDLE *)HandleIn;
 
   //
@@ -858,10 +915,12 @@ SdtFindPathFromNonRoot (
   if (EFI_ERROR (Status)) {
     return EFI_INVALID_PARAMETER;
   }
+
   if (Buffer == NULL) {
     *HandleOut = NULL;
     return EFI_SUCCESS;
   }
+
   return SdtOpenEx (Buffer, (UINTN)AmlHandle->Buffer + AmlHandle->Size - (UINTN)Buffer, HandleOut);
 }
 
@@ -874,14 +933,18 @@ SdtFindPathFromNonRoot (
 **/
 EFI_AML_HANDLE *
 SdtDuplicateHandle (
-  IN EFI_AML_HANDLE      *AmlHandle
+  IN EFI_AML_HANDLE  *AmlHandle
   )
 {
   EFI_AML_HANDLE  *DstAmlHandle;
 
-  DstAmlHandle = AllocatePool (sizeof(*DstAmlHandle));
+  DstAmlHandle = AllocatePool (sizeof (*DstAmlHandle));
   ASSERT (DstAmlHandle != NULL);
-  CopyMem (DstAmlHandle, (VOID *)AmlHandle, sizeof(*DstAmlHandle));
+  if (DstAmlHandle == NULL) {
+    return NULL;
+  }
+
+  CopyMem (DstAmlHandle, (VOID *)AmlHandle, sizeof (*DstAmlHandle));
 
   return DstAmlHandle;
 }
@@ -896,20 +959,21 @@ SdtDuplicateHandle (
 
   @retval EFI_SUCCESS           Success
   @retval EFI_INVALID_PARAMETER HandleIn is NULL or does not refer to a valid ACPI object.
+  @retval EFI_OUT_OF_RESOURCES  Could not allocate a required resource.
 **/
 EFI_STATUS
 SdtFindPathFromRoot (
-  IN    EFI_ACPI_HANDLE HandleIn,
-  IN    UINT8           *AmlPath,
-  OUT   EFI_ACPI_HANDLE *HandleOut
+  IN    EFI_ACPI_HANDLE  HandleIn,
+  IN    UINT8            *AmlPath,
+  OUT   EFI_ACPI_HANDLE  *HandleOut
   )
 {
-  EFI_ACPI_HANDLE     ChildHandle;
-  EFI_AML_HANDLE      *AmlHandle;
-  EFI_STATUS          Status;
-  VOID                *Buffer;
+  EFI_ACPI_HANDLE  ChildHandle;
+  EFI_AML_HANDLE   *AmlHandle;
+  EFI_STATUS       Status;
+  VOID             *Buffer;
 
-  Buffer = NULL;
+  Buffer    = NULL;
   AmlHandle = (EFI_AML_HANDLE *)HandleIn;
 
   //
@@ -920,6 +984,10 @@ SdtFindPathFromRoot (
     // Duplicate RootHandle
     //
     *HandleOut = (EFI_ACPI_HANDLE)SdtDuplicateHandle (AmlHandle);
+    if (*HandleOut == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
     return EFI_SUCCESS;
   }
 
@@ -945,7 +1013,7 @@ SdtFindPathFromRoot (
     // More child
     //
     AmlHandle = (EFI_AML_HANDLE *)ChildHandle;
-    Status = AmlFindPath (AmlHandle, AmlPath, &Buffer, TRUE);
+    Status    = AmlFindPath (AmlHandle, AmlPath, &Buffer, TRUE);
     if (EFI_ERROR (Status)) {
       return EFI_INVALID_PARAMETER;
     }
@@ -955,9 +1023,10 @@ SdtFindPathFromRoot (
       // Great! Find it, open
       //
       Status = SdtOpenEx (Buffer, (UINTN)AmlHandle->Buffer + AmlHandle->Size - (UINTN)Buffer, HandleOut);
-      if (!EFI_ERROR (Status))  {
+      if (!EFI_ERROR (Status)) {
         return EFI_SUCCESS;
       }
+
       //
       // Not success, try next one
       //
@@ -983,14 +1052,14 @@ SdtFindPathFromRoot (
 EFI_STATUS
 EFIAPI
 FindPath (
-  IN    EFI_ACPI_HANDLE HandleIn,
-  IN    VOID            *AcpiPath,
-  OUT   EFI_ACPI_HANDLE *HandleOut
+  IN    EFI_ACPI_HANDLE  HandleIn,
+  IN    VOID             *AcpiPath,
+  OUT   EFI_ACPI_HANDLE  *HandleOut
   )
 {
-  EFI_AML_HANDLE      *AmlHandle;
-  EFI_STATUS          Status;
-  UINT8               *AmlPath;
+  EFI_AML_HANDLE  *AmlHandle;
+  EFI_STATUS      Status;
+  UINT8           *AmlPath;
 
   //
   // Check for invalid input parameters
@@ -1010,9 +1079,9 @@ FindPath (
   }
 
   DEBUG_CODE_BEGIN ();
-  DEBUG ((EFI_D_ERROR, "AcpiSdt: FindPath - "));
+  DEBUG ((DEBUG_ERROR, "AcpiSdt: FindPath - "));
   AmlPrintNameString (AmlPath);
-  DEBUG ((EFI_D_ERROR, "\n"));
+  DEBUG ((DEBUG_ERROR, "\n"));
   DEBUG_CODE_END ();
 
   if (AmlHandle->Signature == EFI_AML_ROOT_HANDLE_SIGNATURE) {
@@ -1041,13 +1110,12 @@ FindPath (
 **/
 VOID
 SdtAcpiTableAcpiSdtConstructor (
-  IN EFI_ACPI_TABLE_INSTANCE   *AcpiTableInstance
+  IN EFI_ACPI_TABLE_INSTANCE  *AcpiTableInstance
   )
 {
-
   InitializeListHead (&AcpiTableInstance->NotifyList);
-  CopyMem (&AcpiTableInstance->AcpiSdtProtocol, &mAcpiSdtProtocolTemplate, sizeof(mAcpiSdtProtocolTemplate));
+  CopyMem (&AcpiTableInstance->AcpiSdtProtocol, &mAcpiSdtProtocolTemplate, sizeof (mAcpiSdtProtocolTemplate));
   AcpiTableInstance->AcpiSdtProtocol.AcpiVersion = (EFI_ACPI_TABLE_VERSION)PcdGet32 (PcdAcpiExposedTableVersions);
 
-  return ;
+  return;
 }

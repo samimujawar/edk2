@@ -7,9 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __INTERNAL_SMBUS_LIB_H_
-#define __INTERNAL_SMBUS_LIB_H_
-
+#pragma once
 
 #include <PiDxe.h>
 
@@ -25,6 +23,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Declaration for internal functions
 //
+
 /**
   Executes an SMBus operation to an SMBus controller.
 
@@ -33,7 +32,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   the Length byte, word, or a block of data.
 
   @param  SmbusOperation  Signifies which particular SMBus hardware protocol instance
-                          that it will use toexecute the SMBus transactions.
+                          that it will use to execute the SMBus transactions.
   @param  SmBusAddress    The address that encodes the SMBUS Slave Address,
                           SMBUS Command, SMBUS Data Length, and PEC.
   @param  Length          Signifies the number of bytes that this operation will
@@ -50,11 +49,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 UINTN
 InternalSmBusExec (
-  IN     EFI_SMBUS_OPERATION        SmbusOperation,
-  IN     UINTN                      SmBusAddress,
-  IN     UINTN                      Length,
-  IN OUT VOID                       *Buffer,
-     OUT RETURN_STATUS              *Status        OPTIONAL
+  IN     EFI_SMBUS_OPERATION  SmbusOperation,
+  IN     UINTN                SmBusAddress,
+  IN     UINTN                Length,
+  IN OUT VOID                 *Buffer,
+  OUT RETURN_STATUS           *Status        OPTIONAL
   );
 
 /**
@@ -72,8 +71,6 @@ InternalSmBusExec (
 EFI_STATUS
 EFIAPI
 SmbusLibConstructor (
-  IN EFI_HANDLE                ImageHandle,
-  IN EFI_SYSTEM_TABLE          *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
-#endif

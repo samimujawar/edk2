@@ -5,11 +5,11 @@
   to connect devices using platform policy.
 
   Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef __BOOT_MANAGER_POLICY_H__
-#define __BOOT_MANAGER_POLICY_H__
+#pragma once
 
 #define EFI_BOOT_MANAGER_POLICY_PROTOCOL_GUID \
   { \
@@ -31,9 +31,14 @@
     0x113B2126, 0xFC8A, 0x11E3, { 0xBD, 0x6C, 0xB8, 0xE8, 0x56, 0x2C, 0xBA, 0xFA } \
   }
 
+#define EFI_BOOT_MANAGER_POLICY_STORAGE_GUID \
+  { \
+    0xCD68FE79, 0xD3CB, 0x436E, { 0xA8, 0x50, 0xF4, 0x43, 0xC8, 0x8C, 0xFB, 0x49 } \
+  }
+
 typedef struct _EFI_BOOT_MANAGER_POLICY_PROTOCOL EFI_BOOT_MANAGER_POLICY_PROTOCOL;
 
-#define EFI_BOOT_MANAGER_POLICY_PROTOCOL_REVISION 0x00010000
+#define EFI_BOOT_MANAGER_POLICY_PROTOCOL_REVISION  0x00010000
 
 /**
   Connect a device path following the platforms EFI Boot Manager policy.
@@ -98,6 +103,12 @@ EFI_STATUS
   EFI_BOOT_SERVICES.ConnectController(). If the Boot Manager has policy
   associated with connect all UEFI drivers this policy will be used.
 
+  If Class is EFI_BOOT_MANAGER_POLICY_STORAGE_GUID then the Boot Manager will
+  connect the protocols associated with the discoverable storage disks. This may include
+  EFI_BLOCK_IO_PROTOCOL, EFI_SIMPLE_FILE_SYSTEM_PROTOCOL, or other storage protocols
+  appropriate to the device. Some platforms may choose to restrict the connected
+  devices to exclude USB or other peripherals.
+
   A platform can also define platform specific Class values as a properly generated
   EFI_GUID would never conflict with this specification.
 
@@ -118,15 +129,14 @@ EFI_STATUS
   );
 
 struct _EFI_BOOT_MANAGER_POLICY_PROTOCOL {
-  UINT64                                       Revision;
-  EFI_BOOT_MANAGER_POLICY_CONNECT_DEVICE_PATH  ConnectDevicePath;
-  EFI_BOOT_MANAGER_POLICY_CONNECT_DEVICE_CLASS ConnectDeviceClass;
+  UINT64                                          Revision;
+  EFI_BOOT_MANAGER_POLICY_CONNECT_DEVICE_PATH     ConnectDevicePath;
+  EFI_BOOT_MANAGER_POLICY_CONNECT_DEVICE_CLASS    ConnectDeviceClass;
 };
 
-extern EFI_GUID gEfiBootManagerPolicyProtocolGuid;
+extern EFI_GUID  gEfiBootManagerPolicyProtocolGuid;
 
-extern EFI_GUID gEfiBootManagerPolicyConsoleGuid;
-extern EFI_GUID gEfiBootManagerPolicyNetworkGuid;
-extern EFI_GUID gEfiBootManagerPolicyConnectAllGuid;
-
-#endif
+extern EFI_GUID  gEfiBootManagerPolicyConsoleGuid;
+extern EFI_GUID  gEfiBootManagerPolicyNetworkGuid;
+extern EFI_GUID  gEfiBootManagerPolicyConnectAllGuid;
+extern EFI_GUID  gEfiBootManagerPolicyStorageGuid;

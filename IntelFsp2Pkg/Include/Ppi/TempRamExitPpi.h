@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _FSP_TEMP_RAM_EXIT_PPI_H_
-#define _FSP_TEMP_RAM_EXIT_PPI_H_
+#pragma once
 
 ///
 /// Global ID for the FSP_TEMP_RAM_EXIT_PPI.
@@ -36,7 +35,7 @@ typedef struct _FSP_TEMP_RAM_EXIT_PPI FSP_TEMP_RAM_EXIT_PPI;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *FSP_TEMP_RAM_EXIT) (
+(EFIAPI *FSP_TEMP_RAM_EXIT)(
   IN  VOID    *TempRamExitParamPtr
   );
 
@@ -44,9 +43,7 @@ EFI_STATUS
 /// This PPI provides function to disable temporary memory.
 ///
 struct _FSP_TEMP_RAM_EXIT_PPI {
-  FSP_TEMP_RAM_EXIT   TempRamExit;
+  FSP_TEMP_RAM_EXIT    TempRamExit;
 };
 
-extern EFI_GUID gFspTempRamExitPpiGuid;
-
-#endif // _FSP_TEMP_RAM_EXIT_PPI_H_
+extern EFI_GUID  gFspTempRamExitPpiGuid;

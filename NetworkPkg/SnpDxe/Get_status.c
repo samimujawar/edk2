@@ -28,68 +28,74 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_STATUS
 PxeGetStatus (
-  IN     SNP_DRIVER *Snp,
-     OUT UINT32     *InterruptStatusPtr,
-  IN     BOOLEAN    GetTransmittedBuf
+  IN     SNP_DRIVER  *Snp,
+  OUT UINT32         *InterruptStatusPtr,
+  IN     BOOLEAN     GetTransmittedBuf
   )
 {
-  PXE_DB_GET_STATUS *Db;
-  UINT16            InterruptFlags;
-  UINT32            Index;
-  UINT64            *Tmp;
+  PXE_DB_GET_STATUS  *Db;
+  UINT16             InterruptFlags;
+  UINT32             Index;
+  UINT64             *Tmp;
 
-  Tmp               = NULL;
-  Db                = Snp->Db;
-  Snp->Cdb.OpCode   = PXE_OPCODE_GET_STATUS;
+  if (Snp->Cdb == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Snp->Cdb is NULL\n", __func__));
+    return EFI_DEVICE_ERROR;
+  }
 
-  Snp->Cdb.OpFlags  = 0;
+  Tmp              = NULL;
+  Db               = Snp->Db;
+  Snp->Cdb->OpCode = PXE_OPCODE_GET_STATUS;
+
+  Snp->Cdb->OpFlags = 0;
 
   if (GetTransmittedBuf) {
-    Snp->Cdb.OpFlags |= PXE_OPFLAGS_GET_TRANSMITTED_BUFFERS;
+    Snp->Cdb->OpFlags |= PXE_OPFLAGS_GET_TRANSMITTED_BUFFERS;
     ZeroMem (Db->TxBuffer, sizeof (Db->TxBuffer));
   }
 
   if (InterruptStatusPtr != NULL) {
-    Snp->Cdb.OpFlags |= PXE_OPFLAGS_GET_INTERRUPT_STATUS;
+    Snp->Cdb->OpFlags |= PXE_OPFLAGS_GET_INTERRUPT_STATUS;
   }
 
   if (Snp->MediaStatusSupported) {
-    Snp->Cdb.OpFlags |= PXE_OPFLAGS_GET_MEDIA_STATUS;
+    Snp->Cdb->OpFlags |= PXE_OPFLAGS_GET_MEDIA_STATUS;
   }
 
-  Snp->Cdb.CPBsize  = PXE_CPBSIZE_NOT_USED;
-  Snp->Cdb.CPBaddr  = PXE_CPBADDR_NOT_USED;
+  Snp->Cdb->CPBsize = PXE_CPBSIZE_NOT_USED;
+  Snp->Cdb->CPBaddr = PXE_CPBADDR_NOT_USED;
 
-  Snp->Cdb.DBsize     = (UINT16) sizeof (PXE_DB_GET_STATUS);
-  Snp->Cdb.DBaddr     = (UINT64)(UINTN) Db;
+  Snp->Cdb->DBsize = (UINT16)sizeof (PXE_DB_GET_STATUS);
+  Snp->Cdb->DBaddr = (UINT64)(UINTN)Db;
 
-  Snp->Cdb.StatCode   = PXE_STATCODE_INITIALIZE;
-  Snp->Cdb.StatFlags  = PXE_STATFLAGS_INITIALIZE;
-  Snp->Cdb.IFnum      = Snp->IfNum;
-  Snp->Cdb.Control    = PXE_CONTROL_LAST_CDB_IN_LIST;
+  Snp->Cdb->StatCode  = PXE_STATCODE_INITIALIZE;
+  Snp->Cdb->StatFlags = PXE_STATFLAGS_INITIALIZE;
+  Snp->Cdb->IFnum     = Snp->IfNum;
+  Snp->Cdb->Control   = PXE_CONTROL_LAST_CDB_IN_LIST;
 
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nSnp->undi.get_status()  "));
+  DEBUG ((DEBUG_NET, "\nSnp->undi.get_status()  "));
 
-  (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
+  (*Snp->IssueUndi32Command)((UINT64)(UINTN)Snp->Cdb);
 
-  if (Snp->Cdb.StatCode != PXE_STATCODE_SUCCESS) {
+  if (Snp->Cdb->StatCode != PXE_STATCODE_SUCCESS) {
     DEBUG (
-      (EFI_D_NET,
-      "\nSnp->undi.get_status()  %xh:%xh\n",
-      Snp->Cdb.StatFlags,
-      Snp->Cdb.StatCode)
+      (DEBUG_NET,
+       "\nSnp->undi.get_status()  %xh:%xh\n",
+       Snp->Cdb->StatFlags,
+       Snp->Cdb->StatCode)
       );
 
     return EFI_DEVICE_ERROR;
   }
+
   //
   // report the values back..
   //
   if (InterruptStatusPtr != NULL) {
-    InterruptFlags      = (UINT16) (Snp->Cdb.StatFlags & PXE_STATFLAGS_GET_STATUS_INTERRUPT_MASK);
+    InterruptFlags = (UINT16)(Snp->Cdb->StatFlags & PXE_STATFLAGS_GET_STATUS_INTERRUPT_MASK);
 
     *InterruptStatusPtr = 0;
 
@@ -108,11 +114,10 @@ PxeGetStatus (
     if ((InterruptFlags & PXE_STATFLAGS_GET_STATUS_SOFTWARE) == PXE_STATFLAGS_GET_STATUS_SOFTWARE) {
       *InterruptStatusPtr |= EFI_SIMPLE_NETWORK_COMMAND_INTERRUPT;
     }
-
   }
 
   if (GetTransmittedBuf) {
-    if ((Snp->Cdb.StatFlags & PXE_STATFLAGS_GET_STATUS_NO_TXBUFS_WRITTEN) == 0) {
+    if ((Snp->Cdb->StatFlags & PXE_STATFLAGS_GET_STATUS_NO_TXBUFS_WRITTEN) == 0) {
       //
       // UNDI has written some transmitted buffer addresses into the DB. Store them into Snp->RecycledTxBuf.
       //
@@ -125,15 +130,18 @@ PxeGetStatus (
             if ((Snp->MaxRecycledTxBuf + SNP_TX_BUFFER_INCREASEMENT) >= SNP_MAX_TX_BUFFER_NUM) {
               return EFI_DEVICE_ERROR;
             }
+
             Tmp = AllocatePool (sizeof (UINT64) * (Snp->MaxRecycledTxBuf + SNP_TX_BUFFER_INCREASEMENT));
             if (Tmp == NULL) {
               return EFI_DEVICE_ERROR;
             }
+
             CopyMem (Tmp, Snp->RecycledTxBuf, sizeof (UINT64) * Snp->RecycledTxBufCount);
             FreePool (Snp->RecycledTxBuf);
-            Snp->RecycledTxBuf    =  Tmp;
+            Snp->RecycledTxBuf     =  Tmp;
             Snp->MaxRecycledTxBuf += SNP_TX_BUFFER_INCREASEMENT;
           }
+
           Snp->RecycledTxBuf[Snp->RecycledTxBufCount] = Db->TxBuffer[Index];
           Snp->RecycledTxBufCount++;
         }
@@ -147,7 +155,7 @@ PxeGetStatus (
   //
   if (Snp->MediaStatusSupported) {
     Snp->Snp.Mode->MediaPresent =
-      (BOOLEAN) (((Snp->Cdb.StatFlags & PXE_STATFLAGS_GET_STATUS_NO_MEDIA) != 0) ? FALSE : TRUE);
+      (BOOLEAN)(((Snp->Cdb->StatFlags & PXE_STATFLAGS_GET_STATUS_NO_MEDIA) != 0) ? FALSE : TRUE);
   }
 
   return EFI_SUCCESS;
@@ -194,9 +202,9 @@ PxeGetStatus (
 EFI_STATUS
 EFIAPI
 SnpUndi32GetStatus (
-  IN EFI_SIMPLE_NETWORK_PROTOCOL *This,
-  OUT UINT32                     *InterruptStatus, OPTIONAL
-  OUT VOID                       **TxBuf           OPTIONAL
+  IN EFI_SIMPLE_NETWORK_PROTOCOL  *This,
+  OUT UINT32                      *InterruptStatus  OPTIONAL,
+  OUT VOID                        **TxBuf           OPTIONAL
   )
 {
   SNP_DRIVER  *Snp;
@@ -207,32 +215,32 @@ SnpUndi32GetStatus (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (InterruptStatus == NULL && TxBuf == NULL) {
+  if ((InterruptStatus == NULL) && (TxBuf == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   Snp = EFI_SIMPLE_NETWORK_DEV_FROM_THIS (This);
 
-  OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
-
   if (Snp == NULL) {
     return EFI_DEVICE_ERROR;
   }
 
+  OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
   switch (Snp->Mode.State) {
-  case EfiSimpleNetworkInitialized:
-    break;
+    case EfiSimpleNetworkInitialized:
+      break;
 
-  case EfiSimpleNetworkStopped:
-    Status = EFI_NOT_STARTED;
-    goto ON_EXIT;
+    case EfiSimpleNetworkStopped:
+      Status = EFI_NOT_STARTED;
+      goto ON_EXIT;
 
-  default:
-    Status = EFI_DEVICE_ERROR;
-    goto ON_EXIT;
+    default:
+      Status = EFI_DEVICE_ERROR;
+      goto ON_EXIT;
   }
 
-  if (Snp->RecycledTxBufCount == 0 && TxBuf != NULL) {
+  if ((Snp->RecycledTxBufCount == 0) && (TxBuf != NULL)) {
     Status = PxeGetStatus (Snp, InterruptStatus, TRUE);
   } else {
     Status = PxeGetStatus (Snp, InterruptStatus, FALSE);
@@ -246,7 +254,7 @@ SnpUndi32GetStatus (
       *TxBuf = NULL;
     } else {
       Snp->RecycledTxBufCount--;
-      *TxBuf = (VOID *) (UINTN) Snp->RecycledTxBuf[Snp->RecycledTxBufCount];
+      *TxBuf = (VOID *)(UINTN)Snp->RecycledTxBuf[Snp->RecycledTxBufCount];
     }
   }
 

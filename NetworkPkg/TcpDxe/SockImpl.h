@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _SOCK_IMPL_H_
-#define _SOCK_IMPL_H_
+#pragma once
 
 #include "Socket.h"
 #include "TcpMain.h"
@@ -26,7 +25,7 @@
     gBS->SignalEvent ((Token)->Event); \
   } while (0)
 
-#define SOCK_HEADER_SPACE (60 + 60 + 72)
+#define SOCK_HEADER_SPACE  (60 + 60 + 72)
 
 /**
   Process the TCP send data, buffer the tcp txdata and append
@@ -41,8 +40,8 @@
 **/
 EFI_STATUS
 SockProcessTcpSndData (
-  IN SOCKET   *Sock,
-  IN VOID     *TcpTxData
+  IN SOCKET  *Sock,
+  IN VOID    *TcpTxData
   );
 
 /**
@@ -56,8 +55,8 @@ SockProcessTcpSndData (
 **/
 UINT32
 SockProcessRcvToken (
-  IN OUT SOCKET        *Sock,
-  IN OUT SOCK_IO_TOKEN *RcvToken
+  IN OUT SOCKET         *Sock,
+  IN OUT SOCK_IO_TOKEN  *RcvToken
   );
 
 /**
@@ -68,7 +67,7 @@ SockProcessRcvToken (
 **/
 VOID
 SockConnFlush (
-  IN OUT SOCKET *Sock
+  IN OUT SOCKET  *Sock
   );
 
 /**
@@ -98,7 +97,7 @@ SockCancelToken (
 **/
 SOCKET *
 SockCreate (
-  IN SOCK_INIT_DATA *SockInitData
+  IN SOCK_INIT_DATA  *SockInitData
   );
 
 /**
@@ -109,7 +108,5 @@ SockCreate (
 **/
 VOID
 SockDestroy (
-  IN OUT SOCKET *Sock
+  IN OUT SOCKET  *Sock
   );
-
-#endif

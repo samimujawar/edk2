@@ -1,12 +1,13 @@
 /** @file
   Header file for ACPI parser
 
-  Copyright (c) 2016 - 2020, Arm Limited. All rights reserved.
+  Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
+  Copyright (c) 2016 - 2024, Arm Limited. All rights reserved.
+  Copyright (C) 2022 - 2026, Advanced Micro Devices, Inc. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef ACPIPARSER_H_
-#define ACPIPARSER_H_
+#pragma once
 
 #define OUTPUT_FIELD_COLUMN_WIDTH  36
 
@@ -50,9 +51,9 @@ IncrementWarningCount (
 BOOLEAN
 EFIAPI
 VerifyChecksum (
-  IN BOOLEAN Log,
-  IN UINT8*  Ptr,
-  IN UINT32  Length
+  IN BOOLEAN  Log,
+  IN UINT8    *Ptr,
+  IN UINT32   Length
   );
 
 /**
@@ -64,8 +65,8 @@ VerifyChecksum (
 VOID
 EFIAPI
 DumpRaw (
-  IN UINT8* Ptr,
-  IN UINT32 Length
+  IN UINT8   *Ptr,
+  IN UINT32  Length
   );
 
 /**
@@ -77,8 +78,8 @@ DumpRaw (
 VOID
 EFIAPI
 DumpUint8 (
-  IN CONST CHAR16* Format,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format,
+  IN UINT8         *Ptr
   );
 
 /**
@@ -90,8 +91,8 @@ DumpUint8 (
 VOID
 EFIAPI
 DumpUint16 (
-  IN CONST CHAR16* Format,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format,
+  IN UINT8         *Ptr
   );
 
 /**
@@ -103,8 +104,8 @@ DumpUint16 (
 VOID
 EFIAPI
 DumpUint32 (
-  IN CONST CHAR16* Format,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format,
+  IN UINT8         *Ptr
   );
 
 /**
@@ -116,8 +117,8 @@ DumpUint32 (
 VOID
 EFIAPI
 DumpUint64 (
-  IN CONST CHAR16* Format,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format,
+  IN UINT8         *Ptr
   );
 
 /**
@@ -128,12 +129,14 @@ DumpUint64 (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 Dump3Chars (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
   );
 
 /**
@@ -144,12 +147,14 @@ Dump3Chars (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 Dump4Chars (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
   );
 
 /**
@@ -160,12 +165,14 @@ Dump4Chars (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 Dump6Chars (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
   );
 
 /**
@@ -176,12 +183,14 @@ Dump6Chars (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 Dump8Chars (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
   );
 
 /**
@@ -192,12 +201,100 @@ Dump8Chars (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 Dump12Chars (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN       UINT8*  Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN       UINT8   *Ptr,
+  IN UINT32        Length
+  );
+
+/**
+  This function traces 16 characters which can be optionally
+  formated using the format string if specified.
+
+  If no format string is specified the Format must be NULL.
+
+  @param [in] Format  Optional format string for tracing the data.
+  @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
+**/
+VOID
+EFIAPI
+Dump16Chars (
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
+  );
+
+/**
+  This function traces reserved fields up to 8 bytes in length.
+
+  Format string is ignored by this function as the reserved field is printed
+  byte by byte with intermittent spacing <eg: 0 0 0 0>. Use DumpxChars for any
+  other use case.
+  @param [in] Format  Optional format string for tracing the data.
+  @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
+**/
+VOID
+EFIAPI
+DumpReserved (
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
+  );
+
+/**
+  This function traces reserved fields up to 64 bits in length.
+
+  Format string is ignored by this function as the reserved field is printed
+  byte by byte with intermittent spacing. eg: <0 0 0 0>. When the field length
+  isn't a multiple of 8, the number of bytes are "ceil"-ed by one. eg for 27
+  bits <0 0 0 0>
+
+  @param [in] Format  Optional format string for tracing the data.
+  @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field as number of bits.
+**/
+VOID
+EFIAPI
+DumpReservedBits (
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
+  );
+
+/**
+  This function validates reserved fields to check if they are 0.
+
+  @param [in] Ptr       Pointer to the start of the field data.
+  @param [in] Length    Length of the field.
+  @param [in] Context   Pointer to context specific information.
+**/
+VOID
+EFIAPI
+ValidateReserved (
+  IN UINT8   *Ptr,
+  IN UINT32  Length,
+  IN VOID    *Context
+  );
+
+/**
+  This function validates bit-length reserved fields to check if they are 0.
+
+  @param [in] Ptr       Pointer to the start of the field data.
+  @param [in] Length    Length of the field.
+  @param [in] Context   Pointer to context specific information.
+**/
+VOID
+EFIAPI
+ValidateReservedBits (
+  IN UINT8   *Ptr,
+  IN UINT32  Length,
+  IN VOID    *Context
   );
 
 /**
@@ -215,8 +312,8 @@ Dump12Chars (
 VOID
 EFIAPI
 PrintFieldName (
-  IN UINT32         Indent,
-  IN CONST CHAR16*  FieldName
+  IN UINT32        Indent,
+  IN CONST CHAR16  *FieldName
   );
 
 /**
@@ -225,18 +322,24 @@ PrintFieldName (
   @param [in] Format  Format string for tracing the data as specified by
                       the 'Format' member of ACPI_PARSER.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
-typedef VOID (EFIAPI *FNPTR_PRINT_FORMATTER)(CONST CHAR16* Format, UINT8* Ptr);
+typedef VOID (EFIAPI *FNPTR_PRINT_FORMATTER)(CONST CHAR16 *Format, UINT8 *Ptr, UINT32 Length);
 
 /**
   This function pointer is the template for validating an ACPI table field.
 
   @param [in] Ptr     Pointer to the start of the field data.
+  @param [in] Length  Length of the field.
   @param [in] Context Pointer to context specific information as specified by
                       the 'Context' member of the ACPI_PARSER.
                       e.g. this could be a pointer to the ACPI table header.
 **/
-typedef VOID (EFIAPI *FNPTR_FIELD_VALIDATOR)(UINT8* Ptr, VOID* Context);
+typedef VOID (EFIAPI *FNPTR_FIELD_VALIDATOR)(
+  UINT8 *Ptr,
+  UINT32 Length,
+  VOID *Context
+  );
 
 /**
   The ACPI_PARSER structure describes the fields of an ACPI table and
@@ -251,6 +354,11 @@ typedef VOID (EFIAPI *FNPTR_FIELD_VALIDATOR)(UINT8* Ptr, VOID* Context);
   the field data. If the field is more complex and requires additional
   processing for formatting and representation a print formatter function
   can be specified in 'PrintFormatter'.
+
+  ParseAcpiBitFields() uses AcpiParser structure to parse the bit fields.
+  It considers Length as a number of bits that need to be parsed.
+  Also, the Offset field will be considered as starting offset of the bitfield.
+
   The PrintFormatter function may choose to use the format string
   specified by 'Format' or use its own internal format string.
 
@@ -258,46 +366,50 @@ typedef VOID (EFIAPI *FNPTR_FIELD_VALIDATOR)(UINT8* Ptr, VOID* Context);
   representing the field data.
 **/
 typedef struct AcpiParser {
-
   /// String describing the ACPI table field
   /// (Field column from ACPI table spec)
-  CONST CHAR16*         NameStr;
+  CONST CHAR16             *NameStr;
 
   /// The length of the field.
   /// (Byte Length column from ACPI table spec)
-  UINT32                Length;
+  /// Length(in bits) of the bitfield if used with ParseAcpiBitFields().
+  UINT32                   Length;
 
   /// The offset of the field from the start of the table.
   /// (Byte Offset column from ACPI table spec)
-  UINT32                Offset;
+  /// The Bit offset of the field if used with ParseAcpiBitFields().
+  UINT32                   Offset;
 
   /// Optional Print() style format string for tracing the data. If not
   /// used this must be set to NULL.
-  CONST CHAR16*         Format;
+  CONST CHAR16             *Format;
 
   /// Optional pointer to a print formatter function which
   /// is typically used to trace complex field information.
   /// If not used this must be set to NULL.
   /// The Format string is passed to the PrintFormatter function
   /// but may be ignored by the implementation code.
-  FNPTR_PRINT_FORMATTER PrintFormatter;
+  FNPTR_PRINT_FORMATTER    PrintFormatter;
 
   /// Optional pointer which may be set to request the parser to update
-  /// a pointer to the field data. If unused this must be set to NULL.
-  VOID**                ItemPtr;
+  /// a pointer to the field data. This value is set after the FieldValidator
+  /// has been called and therefore should not be used by the FieldValidator.
+  /// If unused this must be set to NULL.
+  /// ItemPtr is not supported with ParseAcpiBitFields().
+  VOID                     **ItemPtr;
 
   /// Optional pointer to a field validator function.
   /// The function should directly report any appropriate error or warning
   /// and invoke the appropriate counter update function.
   /// If not used this parameter must be set to NULL.
-  FNPTR_FIELD_VALIDATOR FieldValidator;
+  FNPTR_FIELD_VALIDATOR    FieldValidator;
 
   /// Optional pointer to context specific information,
   /// which the Field Validator function can use to determine
   /// additional information about the ACPI table and make
   /// decisions about the field being validated.
   /// e.g. this could be a pointer to the ACPI table header
-  VOID*                 Context;
+  VOID                     *Context;
 } ACPI_PARSER;
 
 /**
@@ -306,23 +418,23 @@ typedef struct AcpiParser {
 **/
 typedef struct AcpiDescriptionHeaderInfo {
   /// ACPI table signature
-  UINT32* Signature;
+  UINT32    *Signature;
   /// Length of the ACPI table
-  UINT32* Length;
+  UINT32    *Length;
   /// Revision
-  UINT8*  Revision;
+  UINT8     *Revision;
   /// Checksum
-  UINT8*  Checksum;
+  UINT8     *Checksum;
   /// OEM Id - length is 6 bytes
-  UINT8*  OemId;
+  UINT8     *OemId;
   /// OEM table Id
-  UINT64* OemTableId;
+  UINT64    *OemTableId;
   /// OEM revision Id
-  UINT32* OemRevision;
+  UINT32    *OemRevision;
   /// Creator Id
-  UINT32* CreatorId;
+  UINT32    *CreatorId;
   /// Creator revision
-  UINT32* CreatorRevision;
+  UINT32    *CreatorRevision;
 } ACPI_DESCRIPTION_HEADER_INFO;
 
 /**
@@ -356,10 +468,49 @@ EFIAPI
 ParseAcpi (
   IN BOOLEAN            Trace,
   IN UINT32             Indent,
-  IN CONST CHAR8*       AsciiName OPTIONAL,
-  IN UINT8*             Ptr,
+  IN CONST CHAR8        *AsciiName OPTIONAL,
+  IN UINT8              *Ptr,
   IN UINT32             Length,
-  IN CONST ACPI_PARSER* Parser,
+  IN CONST ACPI_PARSER  *Parser,
+  IN UINT32             ParserItems
+  );
+
+/**
+  This function is used to parse an ACPI table bitfield buffer.
+
+  The ACPI table buffer is parsed using the ACPI table parser information
+  specified by a pointer to an array of ACPI_PARSER elements. This parser
+  function iterates through each item on the ACPI_PARSER array and logs the ACPI table bitfields.
+
+  This function can optionally be used to parse ACPI tables and fetch specific
+  field values. The ItemPtr member of the ACPI_PARSER structure (where used)
+  is updated by this parser function to point to the selected field data
+  (e.g. useful for variable length nested fields).
+
+  ItemPtr member of ACPI_PARSER is not supported with this function.
+
+  @param [in] Trace        Trace the ACPI fields TRUE else only parse the
+                           table.
+  @param [in] Indent       Number of spaces to indent the output.
+  @param [in] AsciiName    Optional pointer to an ASCII string that describes
+                           the table being parsed.
+  @param [in] Ptr          Pointer to the start of the buffer.
+  @param [in] Length       Length of the buffer pointed by Ptr.
+  @param [in] Parser       Pointer to an array of ACPI_PARSER structure that
+                           describes the table being parsed.
+  @param [in] ParserItems  Number of items in the ACPI_PARSER array.
+
+  @retval Number of bits parsed.
+**/
+UINT32
+EFIAPI
+ParseAcpiBitFields (
+  IN BOOLEAN            Trace,
+  IN UINT32             Indent,
+  IN CONST CHAR8        *AsciiName OPTIONAL,
+  IN UINT8              *Ptr,
+  IN UINT32             Length,
+  IN CONST ACPI_PARSER  *Parser,
   IN UINT32             ParserItems
   );
 
@@ -369,7 +520,7 @@ ParseAcpi (
   @param [in] Parser The name of the ACPI_PARSER array describing the
               ACPI table fields.
 **/
-#define PARSER_PARAMS(Parser) Parser, sizeof (Parser) / sizeof (Parser[0])
+#define PARSER_PARAMS(Parser)  Parser, sizeof (Parser) / sizeof (Parser[0])
 
 /**
   This is a helper macro for describing the ACPI header fields.
@@ -408,9 +559,9 @@ ParseAcpi (
 UINT32
 EFIAPI
 DumpGasStruct (
-  IN UINT8*        Ptr,
-  IN UINT32        Indent,
-  IN UINT32        Length
+  IN UINT8   *Ptr,
+  IN UINT32  Indent,
+  IN UINT32  Length
   );
 
 /**
@@ -418,12 +569,14 @@ DumpGasStruct (
 
   @param [in] Format  Optional format string for tracing the data.
   @param [in] Ptr     Pointer to the start of the buffer.
+  @param [in] Length  Length of the field.
 **/
 VOID
 EFIAPI
 DumpGas (
-  IN CONST CHAR16* Format OPTIONAL,
-  IN UINT8*        Ptr
+  IN CONST CHAR16  *Format OPTIONAL,
+  IN UINT8         *Ptr,
+  IN UINT32        Length
   );
 
 /**
@@ -436,7 +589,7 @@ DumpGas (
 UINT32
 EFIAPI
 DumpAcpiHeader (
-  IN UINT8* Ptr
+  IN UINT8  *Ptr
   );
 
 /**
@@ -455,10 +608,10 @@ DumpAcpiHeader (
 UINT32
 EFIAPI
 ParseAcpiHeader (
-  IN  UINT8*         Ptr,
-  OUT CONST UINT32** Signature,
-  OUT CONST UINT32** Length,
-  OUT CONST UINT8**  Revision
+  IN  UINT8         *Ptr,
+  OUT CONST UINT32  **Signature,
+  OUT CONST UINT32  **Length,
+  OUT CONST UINT8   **Revision
   );
 
 /**
@@ -476,10 +629,52 @@ ParseAcpiHeader (
 VOID
 EFIAPI
 ParseAcpiAest (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI AGDI table.
+  When trace is enabled this function parses the AGDI table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiAgdi (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI APMT table.
+  When trace is enabled this function parses the APMT table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiApmt (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -497,10 +692,29 @@ ParseAcpiAest (
 VOID
 EFIAPI
 ParseAcpiBgrt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI CCEL table.
+  When trace is enabled this function parses the CCEL table and
+  traces the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiCcel (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -518,10 +732,10 @@ ParseAcpiBgrt (
 VOID
 EFIAPI
 ParseAcpiDbg2 (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -539,10 +753,52 @@ ParseAcpiDbg2 (
 VOID
 EFIAPI
 ParseAcpiDsdt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the EINJ table.
+  When trace is enabled this function parses the EINJ table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiEinj (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI ERST table.
+  When trace is enabled this function parses the ERST table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiErst (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -560,10 +816,10 @@ ParseAcpiDsdt (
 VOID
 EFIAPI
 ParseAcpiFacs (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -581,10 +837,31 @@ ParseAcpiFacs (
 VOID
 EFIAPI
 ParseAcpiFadt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI FPDT table.
+  This function parses the FPDT table and optionally traces the ACPI
+  table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiFpdt (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -606,10 +883,31 @@ ParseAcpiFadt (
 VOID
 EFIAPI
 ParseAcpiGtdt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI HEST table.
+  When trace is enabled this function parses the HEST table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiHest (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -632,10 +930,27 @@ ParseAcpiGtdt (
 VOID
 EFIAPI
 ParseAcpiHmat (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI HPET table.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiHpet (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -661,10 +976,10 @@ ParseAcpiHmat (
 VOID
 EFIAPI
 ParseAcpiIort (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -690,10 +1005,10 @@ ParseAcpiIort (
 VOID
 EFIAPI
 ParseAcpiMadt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -711,10 +1026,31 @@ ParseAcpiMadt (
 VOID
 EFIAPI
 ParseAcpiMcfg (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI MPAM table.
+  When trace is enabled this function parses the MPAM table and
+  traces the ACPI table fields.
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiMpam (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -733,10 +1069,10 @@ ParseAcpiMcfg (
 VOID
 EFIAPI
 ParseAcpiPcct (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -754,10 +1090,75 @@ ParseAcpiPcct (
 VOID
 EFIAPI
 ParseAcpiPptt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI RAS2 table.
+  When trace is enabled this function parses the RAS2 table and
+  traces the ACPI table fields.
+
+  This function parses the RAS2 ACPI table along with PCC Entries
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiRas2 (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI RASF table.
+  When trace is enabled this function parses the RASF table and
+  traces the ACPI table fields.
+
+  This function parses the RASF ACPI table
+
+  This function also performs validation of the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiRasf (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI RIMT table.
+  When trace is enabled this function parses the RIMT table and
+  traces the ACPI table fields.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiRimt (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -777,10 +1178,10 @@ ParseAcpiPptt (
 VOID
 EFIAPI
 ParseAcpiRsdp (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -801,10 +1202,10 @@ ParseAcpiRsdp (
 VOID
 EFIAPI
 ParseAcpiSlit (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -822,10 +1223,10 @@ ParseAcpiSlit (
 VOID
 EFIAPI
 ParseAcpiSpcr (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -849,10 +1250,10 @@ ParseAcpiSpcr (
 VOID
 EFIAPI
 ParseAcpiSrat (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -870,10 +1271,44 @@ ParseAcpiSrat (
 VOID
 EFIAPI
 ParseAcpiSsdt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI TPM2 table.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiTpm2 (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
+  );
+
+/**
+  This function parses the ACPI WSMT table.
+
+  @param [in] Trace              If TRUE, trace the ACPI fields.
+  @param [in] Ptr                Pointer to the start of the buffer.
+  @param [in] AcpiTableLength    Length of the ACPI table.
+  @param [in] AcpiTableRevision  Revision of the ACPI table.
+**/
+VOID
+EFIAPI
+ParseAcpiWsmt (
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
 
 /**
@@ -890,10 +1325,8 @@ ParseAcpiSsdt (
 VOID
 EFIAPI
 ParseAcpiXsdt (
-  IN BOOLEAN Trace,
-  IN UINT8*  Ptr,
-  IN UINT32  AcpiTableLength,
-  IN UINT8   AcpiTableRevision
+  IN BOOLEAN  Trace,
+  IN UINT8    *Ptr,
+  IN UINT32   AcpiTableLength,
+  IN UINT8    AcpiTableRevision
   );
-
-#endif // ACPIPARSER_H_

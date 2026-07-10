@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __FRAMEBUFFER_BLT_LIB__
-#define __FRAMEBUFFER_BLT_LIB__
+#pragma once
 
 #include <Protocol/GraphicsOutput.h>
 
@@ -73,7 +72,7 @@ RETURN_STATUS
 EFIAPI
 FrameBufferBlt (
   IN     FRAME_BUFFER_CONFIGURE             *Configure,
-  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer, OPTIONAL
+  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer  OPTIONAL,
   IN     EFI_GRAPHICS_OUTPUT_BLT_OPERATION  BltOperation,
   IN     UINTN                              SourceX,
   IN     UINTN                              SourceY,
@@ -83,5 +82,3 @@ FrameBufferBlt (
   IN     UINTN                              Height,
   IN     UINTN                              Delta
   );
-
-#endif

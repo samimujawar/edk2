@@ -14,16 +14,14 @@
 
 **/
 
-#ifndef __S3_SAVE_STATE_H__
-#define __S3_SAVE_STATE_H__
+#pragma once
 
 #define EFI_S3_SAVE_STATE_PROTOCOL_GUID \
     { 0xe857caf6, 0xc046, 0x45dc, { 0xbe, 0x3f, 0xee, 0x7, 0x65, 0xfb, 0xa8, 0x87 }}
 
-
 typedef VOID *EFI_S3_BOOT_SCRIPT_POSITION;
 
-typedef struct _EFI_S3_SAVE_STATE_PROTOCOL  EFI_S3_SAVE_STATE_PROTOCOL;
+typedef struct _EFI_S3_SAVE_STATE_PROTOCOL EFI_S3_SAVE_STATE_PROTOCOL;
 
 /**
   Record operations that need to be replayed during an S3 resume.
@@ -45,10 +43,10 @@ typedef struct _EFI_S3_SAVE_STATE_PROTOCOL  EFI_S3_SAVE_STATE_PROTOCOL;
 typedef
 EFI_STATUS
 (EFIAPI *EFI_S3_SAVE_STATE_WRITE)(
-   IN CONST EFI_S3_SAVE_STATE_PROTOCOL  *This,
-   IN       UINTN                       OpCode,
-   ...
-);
+  IN CONST EFI_S3_SAVE_STATE_PROTOCOL  *This,
+  IN       UINTN                       OpCode,
+  ...
+  );
 
 /**
   Record operations that need to be replayed during an S3 resume.
@@ -89,12 +87,12 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *EFI_S3_SAVE_STATE_INSERT)(
-   IN CONST EFI_S3_SAVE_STATE_PROTOCOL  *This,
-   IN       BOOLEAN                     BeforeOrAfter,
-   IN OUT   EFI_S3_BOOT_SCRIPT_POSITION *Position       OPTIONAL,
-   IN       UINTN                       OpCode,
-   ...
-);
+  IN CONST EFI_S3_SAVE_STATE_PROTOCOL  *This,
+  IN       BOOLEAN                     BeforeOrAfter,
+  IN OUT   EFI_S3_BOOT_SCRIPT_POSITION *Position       OPTIONAL,
+  IN       UINTN                       OpCode,
+  ...
+  );
 
 /**
   Find a label within the boot script table and, if not present, optionally create it.
@@ -118,7 +116,7 @@ EFI_STATUS
   @param[in]      Label               Points to the label which will be inserted in the boot script table.
 
   @retval    EFI_SUCCESS              The label already exists or was inserted.
-  @retval    EFI_NOT_FOUND            The label did not already exist and CreateifNotFound was FALSE.
+  @retval    EFI_NOT_FOUND            The label did not already exist and CreateIfNotFound was FALSE.
   @retval    EFI_INVALID_PARAMETER    The Label is NULL or points to an empty string.
   @retval    EFI_INVALID_PARAMETER    The Position is not a valid position in the boot script table.
   @retval    EFI_OUT_OF_RESOURCES     There is insufficient memory to store the boot script.
@@ -126,12 +124,12 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *EFI_S3_SAVE_STATE_LABEL)(
-   IN CONST  EFI_S3_SAVE_STATE_PROTOCOL      *This,
-   IN        BOOLEAN                         BeforeOrAfter,
-   IN        BOOLEAN                         CreateIfNotFound,
-   IN OUT    EFI_S3_BOOT_SCRIPT_POSITION     *Position OPTIONAL,
-   IN CONST  CHAR8                           *Label
-);
+  IN CONST  EFI_S3_SAVE_STATE_PROTOCOL      *This,
+  IN        BOOLEAN                         BeforeOrAfter,
+  IN        BOOLEAN                         CreateIfNotFound,
+  IN OUT    EFI_S3_BOOT_SCRIPT_POSITION     *Position OPTIONAL,
+  IN CONST  CHAR8                           *Label
+  );
 
 /**
   Compare two positions in the boot script table and return their relative position.
@@ -152,19 +150,17 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *EFI_S3_SAVE_STATE_COMPARE)(
-   IN CONST EFI_S3_SAVE_STATE_PROTOCOL          *This,
-   IN       EFI_S3_BOOT_SCRIPT_POSITION         Position1,
-   IN       EFI_S3_BOOT_SCRIPT_POSITION         Position2,
-   OUT      UINTN                               *RelativePosition
-);
+  IN CONST EFI_S3_SAVE_STATE_PROTOCOL          *This,
+  IN       EFI_S3_BOOT_SCRIPT_POSITION         Position1,
+  IN       EFI_S3_BOOT_SCRIPT_POSITION         Position2,
+  OUT      UINTN                               *RelativePosition
+  );
 
 struct _EFI_S3_SAVE_STATE_PROTOCOL {
-  EFI_S3_SAVE_STATE_WRITE   Write;
-  EFI_S3_SAVE_STATE_INSERT  Insert;
-  EFI_S3_SAVE_STATE_LABEL   Label;
-  EFI_S3_SAVE_STATE_COMPARE Compare;
+  EFI_S3_SAVE_STATE_WRITE      Write;
+  EFI_S3_SAVE_STATE_INSERT     Insert;
+  EFI_S3_SAVE_STATE_LABEL      Label;
+  EFI_S3_SAVE_STATE_COMPARE    Compare;
 };
 
-extern EFI_GUID gEfiS3SaveStateProtocolGuid;
-
-#endif // __S3_SAVE_STATE_H__
+extern EFI_GUID  gEfiS3SaveStateProtocolGuid;

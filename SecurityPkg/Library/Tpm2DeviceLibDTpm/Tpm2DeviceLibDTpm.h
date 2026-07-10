@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _TPM2_DEVICE_LIB_DTPM_H_
-#define _TPM2_DEVICE_LIB_DTPM_H_
+#pragma once
 
 /**
   Return PTP interface type.
@@ -19,7 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 TPM2_PTP_INTERFACE_TYPE
 Tpm2GetPtpInterface (
-  IN VOID *Register
+  IN VOID  *Register
   );
 
 /**
@@ -31,7 +30,7 @@ Tpm2GetPtpInterface (
 **/
 UINT8
 Tpm2GetIdleByPass (
-  IN VOID *Register
+  IN VOID  *Register
   );
 
 /**
@@ -63,5 +62,3 @@ EFI_STATUS
 InternalTpm2DeviceLibDTpmCommonConstructor (
   VOID
   );
-
-#endif // _TPM2_DEVICE_LIB_DTPM_H_

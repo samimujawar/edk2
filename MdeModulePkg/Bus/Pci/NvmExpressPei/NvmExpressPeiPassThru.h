@@ -8,10 +8,7 @@
 
 **/
 
-#ifndef _NVM_EXPRESS_PEI_PASSTHRU_H_
-#define _NVM_EXPRESS_PEI_PASSTHRU_H_
-
-
+#pragma once
 
 /**
   Sends an NVM Express Command Packet to an NVM Express controller or namespace. This function only
@@ -46,9 +43,9 @@
 **/
 EFI_STATUS
 NvmePassThruExecute (
-  IN     PEI_NVME_CONTROLLER_PRIVATE_DATA                  *Private,
-  IN     UINT32                                            NamespaceId,
-  IN OUT EFI_NVM_EXPRESS_PASS_THRU_COMMAND_PACKET          *Packet
+  IN     PEI_NVME_CONTROLLER_PRIVATE_DATA          *Private,
+  IN     UINT32                                    NamespaceId,
+  IN OUT EFI_NVM_EXPRESS_PASS_THRU_COMMAND_PACKET  *Packet
   );
 
 /**
@@ -71,9 +68,9 @@ NvmePassThruExecute (
 EFI_STATUS
 EFIAPI
 NvmePassThruGetDevicePath (
-  IN  EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI *This,
-  OUT UINTN                               *DevicePathLength,
-  OUT EFI_DEVICE_PATH_PROTOCOL            **DevicePath
+  IN  EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI  *This,
+  OUT UINTN                                *DevicePathLength,
+  OUT EFI_DEVICE_PATH_PROTOCOL             **DevicePath
   );
 
 /**
@@ -115,8 +112,8 @@ NvmePassThruGetDevicePath (
 EFI_STATUS
 EFIAPI
 NvmePassThruGetNextNameSpace (
-  IN     EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI   *This,
-  IN OUT UINT32                                *NamespaceId
+  IN     EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI  *This,
+  IN OUT UINT32                               *NamespaceId
   );
 
 /**
@@ -153,9 +150,7 @@ NvmePassThruGetNextNameSpace (
 EFI_STATUS
 EFIAPI
 NvmePassThru (
-  IN     EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI               *This,
-  IN     UINT32                                            NamespaceId,
-  IN OUT EFI_NVM_EXPRESS_PASS_THRU_COMMAND_PACKET          *Packet
+  IN     EDKII_PEI_NVM_EXPRESS_PASS_THRU_PPI       *This,
+  IN     UINT32                                    NamespaceId,
+  IN OUT EFI_NVM_EXPRESS_PASS_THRU_COMMAND_PACKET  *Packet
   );
-
-#endif

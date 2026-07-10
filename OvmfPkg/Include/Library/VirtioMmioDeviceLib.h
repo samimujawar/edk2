@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef _VIRTIO_MMIO_DEVICE_LIB_H_
-#define _VIRTIO_MMIO_DEVICE_LIB_H_
+#pragma once
 
 /**
 
@@ -35,8 +34,8 @@
 **/
 EFI_STATUS
 VirtioMmioInstallDevice (
-  IN PHYSICAL_ADDRESS       BaseAddress,
-  IN EFI_HANDLE             Handle
+  IN PHYSICAL_ADDRESS  BaseAddress,
+  IN EFI_HANDLE        Handle
   );
 
 /**
@@ -54,7 +53,5 @@ VirtioMmioInstallDevice (
 **/
 EFI_STATUS
 VirtioMmioUninstallDevice (
-  IN EFI_HANDLE             Handle
+  IN EFI_HANDLE  Handle
   );
-
-#endif // _VIRTIO_MMIO_DEVICE_LIB_H_

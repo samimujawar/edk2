@@ -5,8 +5,7 @@
 
 **/
 
-#ifndef _FSP_PLATFORM_LIB_H_
-#define _FSP_PLATFORM_LIB_H_
+#pragma once
 
 /**
   Get system memory resource descriptor by owner.
@@ -16,7 +15,7 @@
 EFI_HOB_RESOURCE_DESCRIPTOR *
 EFIAPI
 FspGetResourceDescriptorByOwner (
-  IN EFI_GUID   *OwnerGuid
+  IN EFI_GUID  *OwnerGuid
   );
 
 /**
@@ -28,10 +27,9 @@ FspGetResourceDescriptorByOwner (
 VOID
 EFIAPI
 FspGetSystemMemorySize (
-  IN OUT UINT64              *LowMemoryLength,
-  IN OUT UINT64              *HighMemoryLength
+  IN OUT UINT64  *LowMemoryLength,
+  IN OUT UINT64  *HighMemoryLength
   );
-
 
 /**
   Set a new stack frame for the continuation function.
@@ -61,7 +59,7 @@ FspSiliconInitDone (
 VOID
 EFIAPI
 FspMemoryInitDone (
-  IN OUT VOID   **HobListPtr
+  IN OUT VOID  **HobListPtr
   );
 
 /**
@@ -95,7 +93,7 @@ FspWaitForNotify (
 VOID
 EFIAPI
 FspSiliconInitDone2 (
-  IN EFI_STATUS Status
+  IN EFI_STATUS  Status
   );
 
 /**
@@ -107,8 +105,8 @@ FspSiliconInitDone2 (
 VOID
 EFIAPI
 FspMemoryInitDone2 (
-  IN EFI_STATUS Status,
-  IN OUT VOID   **HobListPtr
+  IN EFI_STATUS  Status,
+  IN OUT VOID    **HobListPtr
   );
 
 /**
@@ -119,7 +117,18 @@ FspMemoryInitDone2 (
 VOID
 EFIAPI
 FspTempRamExitDone2 (
-  IN EFI_STATUS Status
+  IN EFI_STATUS  Status
   );
 
-#endif
+/**
+  Calculate TemporaryRam Size using Base address.
+
+  @param[in]  TemporaryRamBase         the address of target memory
+  @param[out] TemporaryRamSize         the size of target memory
+**/
+VOID
+EFIAPI
+ReadTemporaryRamSize (
+  IN  UINT32  TemporaryRamBase,
+  OUT UINT32  *TemporaryRamSize
+  );

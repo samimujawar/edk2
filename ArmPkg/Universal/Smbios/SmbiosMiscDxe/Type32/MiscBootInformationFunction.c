@@ -16,6 +16,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OemMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "SmbiosMisc.h"
@@ -32,11 +33,10 @@
   @retval EFI_OUT_OF_RESOURCES       Failed to allocate required memory.
 
 **/
-SMBIOS_MISC_TABLE_FUNCTION(MiscBootInformation)
-{
-  EFI_STATUS                         Status;
-  SMBIOS_TABLE_TYPE32                *SmbiosRecord;
-  SMBIOS_TABLE_TYPE32                *InputData;
+SMBIOS_MISC_TABLE_FUNCTION (MiscBootInformation) {
+  EFI_STATUS           Status;
+  SMBIOS_TABLE_TYPE32  *SmbiosRecord;
+  SMBIOS_TABLE_TYPE32  *InputData;
 
   //
   // First check for invalid parameters.
@@ -59,13 +59,20 @@ SMBIOS_MISC_TABLE_FUNCTION(MiscBootInformation)
 
   SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE32);
 
+  SmbiosRecord->BootStatus = OemGetBootStatus ();
+
   //
   // Now we have got the full smbios record, call smbios protocol to add this record.
   //
-  Status = SmbiosMiscAddRecord ((UINT8*)SmbiosRecord, NULL);
+  Status = SmbiosMiscAddRecord ((UINT8 *)SmbiosRecord, NULL);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "[%a]:[%dL] Smbios Type32 Table Log Failed! %r \n",
-            __FUNCTION__, __LINE__, Status));
+    DEBUG ((
+      DEBUG_ERROR,
+      "[%a]:[%dL] Smbios Type32 Table Log Failed! %r \n",
+      __func__,
+      DEBUG_LINE_NUMBER,
+      Status
+      ));
   }
 
   FreePool (SmbiosRecord);

@@ -9,8 +9,8 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-#ifndef __GNTTAB_H__
-#define __GNTTAB_H__
+
+#pragma once
 
 #include <IndustryStandard/Xen/grant_table.h>
 
@@ -46,11 +46,11 @@ XenGrantTableDeinit (
 EFI_STATUS
 EFIAPI
 XenBusGrantAccess (
-  IN  XENBUS_PROTOCOL *This,
-  IN  domid_t         DomainId,
-  IN  UINTN           Frame, // MFN
-  IN  BOOLEAN         ReadOnly,
-  OUT grant_ref_t     *RefPtr
+  IN  XENBUS_PROTOCOL  *This,
+  IN  domid_t          DomainId,
+  IN  UINTN            Frame, // MFN
+  IN  BOOLEAN          ReadOnly,
+  OUT grant_ref_t      *RefPtr
   );
 
 /**
@@ -66,5 +66,3 @@ XenBusGrantEndAccess (
   IN XENBUS_PROTOCOL  *This,
   IN grant_ref_t      Ref
   );
-
-#endif /* !__GNTTAB_H__ */

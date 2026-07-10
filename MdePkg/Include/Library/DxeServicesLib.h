@@ -8,8 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __DXE_SERVICES_LIB_H__
-#define __DXE_SERVICES_LIB_H__
+#pragma once
 
 /**
   Searches all the available firmware volumes and returns the first matching FFS section.
@@ -53,12 +52,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 GetSectionFromAnyFvByFileType  (
-  IN  EFI_FV_FILETYPE               FileType,
-  IN  UINTN                         FileInstance,
-  IN  EFI_SECTION_TYPE              SectionType,
-  IN  UINTN                         SectionInstance,
-  OUT VOID                          **Buffer,
-  OUT UINTN                         *Size
+  IN  EFI_FV_FILETYPE   FileType,
+  IN  UINTN             FileInstance,
+  IN  EFI_SECTION_TYPE  SectionType,
+  IN  UINTN             SectionInstance,
+  OUT VOID              **Buffer,
+  OUT UINTN             *Size
   );
 
 /**
@@ -107,11 +106,11 @@ GetSectionFromAnyFvByFileType  (
 EFI_STATUS
 EFIAPI
 GetSectionFromAnyFv  (
-  IN  CONST EFI_GUID                *NameGuid,
-  IN  EFI_SECTION_TYPE              SectionType,
-  IN  UINTN                         SectionInstance,
-  OUT VOID                          **Buffer,
-  OUT UINTN                         *Size
+  IN  CONST EFI_GUID    *NameGuid,
+  IN  EFI_SECTION_TYPE  SectionType,
+  IN  UINTN             SectionInstance,
+  OUT VOID              **Buffer,
+  OUT UINTN             *Size
   );
 
 /**
@@ -162,13 +161,12 @@ GetSectionFromAnyFv  (
 EFI_STATUS
 EFIAPI
 GetSectionFromFv (
-  IN  CONST EFI_GUID                *NameGuid,
-  IN  EFI_SECTION_TYPE              SectionType,
-  IN  UINTN                         SectionInstance,
-  OUT VOID                          **Buffer,
-  OUT UINTN                         *Size
+  IN  CONST EFI_GUID    *NameGuid,
+  IN  EFI_SECTION_TYPE  SectionType,
+  IN  UINTN             SectionInstance,
+  OUT VOID              **Buffer,
+  OUT UINTN             *Size
   );
-
 
 /**
   Searches the FFS file the currently executing module was loaded from and returns the first matching FFS section.
@@ -215,12 +213,11 @@ GetSectionFromFv (
 EFI_STATUS
 EFIAPI
 GetSectionFromFfs (
-  IN  EFI_SECTION_TYPE              SectionType,
-  IN  UINTN                         SectionInstance,
-  OUT VOID                          **Buffer,
-  OUT UINTN                         *Size
+  IN  EFI_SECTION_TYPE  SectionType,
+  IN  UINTN             SectionInstance,
+  OUT VOID              **Buffer,
+  OUT UINTN             *Size
   );
-
 
 /**
   Get the image file buffer data and buffer size by its device path.
@@ -251,10 +248,10 @@ GetSectionFromFfs (
 VOID *
 EFIAPI
 GetFileBufferByFilePath (
-  IN BOOLEAN                           BootPolicy,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL    *FilePath,
-  OUT      UINTN                       *FileSize,
-  OUT UINT32                           *AuthenticationStatus
+  IN BOOLEAN                         BootPolicy,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  OUT      UINTN                     *FileSize,
+  OUT UINT32                         *AuthenticationStatus
   );
 
 /**
@@ -320,5 +317,3 @@ AllocatePeiAccessiblePages (
   IN EFI_MEMORY_TYPE  MemoryType,
   IN UINTN            Pages
   );
-
-#endif

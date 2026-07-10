@@ -8,8 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _PERFORMANCE_MEASUREMENT_H_
-#define _PERFORMANCE_MEASUREMENT_H_
+#pragma once
 
 //
 // GUID for Performance measurement Protocol
@@ -53,20 +52,18 @@ typedef enum {
 typedef
 EFI_STATUS
 (EFIAPI *CREATE_PERFORMANCE_MEASUREMENT)(
-  IN CONST VOID                        *CallerIdentifier, OPTIONAL
-  IN CONST VOID                        *Guid,     OPTIONAL
-  IN CONST CHAR8                       *String,   OPTIONAL
-  IN       UINT64                      TimeStamp, OPTIONAL
-  IN       UINT64                      Address,   OPTIONAL
+  IN CONST VOID                        *CallerIdentifier  OPTIONAL,
+  IN CONST VOID                        *Guid      OPTIONAL,
+  IN CONST CHAR8                       *String    OPTIONAL,
+  IN       UINT64                      TimeStamp  OPTIONAL,
+  IN       UINT64                      Address    OPTIONAL,
   IN       UINT32                      Identifier,
   IN       PERF_MEASUREMENT_ATTRIBUTE  Attribute
   );
 
 struct _EDKII_PERFORMANCE_MEASUREMENT_PROTOCOL {
-  CREATE_PERFORMANCE_MEASUREMENT CreatePerformanceMeasurement;
+  CREATE_PERFORMANCE_MEASUREMENT    CreatePerformanceMeasurement;
 };
 
-extern EFI_GUID gEdkiiPerformanceMeasurementProtocolGuid;
-extern EFI_GUID gEdkiiSmmPerformanceMeasurementProtocolGuid;
-
-#endif // _PERFORMANCE_MEASUREMENT_H_
+extern EFI_GUID  gEdkiiPerformanceMeasurementProtocolGuid;
+extern EFI_GUID  gEdkiiSmmPerformanceMeasurementProtocolGuid;

@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __NON_DISCOVERABLE_DEVICE_H__
-#define __NON_DISCOVERABLE_DEVICE_H__
+#pragma once
 
 #include <IndustryStandard/Acpi.h>
 
@@ -43,7 +42,7 @@ typedef enum {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *NON_DISCOVERABLE_DEVICE_INIT) (
+(EFIAPI *NON_DISCOVERABLE_DEVICE_INIT)(
   IN  NON_DISCOVERABLE_DEVICE       *This
   );
 
@@ -51,21 +50,19 @@ struct _NON_DISCOVERABLE_DEVICE {
   //
   // The type of device
   //
-  CONST EFI_GUID                      *Type;
+  CONST EFI_GUID                       *Type;
   //
   // Whether this device is DMA coherent
   //
-  NON_DISCOVERABLE_DEVICE_DMA_TYPE    DmaType;
+  NON_DISCOVERABLE_DEVICE_DMA_TYPE     DmaType;
   //
   // Initialization function for the device
   //
-  NON_DISCOVERABLE_DEVICE_INIT        Initialize;
+  NON_DISCOVERABLE_DEVICE_INIT         Initialize;
   //
   // The MMIO and I/O regions owned by the device
   //
-  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR   *Resources;
+  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR    *Resources;
 };
 
-extern EFI_GUID gEdkiiNonDiscoverableDeviceProtocolGuid;
-
-#endif
+extern EFI_GUID  gEdkiiNonDiscoverableDeviceProtocolGuid;

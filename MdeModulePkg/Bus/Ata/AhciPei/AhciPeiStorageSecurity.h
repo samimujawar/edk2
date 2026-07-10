@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef _AHCI_PEI_STORAGE_SECURITY_H_
-#define _AHCI_PEI_STORAGE_SECURITY_H_
+#pragma once
 
 /**
   Gets the count of storage security devices that one specific driver detects.
@@ -24,8 +23,8 @@
 EFI_STATUS
 EFIAPI
 AhciStorageSecurityGetDeviceNo (
-  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
-  OUT UINTN                                 *NumberofDevices
+  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI  *This,
+  OUT UINTN                               *NumberofDevices
   );
 
 /**
@@ -56,10 +55,10 @@ AhciStorageSecurityGetDeviceNo (
 EFI_STATUS
 EFIAPI
 AhciStorageSecurityGetDevicePath (
-  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
-  IN  UINTN                                 DeviceIndex,
-  OUT UINTN                                 *DevicePathLength,
-  OUT EFI_DEVICE_PATH_PROTOCOL              **DevicePath
+  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI  *This,
+  IN  UINTN                               DeviceIndex,
+  OUT UINTN                               *DevicePathLength,
+  OUT EFI_DEVICE_PATH_PROTOCOL            **DevicePath
   );
 
 /**
@@ -151,14 +150,14 @@ AhciStorageSecurityGetDevicePath (
 EFI_STATUS
 EFIAPI
 AhciStorageSecurityReceiveData (
-  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
-  IN  UINTN                                 DeviceIndex,
-  IN  UINT64                                Timeout,
-  IN  UINT8                                 SecurityProtocolId,
-  IN  UINT16                                SecurityProtocolSpecificData,
-  IN  UINTN                                 PayloadBufferSize,
-  OUT VOID                                  *PayloadBuffer,
-  OUT UINTN                                 *PayloadTransferSize
+  IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI  *This,
+  IN  UINTN                               DeviceIndex,
+  IN  UINT64                              Timeout,
+  IN  UINT8                               SecurityProtocolId,
+  IN  UINT16                              SecurityProtocolSpecificData,
+  IN  UINTN                               PayloadBufferSize,
+  OUT VOID                                *PayloadBuffer,
+  OUT UINTN                               *PayloadTransferSize
   );
 
 /**
@@ -236,5 +235,3 @@ AhciStorageSecuritySendData (
   IN UINTN                               PayloadBufferSize,
   IN VOID                                *PayloadBuffer
   );
-
-#endif

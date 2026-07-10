@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _UEFI_SHELL_DEBUG1_COMMANDS_LIB_H_
-#define _UEFI_SHELL_DEBUG1_COMMANDS_LIB_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -50,9 +49,9 @@
 #include <Library/DevicePathLib.h>
 #include <Library/PrintLib.h>
 #include <Library/HandleParsingLib.h>
+#include <Library/SafeIntLib.h>
 
-
-extern        EFI_HII_HANDLE                    gShellDebug1HiiHandle;
+extern        EFI_HII_HANDLE  gShellDebug1HiiHandle;
 
 /**
   Function returns a system configuration table that is stored in the
@@ -66,8 +65,8 @@ extern        EFI_HII_HANDLE                    gShellDebug1HiiHandle;
 **/
 EFI_STATUS
 GetSystemConfigurationTable (
-  IN EFI_GUID *TableGuid,
-  IN OUT VOID **Table
+  IN EFI_GUID  *TableGuid,
+  IN OUT VOID  **Table
   );
 
 /**
@@ -240,6 +239,19 @@ ShellCommandRunPci (
   );
 
 /**
+  Function for 'cxl' command.
+
+  @param[in] ImageHandle  Handle to the Image (NULL if Internal).
+  @param[in] SystemTable  Pointer to the System Table (NULL if Internal).
+**/
+SHELL_STATUS
+EFIAPI
+ShellCommandRunCxl (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  );
+
+/**
   Function for 'smbiosview' command.
 
   @param[in] ImageHandle  Handle to the Image (NULL if Internal).
@@ -313,9 +325,9 @@ ShellCommandRunHexEdit (
 **/
 VOID
 EditorClearLine (
-  IN UINTN Row,
-  IN UINTN LastCol,
-  IN UINTN LastRow
+  IN UINTN  Row,
+  IN UINTN  LastCol,
+  IN UINTN  LastRow
   );
 
 /**
@@ -328,7 +340,7 @@ EditorClearLine (
 **/
 BOOLEAN
 IsValidFileName (
-  IN CONST CHAR16 *Name
+  IN CONST CHAR16  *Name
   );
 
 /**
@@ -341,7 +353,7 @@ IsValidFileName (
 **/
 CHAR16 *
 EditGetDefaultFileName (
-  IN CONST CHAR16 *Extension
+  IN CONST CHAR16  *Extension
   );
 
 /**
@@ -368,10 +380,8 @@ EditGetDefaultFileName (
 **/
 EFI_STATUS
 ReadFileIntoBuffer (
-  IN CONST CHAR16 *FileName,
-  OUT VOID        **Buffer,
-  OUT UINTN       *BufferSize OPTIONAL,
-  OUT BOOLEAN     *ReadOnly
+  IN CONST CHAR16  *FileName,
+  OUT VOID         **Buffer,
+  OUT UINTN        *BufferSize OPTIONAL,
+  OUT BOOLEAN      *ReadOnly
   );
-
-#endif

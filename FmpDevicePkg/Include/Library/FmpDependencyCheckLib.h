@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __FMP_DEPENDENCY_CHECK_LIB__
-#define __FMP_DEPENDENCY_CHECK_LIB__
+#pragma once
 
 #include <PiDxe.h>
 #include <Protocol/FirmwareManagement.h>
@@ -36,9 +35,7 @@ EFIAPI
 CheckFmpDependency (
   IN  EFI_GUID                ImageTypeId,
   IN  UINT32                  Version,
-  IN  EFI_FIRMWARE_IMAGE_DEP  *Dependencies,    OPTIONAL
+  IN  EFI_FIRMWARE_IMAGE_DEP  *Dependencies     OPTIONAL,
   IN  UINT32                  DependenciesSize,
   OUT UINT32                  *LastAttemptStatus OPTIONAL
   );
-
-#endif

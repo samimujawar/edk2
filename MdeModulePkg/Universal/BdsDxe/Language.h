@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _LANGUAGE_H_
-#define _LANGUAGE_H_
+#pragma once
 
 /**
   Determine the current language that will be used
@@ -18,7 +17,5 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 VOID
 InitializeLanguage (
-  BOOLEAN LangCodesSettingRequired
+  BOOLEAN  LangCodesSettingRequired
   );
-
-#endif // _LANGUAGE_H_

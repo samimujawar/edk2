@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _CPU_IO2_DXE_H_
-#define _CPU_IO2_DXE_H_
+#pragma once
 
 #include <PiDxe.h>
 
@@ -18,7 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/IoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define MAX_IO_PORT_ADDRESS   0xFFFF
+#define MAX_IO_PORT_ADDRESS  0xFFFF
 
 /**
   Reads memory-mapped registers.
@@ -215,5 +214,3 @@ CpuIoServiceWrite (
   IN UINTN                      Count,
   IN VOID                       *Buffer
   );
-
-#endif

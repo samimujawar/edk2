@@ -8,10 +8,10 @@
 
 **/
 
-#ifndef __FW_CFG_LIB__
-#define __FW_CFG_LIB__
+#pragma once
 
 #include <IndustryStandard/QemuFwCfg.h>
+#include <Library/PlatformInitLib.h>
 
 /**
   Returns a boolean indicating if the firmware configuration interface
@@ -29,7 +29,6 @@ QemuFwCfgIsAvailable (
   VOID
   );
 
-
 /**
   Selects a firmware configuration item for reading.
 
@@ -42,9 +41,8 @@ QemuFwCfgIsAvailable (
 VOID
 EFIAPI
 QemuFwCfgSelectItem (
-  IN FIRMWARE_CONFIG_ITEM   QemuFwCfgItem
+  IN FIRMWARE_CONFIG_ITEM  QemuFwCfgItem
   );
-
 
 /**
   Reads firmware configuration bytes into a buffer
@@ -60,10 +58,9 @@ QemuFwCfgSelectItem (
 VOID
 EFIAPI
 QemuFwCfgReadBytes (
-  IN UINTN                  Size,
-  IN VOID                   *Buffer  OPTIONAL
+  IN UINTN  Size,
+  IN VOID   *Buffer  OPTIONAL
   );
-
 
 /**
   Writes firmware configuration bytes from a buffer
@@ -79,10 +76,9 @@ QemuFwCfgReadBytes (
 VOID
 EFIAPI
 QemuFwCfgWriteBytes (
-  IN UINTN                  Size,
-  IN VOID                   *Buffer
+  IN UINTN  Size,
+  IN VOID   *Buffer
   );
-
 
 /**
   Skip bytes in the firmware configuration item.
@@ -96,9 +92,8 @@ QemuFwCfgWriteBytes (
 VOID
 EFIAPI
 QemuFwCfgSkipBytes (
-  IN UINTN                  Size
+  IN UINTN  Size
   );
-
 
 /**
   Reads a UINT8 firmware configuration value
@@ -112,7 +107,6 @@ QemuFwCfgRead8 (
   VOID
   );
 
-
 /**
   Reads a UINT16 firmware configuration value
 
@@ -124,7 +118,6 @@ EFIAPI
 QemuFwCfgRead16 (
   VOID
   );
-
 
 /**
   Reads a UINT32 firmware configuration value
@@ -138,7 +131,6 @@ QemuFwCfgRead32 (
   VOID
   );
 
-
 /**
   Reads a UINT64 firmware configuration value
 
@@ -150,7 +142,6 @@ EFIAPI
 QemuFwCfgRead64 (
   VOID
   );
-
 
 /**
   Find the configuration item corresponding to the firmware configuration file.
@@ -173,5 +164,21 @@ QemuFwCfgFindFile (
   OUT  UINTN                 *Size
   );
 
-#endif
+/**
+  OVMF reads configuration data from QEMU via fw_cfg.
+  For Td-Guest VMM is out of TCB and the configuration data is untrusted.
+  From the security perpective the configuration data shall be measured
+  before it is consumed.
+  This function reads the fw_cfg items and cached them. In the meanwhile these
+  fw_cfg items are measured as well. This is to avoid changing the order when
+  reading the fw_cfg process, which depends on multiple factors(depex, order in
+  the Firmware volume).
 
+  @retval  RETURN_SUCCESS   - Successfully cache with measurement
+  @retval  Others           - As the error code indicates
+ */
+RETURN_STATUS
+EFIAPI
+QemuFwCfgInitCache (
+  IN OUT EFI_HOB_PLATFORM_INFO  *PlatformInfoHob
+  );

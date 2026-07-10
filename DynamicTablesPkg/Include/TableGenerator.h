@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2017 - 2019, ARM Limited. All rights reserved.
+  Copyright (c) 2017 - 2026, ARM Limited. All rights reserved.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -10,8 +10,7 @@
     - DT     - Device Tree
 **/
 
-#ifndef TABLE_GENERATOR_H_
-#define TABLE_GENERATOR_H_
+#pragma once
 
 /** The TABLE_GENERATOR_ID type describes the Table Generator ID
 
@@ -46,16 +45,34 @@ _______________________________________________________________________________
 
     Standard ACPI Table IDs:
        0 - Reserved
-       1 - RAW
+       1 - RAW, DSDT, SSDT
        2 - FADT
-       3 - DSDT
-       4 - SSDT
-       5 - MADT
-       6 - GTDT
-       7 - DBG2
-       8 - SPCR
-       9 - MCFG
-      10 - PPTT
+       3 - MADT
+       4 - GTDT
+       5 - DBG2
+       6 - SPCR
+       7 - MCFG
+       8 - IORT
+       9 - PPTT
+      10 - SRAT
+      11 - SSDT Serial Port
+      12 - SSDT CMN
+      13 - SSDT Cpu
+      14 - SSDT Pcie
+      15 - SSDT Plic/Aplic
+      16 - PCCT
+      17 - TPM2
+      18 - WSMT
+      19 - HPET
+      20 - SSDT HPET
+      21 - SPMI
+      22 - FACS
+      23 - CEDT
+      24 - SLIT
+      25 - RHCT
+      26 - SSDT DMC
+      27 - HEST
+      28 - EINJ
 
     Standard SMBIOS Table IDs:
        0 - Reserved
@@ -107,7 +124,7 @@ _______________________________________________________________________________
      128 - Table Type126
      129 - Table Type127
 **/
-typedef UINT32  TABLE_GENERATOR_ID;
+typedef UINT32 TABLE_GENERATOR_ID;
 
 /** This enum lists the Table Generator Types.
 */
@@ -127,19 +144,19 @@ typedef enum TableGeneratorNameSpace {
 
 /** A mask for the Table ID bits of TABLE_GENERATOR_ID.
 */
-#define TABLE_ID_MASK                 0xFF
+#define TABLE_ID_MASK  0xFF
 
 /** A mask for the Namespace ID bits of TABLE_GENERATOR_ID.
 */
-#define TABLE_NAMESPACEID_MASK        (BIT31)
+#define TABLE_NAMESPACEID_MASK  (BIT31)
 
 /** A mask for the Table Type bits of TABLE_GENERATOR_ID.
 */
-#define TABLE_TYPE_MASK               (BIT29 | BIT28)
+#define TABLE_TYPE_MASK  (BIT29 | BIT28)
 
 /** Starting bit position for the Table Type bits
 */
-#define TABLE_TYPE_BIT_SHIFT          28
+#define TABLE_TYPE_BIT_SHIFT  28
 
 /** Starting bit position for the Table Namespace ID bit
 */
@@ -194,9 +211,9 @@ typedef enum TableGeneratorNameSpace {
   @return a TableGeneratorId calculated from the inputs.
 **/
 #define CREATE_TABLE_GEN_ID(TableType, TableNameSpaceId, TableId)      \
-          ((((TableType) << TABLE_TYPE_BIT_SHIFT) & TABLE_TYPE_MASK) | \
-           (((TableNameSpaceId) << TABLE_NAMESPACE_ID_BIT_SHIFT) &     \
-             TABLE_NAMESPACEID_MASK) | ((TableId) & TABLE_ID_MASK))
+          (((((TABLE_GENERATOR_ID)TableType) << TABLE_TYPE_BIT_SHIFT) & TABLE_TYPE_MASK) | \
+           ((((TABLE_GENERATOR_ID)TableNameSpaceId) << TABLE_NAMESPACE_ID_BIT_SHIFT) &     \
+             TABLE_NAMESPACEID_MASK) | (((TABLE_GENERATOR_ID)TableId) & TABLE_ID_MASK))
 
 /** Starting bit position for MAJOR revision
 */
@@ -204,11 +221,11 @@ typedef enum TableGeneratorNameSpace {
 
 /** A mask for Major revision.
 */
-#define MAJOR_REVISION_MASK       0xFFFF
+#define MAJOR_REVISION_MASK  0xFFFF
 
 /** A mask for Minor revision.
 */
-#define MINOR_REVISION_MASK       0xFFFF
+#define MINOR_REVISION_MASK  0xFFFF
 
 /** This macro generates a Major.Minor version
     where the Major and Minor fields are 16 bit.
@@ -242,6 +259,3 @@ typedef enum TableGeneratorNameSpace {
   @return the Minor part of the revision.
 **/
 #define GET_MINOR_REVISION(Revision)  ((Revision) & MINOR_REVISION_MASK)
-
-#endif // TABLE_GENERATOR_H_
-

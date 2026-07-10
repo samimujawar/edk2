@@ -1,62 +1,24 @@
 /** @file
   Instance of MM memory check library.
 
-  MM memory check library library implementation. This library consumes MM_ACCESS_PROTOCOL
+  MM memory check library implementation. This library consumes MM_ACCESS_PROTOCOL
   to get MMRAM information. In order to use this library instance, the platform should produce
   all MMRAM range via MM_ACCESS_PROTOCOL, including the range for firmware (like MM Core
   and MM driver) and/or specific dedicated hardware.
 
-  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2015 - 2024, Intel Corporation. All rights reserved.<BR>
   Copyright (c) 2016 - 2021, Arm Limited. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
-#include <PiMm.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-
-EFI_MMRAM_DESCRIPTOR *mMmMemLibInternalMmramRanges;
-UINTN                mMmMemLibInternalMmramCount;
+#include "StandaloneMmMemLibInternal.h"
 
 //
 // Maximum support address used to check input buffer
 //
 EFI_PHYSICAL_ADDRESS  mMmMemLibInternalMaximumSupportAddress = 0;
-
-/**
-  Calculate and save the maximum support address.
-
-**/
-VOID
-MmMemLibInternalCalculateMaximumSupportAddress (
-  VOID
-  );
-
-/**
-  Initialize cached Mmram Ranges from HOB.
-
-  @retval EFI_UNSUPPORTED   The routine is unable to extract MMRAM information.
-  @retval EFI_SUCCESS       MmRanges are populated successfully.
-
-**/
-EFI_STATUS
-MmMemLibInternalPopulateMmramRanges (
-  VOID
-  );
-
-/**
-  Deinitialize cached Mmram Ranges.
-
-**/
-VOID
-MmMemLibInternalFreeMmramRanges (
-  VOID
-  );
 
 /**
   This function check if the buffer is valid per processor architecture and not overlap with MMRAM.
@@ -74,15 +36,14 @@ MmIsBufferOutsideMmValid (
   IN UINT64                Length
   )
 {
-  UINTN  Index;
-
   //
   // Check override.
   // NOTE: (B:0->L:4G) is invalid for IA32, but (B:1->L:4G-1)/(B:4G-1->L:1) is valid.
   //
   if ((Length > mMmMemLibInternalMaximumSupportAddress) ||
       (Buffer > mMmMemLibInternalMaximumSupportAddress) ||
-      ((Length != 0) && (Buffer > (mMmMemLibInternalMaximumSupportAddress - (Length - 1)))) ) {
+      ((Length != 0) && (Buffer > (mMmMemLibInternalMaximumSupportAddress - (Length - 1)))))
+  {
     //
     // Overflow happen
     //
@@ -96,28 +57,7 @@ MmIsBufferOutsideMmValid (
     return FALSE;
   }
 
-  for (Index = 0; Index < mMmMemLibInternalMmramCount; Index ++) {
-    if (((Buffer >= mMmMemLibInternalMmramRanges[Index].CpuStart) &&
-         (Buffer < mMmMemLibInternalMmramRanges[Index].CpuStart + mMmMemLibInternalMmramRanges[Index].PhysicalSize)) ||
-        ((mMmMemLibInternalMmramRanges[Index].CpuStart >= Buffer) &&
-         (mMmMemLibInternalMmramRanges[Index].CpuStart < Buffer + Length))) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "MmIsBufferOutsideMmValid: Overlap: Buffer (0x%lx) - Length (0x%lx), ",
-        Buffer,
-        Length
-        ));
-      DEBUG ((
-        DEBUG_ERROR,
-        "CpuStart (0x%lx) - PhysicalSize (0x%lx)\n",
-        mMmMemLibInternalMmramRanges[Index].CpuStart,
-        mMmMemLibInternalMmramRanges[Index].PhysicalSize
-        ));
-      return FALSE;
-    }
-  }
-
-  return TRUE;
+  return MmMemLibIsValidNonMmramRange (Buffer, Length);
 }
 
 /**
@@ -149,6 +89,7 @@ MmCopyMemToMmram (
     DEBUG ((DEBUG_ERROR, "MmCopyMemToMmram: Security Violation: Source (0x%x), Length (0x%x)\n", SourceBuffer, Length));
     return EFI_SECURITY_VIOLATION;
   }
+
   CopyMem (DestinationBuffer, SourceBuffer, Length);
   return EFI_SUCCESS;
 }
@@ -179,10 +120,15 @@ MmCopyMemFromMmram (
   )
 {
   if (!MmIsBufferOutsideMmValid ((EFI_PHYSICAL_ADDRESS)(UINTN)DestinationBuffer, Length)) {
-    DEBUG ((DEBUG_ERROR, "MmCopyMemFromMmram: Security Violation: Destination (0x%x), Length (0x%x)\n",
-            DestinationBuffer, Length));
+    DEBUG ((
+      DEBUG_ERROR,
+      "MmCopyMemFromMmram: Security Violation: Destination (0x%x), Length (0x%x)\n",
+      DestinationBuffer,
+      Length
+      ));
     return EFI_SECURITY_VIOLATION;
   }
+
   CopyMem (DestinationBuffer, SourceBuffer, Length);
   return EFI_SUCCESS;
 }
@@ -214,14 +160,20 @@ MmCopyMem (
   )
 {
   if (!MmIsBufferOutsideMmValid ((EFI_PHYSICAL_ADDRESS)(UINTN)DestinationBuffer, Length)) {
-    DEBUG ((DEBUG_ERROR, "MmCopyMem: Security Violation: Destination (0x%x), Length (0x%x)\n",
-            DestinationBuffer, Length));
+    DEBUG ((
+      DEBUG_ERROR,
+      "MmCopyMem: Security Violation: Destination (0x%x), Length (0x%x)\n",
+      DestinationBuffer,
+      Length
+      ));
     return EFI_SECURITY_VIOLATION;
   }
+
   if (!MmIsBufferOutsideMmValid ((EFI_PHYSICAL_ADDRESS)(UINTN)SourceBuffer, Length)) {
     DEBUG ((DEBUG_ERROR, "MmCopyMem: Security Violation: Source (0x%x), Length (0x%x)\n", SourceBuffer, Length));
     return EFI_SECURITY_VIOLATION;
   }
+
   CopyMem (DestinationBuffer, SourceBuffer, Length);
   return EFI_SUCCESS;
 }
@@ -254,6 +206,7 @@ MmSetMem (
     DEBUG ((DEBUG_ERROR, "MmSetMem: Security Violation: Source (0x%x), Length (0x%x)\n", Buffer, Length));
     return EFI_SECURITY_VIOLATION;
   }
+
   SetMem (Buffer, Length, Value);
   return EFI_SUCCESS;
 }
@@ -270,23 +223,21 @@ MmSetMem (
 EFI_STATUS
 EFIAPI
 MemLibConstructor (
-  IN EFI_HANDLE             ImageHandle,
-  IN EFI_MM_SYSTEM_TABLE    *MmSystemTable
+  IN EFI_HANDLE           ImageHandle,
+  IN EFI_MM_SYSTEM_TABLE  *MmSystemTable
   )
 {
-  EFI_STATUS Status;
-
   //
   // Calculate and save maximum support address
   //
-  MmMemLibInternalCalculateMaximumSupportAddress ();
+  MmMemLibCalculateMaximumSupportAddress ();
 
   //
-  // Initialize cached Mmram Ranges from HOB.
+  // Initialize valid non-Mmram Ranges from Resource HOB.
   //
-  Status = MmMemLibInternalPopulateMmramRanges ();
+  MmMemLibInitializeValidNonMmramRanges ();
 
-  return Status;
+  return EFI_SUCCESS;
 }
 
 /**
@@ -301,15 +252,13 @@ MemLibConstructor (
 EFI_STATUS
 EFIAPI
 MemLibDestructor (
-  IN EFI_HANDLE             ImageHandle,
-  IN EFI_MM_SYSTEM_TABLE    *MmSystemTable
+  IN EFI_HANDLE           ImageHandle,
+  IN EFI_MM_SYSTEM_TABLE  *MmSystemTable
   )
 {
-
   //
-  // Deinitialize cached Mmram Ranges.
+  // Deinitialize cached non-Mmram Ranges.
   //
-  MmMemLibInternalFreeMmramRanges ();
-
+  MmMemLibFreeValidNonMmramRanges ();
   return EFI_SUCCESS;
 }

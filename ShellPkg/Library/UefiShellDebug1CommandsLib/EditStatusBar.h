@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _LIB_STATUS_BAR_H_
-#define _LIB_STATUS_BAR_H_
+#pragma once
 
 /**
   Initialization function for Status Bar.
@@ -62,7 +61,7 @@ StatusBarRefresh (
 **/
 EFI_STATUS
 StatusBarSetStatusString (
-  IN CHAR16 *Str
+  IN CHAR16  *Str
   );
 
 /**
@@ -70,7 +69,7 @@ StatusBarSetStatusString (
 
   @return The string that is used.
 **/
-CONST CHAR16*
+CONST CHAR16 *
 StatusBarGetString (
   VOID
   );
@@ -79,7 +78,7 @@ StatusBarGetString (
   Function to set the need refresh boolean to TRUE.
 **/
 VOID
-StatusBarSetRefresh(
+StatusBarSetRefresh (
   VOID
   );
 
@@ -89,8 +88,6 @@ StatusBarSetRefresh(
   @retval TRUE    The status bar needs to be refreshed.
 **/
 BOOLEAN
-StatusBarGetRefresh(
+StatusBarGetRefresh (
   VOID
   );
-
-#endif

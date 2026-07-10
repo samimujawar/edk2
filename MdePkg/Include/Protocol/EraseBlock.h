@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __EFI_ERASE_BLOCK_PROTOCOL_H__
-#define __EFI_ERASE_BLOCK_PROTOCOL_H__
+#pragma once
 
 #define EFI_ERASE_BLOCK_PROTOCOL_GUID \
   { \
@@ -19,7 +18,7 @@
 
 typedef struct _EFI_ERASE_BLOCK_PROTOCOL EFI_ERASE_BLOCK_PROTOCOL;
 
-#define EFI_ERASE_BLOCK_PROTOCOL_REVISION ((2<<16) | (60))
+#define EFI_ERASE_BLOCK_PROTOCOL_REVISION  ((2<<16) | (60))
 
 ///
 /// EFI_ERASE_BLOCK_TOKEN
@@ -30,11 +29,11 @@ typedef struct {
   // non-blocking I/O is supported, then non-blocking I/O is performed, and
   // Event will be signaled when the erase request is completed.
   //
-  EFI_EVENT             Event;
+  EFI_EVENT     Event;
   //
   // Defines whether the signaled event encountered an error.
   //
-  EFI_STATUS            TransactionStatus;
+  EFI_STATUS    TransactionStatus;
 } EFI_ERASE_BLOCK_TOKEN;
 
 /**
@@ -66,7 +65,7 @@ typedef struct {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_BLOCK_ERASE) (
+(EFIAPI *EFI_BLOCK_ERASE)(
   IN     EFI_ERASE_BLOCK_PROTOCOL      *This,
   IN     UINT32                        MediaId,
   IN     EFI_LBA                       LBA,
@@ -85,15 +84,13 @@ struct _EFI_ERASE_BLOCK_PROTOCOL {
   // revisions must be backwards compatible. If a future version is not
   // backwards compatible, it is not the same GUID.
   //
-  UINT64                     Revision;
+  UINT64             Revision;
   //
   // Returns the erase length granularity as a number of logical blocks. A
   // value of 1 means the erase granularity is one logical block.
   //
-  UINT32                     EraseLengthGranularity;
-  EFI_BLOCK_ERASE            EraseBlocks;
+  UINT32             EraseLengthGranularity;
+  EFI_BLOCK_ERASE    EraseBlocks;
 };
 
-extern EFI_GUID gEfiEraseBlockProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiEraseBlockProtocolGuid;

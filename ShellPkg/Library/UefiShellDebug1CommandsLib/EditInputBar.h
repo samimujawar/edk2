@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _LIB_INPUT_BAR_H_
-#define _LIB_INPUT_BAR_H_
+#pragma once
 
 /**
   Initialize the input bar.
@@ -16,7 +15,7 @@
 **/
 VOID
 InputBarInit (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TextInEx
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *TextInEx
   );
 
 /**
@@ -37,8 +36,8 @@ InputBarCleanup (
 **/
 EFI_STATUS
 InputBarRefresh (
-  UINTN LastRow,
-  UINTN LastColumn
+  UINTN  LastRow,
+  UINTN  LastColumn
   );
 
 /**
@@ -51,7 +50,7 @@ InputBarRefresh (
 **/
 EFI_STATUS
 InputBarSetPrompt (
-  IN CONST CHAR16 *Str
+  IN CONST CHAR16  *Str
   );
 
 /**
@@ -64,7 +63,7 @@ InputBarSetPrompt (
 **/
 EFI_STATUS
 InputBarSetStringSize (
-  UINTN   Size
+  UINTN  Size
   );
 
 /**
@@ -73,9 +72,7 @@ InputBarSetStringSize (
   @retval NULL                  No input has been received.
   @return The string that was input.
 **/
-CONST CHAR16*
+CONST CHAR16 *
 InputBarGetString (
   VOID
   );
-
-#endif

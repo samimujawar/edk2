@@ -17,13 +17,12 @@
 
 **/
 
-#ifndef _MM_ACCESS_PPI_H_
-#define _MM_ACCESS_PPI_H_
+#pragma once
 
 #define EFI_PEI_MM_ACCESS_PPI_GUID \
   { 0x268f33a9, 0xcccd, 0x48be, { 0x88, 0x17, 0x86, 0x5, 0x3a, 0xc3, 0x2e, 0xd6 }}
 
-typedef struct _EFI_PEI_MM_ACCESS_PPI  EFI_PEI_MM_ACCESS_PPI;
+typedef struct _EFI_PEI_MM_ACCESS_PPI EFI_PEI_MM_ACCESS_PPI;
 
 /**
   Opens the MMRAM area to be accessible by a PEIM.
@@ -142,14 +141,12 @@ EFI_STATUS
 ///  memory controller would publish this PPI.
 ///
 struct _EFI_PEI_MM_ACCESS_PPI {
-  EFI_PEI_MM_OPEN          Open;
-  EFI_PEI_MM_CLOSE         Close;
-  EFI_PEI_MM_LOCK          Lock;
-  EFI_PEI_MM_CAPABILITIES  GetCapabilities;
-  BOOLEAN                  LockState;
-  BOOLEAN                  OpenState;
+  EFI_PEI_MM_OPEN            Open;
+  EFI_PEI_MM_CLOSE           Close;
+  EFI_PEI_MM_LOCK            Lock;
+  EFI_PEI_MM_CAPABILITIES    GetCapabilities;
+  BOOLEAN                    LockState;
+  BOOLEAN                    OpenState;
 };
 
-extern EFI_GUID gEfiPeiMmAccessPpiGuid;
-
-#endif
+extern EFI_GUID  gEfiPeiMmAccessPpiGuid;

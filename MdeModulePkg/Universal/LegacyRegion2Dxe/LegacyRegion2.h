@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __DUMMY_LEGACY_REGION2_H__
-#define __DUMMY_LEGACY_REGION2_H__
+#pragma once
 
 #include <Protocol/LegacyRegion2.h>
 #include <Library/DebugLib.h>
@@ -70,10 +69,10 @@ LegacyRegion2Decode (
 EFI_STATUS
 EFIAPI
 LegacyRegion2Lock (
-  IN  EFI_LEGACY_REGION2_PROTOCOL *This,
-  IN  UINT32                      Start,
-  IN  UINT32                      Length,
-  OUT UINT32                      *Granularity
+  IN  EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                       Start,
+  IN  UINT32                       Length,
+  OUT UINT32                       *Granularity
   );
 
 /**
@@ -104,10 +103,10 @@ LegacyRegion2Lock (
 EFI_STATUS
 EFIAPI
 LegacyRegion2BootLock (
-  IN EFI_LEGACY_REGION2_PROTOCOL          *This,
-  IN  UINT32                              Start,
-  IN  UINT32                              Length,
-  OUT UINT32                              *Granularity
+  IN EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                      Start,
+  IN  UINT32                      Length,
+  OUT UINT32                      *Granularity
   );
 
 /**
@@ -165,5 +164,3 @@ LegacyRegionGetInfo (
   OUT UINT32                        *DescriptorCount,
   OUT EFI_LEGACY_REGION_DESCRIPTOR  **Descriptor
   );
-
-#endif

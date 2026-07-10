@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __SPI_SMM_NOR_FLASH_PROTOCOL_H__
-#define __SPI_SMM_NOR_FLASH_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/SpiNorFlash.h>
 
@@ -22,9 +21,7 @@
     { 0x86, 0x04, 0x87, 0xff, 0x6d, 0x66, 0x2c, 0x9a } }
 
 typedef
-struct _EFI_SPI_NOR_FLASH_PROTOCOL
+  struct _EFI_SPI_NOR_FLASH_PROTOCOL
 EFI_SPI_SMM_NOR_FLASH_PROTOCOL;
 
-extern EFI_GUID gEfiSpiSmmNorFlashProtocolGuid;
-
-#endif // __SPI_SMM_NOR_FLASH_PROTOCOL_H__
+extern EFI_GUID  gEfiSpiSmmNorFlashProtocolGuid;

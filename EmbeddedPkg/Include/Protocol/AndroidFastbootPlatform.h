@@ -6,10 +6,9 @@
 
 **/
 
-#ifndef __ANDROID_FASTBOOT_PLATFORM_H__
-#define __ANDROID_FASTBOOT_PLATFORM_H__
+#pragma once
 
-extern EFI_GUID gAndroidFastbootPlatformProtocolGuid;
+extern EFI_GUID  gAndroidFastbootPlatformProtocolGuid;
 
 /*
   Protocol for platform-specific operations initiated by Android Fastboot.
@@ -58,9 +57,9 @@ VOID
 typedef
 EFI_STATUS
 (*FASTBOOT_PLATFORM_FLASH) (
-  IN CHAR8   *PartitionName,
-  IN UINTN    BufferSize,
-  IN VOID    *Buffer
+  IN CHAR8  *PartitionName,
+  IN UINTN  BufferSize,
+  IN VOID   *Buffer
   );
 
 /*
@@ -74,7 +73,7 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (*FASTBOOT_PLATFORM_ERASE) (
-  IN CHAR8   *PartitionName
+  IN CHAR8  *PartitionName
   );
 
 /*
@@ -98,8 +97,8 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (*FASTBOOT_PLATFORM_GETVAR) (
-  IN  CHAR8   *Name,
-  OUT CHAR8   *Value
+  IN  CHAR8  *Name,
+  OUT CHAR8  *Value
   );
 
 /*
@@ -124,16 +123,14 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (*FASTBOOT_PLATFORM_OEM_COMMAND) (
-  IN  CHAR8   *Command
+  IN  CHAR8  *Command
   );
 
 typedef struct _FASTBOOT_PLATFORM_PROTOCOL {
-  FASTBOOT_PLATFORM_INIT          Init;
-  FASTBOOT_PLATFORM_UN_INIT       UnInit;
-  FASTBOOT_PLATFORM_FLASH         FlashPartition;
-  FASTBOOT_PLATFORM_ERASE         ErasePartition;
-  FASTBOOT_PLATFORM_GETVAR        GetVar;
-  FASTBOOT_PLATFORM_OEM_COMMAND   DoOemCommand;
+  FASTBOOT_PLATFORM_INIT           Init;
+  FASTBOOT_PLATFORM_UN_INIT        UnInit;
+  FASTBOOT_PLATFORM_FLASH          FlashPartition;
+  FASTBOOT_PLATFORM_ERASE          ErasePartition;
+  FASTBOOT_PLATFORM_GETVAR         GetVar;
+  FASTBOOT_PLATFORM_OEM_COMMAND    DoOemCommand;
 } FASTBOOT_PLATFORM_PROTOCOL;
-
-#endif

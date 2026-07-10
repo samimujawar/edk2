@@ -6,8 +6,7 @@
 *
 **/
 
-#ifndef __PREPI_HOBLIST_POINTER_LIB_H__
-#define __PREPI_HOBLIST_POINTER_LIB_H__
+#pragma once
 
 /**
   Returns the pointer to the HOB list.
@@ -32,7 +31,5 @@ PrePeiGetHobList (
 EFI_STATUS
 EFIAPI
 PrePeiSetHobList (
-  IN  VOID      *HobList
+  IN  VOID  *HobList
   );
-
-#endif

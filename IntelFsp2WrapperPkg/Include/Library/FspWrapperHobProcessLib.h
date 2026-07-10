@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __FSP_WRAPPER_HOB_PROCESS_LIB_H__
-#define __FSP_WRAPPER_HOB_PROCESS_LIB_H__
+#pragma once
 
 /**
   Post FSP-M HOB process for Memory Resource Descriptor.
@@ -19,7 +18,7 @@
 EFI_STATUS
 EFIAPI
 PostFspmHobProcess (
-  IN VOID                 *FspHobList
+  IN VOID  *FspHobList
   );
 
 /**
@@ -32,7 +31,18 @@ PostFspmHobProcess (
 EFI_STATUS
 EFIAPI
 PostFspsHobProcess (
-  IN VOID                 *FspHobList
+  IN VOID  *FspHobList
   );
 
-#endif
+/**
+  Post FSP-I HOB process.
+
+  @param[in] FspHobList  Pointer to the HOB data structure produced by FSP.
+
+  @return If platform process the FSP hob list successfully.
+**/
+EFI_STATUS
+EFIAPI
+PostFspiHobProcess (
+  IN VOID  *FspHobList
+  );

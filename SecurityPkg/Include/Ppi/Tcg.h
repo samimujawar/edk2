@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _TCG_PPI_H_
-#define _TCG_PPI_H_
+#pragma once
 
 #include <IndustryStandard/UefiTcgPlatform.h>
 
@@ -57,9 +56,7 @@ EFI_STATUS
 /// The EFI_TCG Protocol abstracts TCG activity.
 ///
 struct _EDKII_TCG_PPI {
-  EDKII_TCG_HASH_LOG_EXTEND_EVENT     HashLogExtendEvent;
+  EDKII_TCG_HASH_LOG_EXTEND_EVENT    HashLogExtendEvent;
 };
 
-extern EFI_GUID gEdkiiTcgPpiGuid;
-
-#endif
+extern EFI_GUID  gEdkiiTcgPpiGuid;

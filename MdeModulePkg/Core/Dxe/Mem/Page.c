@@ -9,43 +9,31 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "DxeMain.h"
 #include "Imem.h"
 #include "HeapGuard.h"
-
-//
-// Entry for tracking the memory regions for each memory type to coalesce similar memory types
-//
-typedef struct {
-  EFI_PHYSICAL_ADDRESS  BaseAddress;
-  EFI_PHYSICAL_ADDRESS  MaximumAddress;
-  UINT64                CurrentNumberOfPages;
-  UINT64                NumberOfPages;
-  UINTN                 InformationIndex;
-  BOOLEAN               Special;
-  BOOLEAN               Runtime;
-} EFI_MEMORY_TYPE_STATISTICS;
+#include <Pi/PiDxeCis.h>
 
 //
 // MemoryMap - The current memory map
 //
-UINTN     mMemoryMapKey = 0;
+UINTN  mMemoryMapKey = 0;
 
-#define MAX_MAP_DEPTH 6
+#define MAX_MAP_DEPTH  6
 
 ///
 /// mMapDepth - depth of new descriptor stack
 ///
-UINTN         mMapDepth = 0;
+UINTN  mMapDepth = 0;
 ///
 /// mMapStack - space to use as temp storage to build new map descriptors
 ///
-MEMORY_MAP    mMapStack[MAX_MAP_DEPTH];
-UINTN         mFreeMapStack = 0;
+MEMORY_MAP  mMapStack[MAX_MAP_DEPTH];
+UINTN       mFreeMapStack = 0;
 ///
 /// This list maintain the free memory map list
 ///
-LIST_ENTRY   mFreeMemoryMapEntryList = INITIALIZE_LIST_HEAD_VARIABLE (mFreeMemoryMapEntryList);
-BOOLEAN      mMemoryTypeInformationInitialized = FALSE;
+LIST_ENTRY  mFreeMemoryMapEntryList           = INITIALIZE_LIST_HEAD_VARIABLE (mFreeMemoryMapEntryList);
+BOOLEAN     mMemoryTypeInformationInitialized = FALSE;
 
-EFI_MEMORY_TYPE_STATISTICS mMemoryTypeStatistics[EfiMaxMemoryType + 1] = {
+EFI_MEMORY_TYPE_STATISTICS  mMemoryTypeStatistics[EfiMaxMemoryType + 1] = {
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, TRUE,  FALSE },  // EfiReservedMemoryType
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, FALSE, FALSE },  // EfiLoaderCode
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, FALSE, FALSE },  // EfiLoaderData
@@ -61,13 +49,14 @@ EFI_MEMORY_TYPE_STATISTICS mMemoryTypeStatistics[EfiMaxMemoryType + 1] = {
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, FALSE, FALSE },  // EfiMemoryMappedIOPortSpace
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, TRUE,  TRUE  },  // EfiPalCode
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, FALSE, FALSE },  // EfiPersistentMemory
+  { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, TRUE,  FALSE },  // EfiUnacceptedMemoryType
   { 0, MAX_ALLOC_ADDRESS, 0, 0, EfiMaxMemoryType, FALSE, FALSE }   // EfiMaxMemoryType
 };
 
-EFI_PHYSICAL_ADDRESS mDefaultMaximumAddress = MAX_ALLOC_ADDRESS;
-EFI_PHYSICAL_ADDRESS mDefaultBaseAddress = MAX_ALLOC_ADDRESS;
+EFI_PHYSICAL_ADDRESS  mDefaultMaximumAddress = MAX_ALLOC_ADDRESS;
+EFI_PHYSICAL_ADDRESS  mDefaultBaseAddress    = MAX_ALLOC_ADDRESS;
 
-EFI_MEMORY_TYPE_INFORMATION gMemoryTypeInformation[EfiMaxMemoryType + 1] = {
+EFI_MEMORY_TYPE_INFORMATION  gMemoryTypeInformation[EfiMaxMemoryType + 1] = {
   { EfiReservedMemoryType,      0 },
   { EfiLoaderCode,              0 },
   { EfiLoaderData,              0 },
@@ -83,6 +72,7 @@ EFI_MEMORY_TYPE_INFORMATION gMemoryTypeInformation[EfiMaxMemoryType + 1] = {
   { EfiMemoryMappedIOPortSpace, 0 },
   { EfiPalCode,                 0 },
   { EfiPersistentMemory,        0 },
+  { EfiGcdMemoryTypeUnaccepted, 0 },
   { EfiMaxMemoryType,           0 }
 };
 //
@@ -90,7 +80,7 @@ EFI_MEMORY_TYPE_INFORMATION gMemoryTypeInformation[EfiMaxMemoryType + 1] = {
 // and ready to load the module in to specified address.or else, the memory is not ready and module will be loaded at a
 //  address assigned by DXE core.
 //
-GLOBAL_REMOVE_IF_UNREFERENCED   BOOLEAN       gLoadFixedAddressCodeMemoryReady = FALSE;
+GLOBAL_REMOVE_IF_UNREFERENCED   BOOLEAN  gLoadFixedAddressCodeMemoryReady = FALSE;
 
 /**
   Enter critical section by gaining lock on gMemoryLock.
@@ -104,8 +94,6 @@ CoreAcquireMemoryLock (
   CoreAcquireLock (&gMemoryLock);
 }
 
-
-
 /**
   Exit critical section by releasing lock on gMemoryLock.
 
@@ -118,9 +106,6 @@ CoreReleaseMemoryLock (
   CoreReleaseLock (&gMemoryLock);
 }
 
-
-
-
 /**
   Internal function.  Removes a descriptor entry.
 
@@ -129,7 +114,7 @@ CoreReleaseMemoryLock (
 **/
 VOID
 RemoveMemoryMapEntry (
-  IN OUT MEMORY_MAP      *Entry
+  IN OUT MEMORY_MAP  *Entry
   )
 {
   RemoveEntryList (&Entry->Link);
@@ -141,6 +126,31 @@ RemoveMemoryMapEntry (
     //
     InsertTailList (&mFreeMemoryMapEntryList, &Entry->Link);
   }
+}
+
+/**
+  Helper function to evaluate if memory regions intersect.
+
+  @param  Start1     The address of the first byte in the first memory region.
+  @param  End1       The address of the last byte in the first memory region.
+  @param  Start2     The address of the first byte in the second memory region.
+  @param  End2       The address of the last byte in the second memory region.
+
+  @return TRUE if the memory regions intersect, FALSE otherwise.
+**/
+static
+BOOLEAN
+MemoryRegionsIntersect (
+  IN EFI_PHYSICAL_ADDRESS  Start1,
+  IN EFI_PHYSICAL_ADDRESS  End1,
+  IN EFI_PHYSICAL_ADDRESS  Start2,
+  IN EFI_PHYSICAL_ADDRESS  End2
+  )
+{
+  ASSERT (Start1 <= End1);
+  ASSERT (Start2 <= End2);
+
+  return ((Start1 <= End2) && (Start2 <= End1));
 }
 
 /**
@@ -157,17 +167,17 @@ RemoveMemoryMapEntry (
 **/
 VOID
 CoreAddRange (
-  IN EFI_MEMORY_TYPE          Type,
-  IN EFI_PHYSICAL_ADDRESS     Start,
-  IN EFI_PHYSICAL_ADDRESS     End,
-  IN UINT64                   Attribute
+  IN EFI_MEMORY_TYPE       Type,
+  IN EFI_PHYSICAL_ADDRESS  Start,
+  IN EFI_PHYSICAL_ADDRESS  End,
+  IN UINT64                Attribute
   )
 {
-  LIST_ENTRY        *Link;
-  MEMORY_MAP        *Entry;
+  LIST_ENTRY  *Link;
+  MEMORY_MAP  *Entry;
 
   ASSERT ((Start & EFI_PAGE_MASK) == 0);
-  ASSERT (End > Start) ;
+  ASSERT (End > Start);
 
   ASSERT_LOCKED (&gMemoryLock);
 
@@ -182,7 +192,7 @@ CoreAddRange (
   // at address 0, then do not zero the page at address 0 because the page is being
   // used for other purposes.
   //
-  if (Type == EfiConventionalMemory && Start == 0 && (End >= EFI_PAGE_SIZE - 1)) {
+  if ((Type == EfiConventionalMemory) && (Start == 0) && (End >= EFI_PAGE_SIZE - 1)) {
     if ((PcdGet8 (PcdNullPointerDetectionPropertyMask) & BIT0) == 0) {
       SetMem ((VOID *)(UINTN)Start, EFI_PAGE_SIZE, 0);
     }
@@ -226,12 +236,9 @@ CoreAddRange (
     }
 
     if (Entry->End + 1 == Start) {
-
       Start = Entry->Start;
       RemoveMemoryMapEntry (Entry);
-
     } else if (Entry->Start == End + 1) {
-
       End = Entry->End;
       RemoveMemoryMapEntry (Entry);
     }
@@ -241,19 +248,19 @@ CoreAddRange (
   // Add descriptor
   //
 
-  mMapStack[mMapDepth].Signature     = MEMORY_MAP_SIGNATURE;
-  mMapStack[mMapDepth].FromPages      = FALSE;
-  mMapStack[mMapDepth].Type          = Type;
-  mMapStack[mMapDepth].Start         = Start;
-  mMapStack[mMapDepth].End           = End;
-  mMapStack[mMapDepth].VirtualStart  = 0;
-  mMapStack[mMapDepth].Attribute     = Attribute;
+  mMapStack[mMapDepth].Signature    = MEMORY_MAP_SIGNATURE;
+  mMapStack[mMapDepth].FromPages    = FALSE;
+  mMapStack[mMapDepth].Type         = Type;
+  mMapStack[mMapDepth].Start        = Start;
+  mMapStack[mMapDepth].End          = End;
+  mMapStack[mMapDepth].VirtualStart = 0;
+  mMapStack[mMapDepth].Attribute    = Attribute;
   InsertTailList (&gMemoryMap, &mMapStack[mMapDepth].Link);
 
   mMapDepth += 1;
   ASSERT (mMapDepth < MAX_MAP_DEPTH);
 
-  return ;
+  return;
 }
 
 /**
@@ -274,9 +281,9 @@ AllocateMemoryMapEntry (
   VOID
   )
 {
-  MEMORY_MAP*            FreeDescriptorEntries;
-  MEMORY_MAP*            Entry;
-  UINTN                  Index;
+  MEMORY_MAP  *FreeDescriptorEntries;
+  MEMORY_MAP  *Entry;
+  UINTN       Index;
 
   if (IsListEmpty (&mFreeMemoryMapEntryList)) {
     //
@@ -292,7 +299,7 @@ AllocateMemoryMapEntry (
       //
       // Enque the free memmory map entries into the list
       //
-      for (Index = 0; Index < DEFAULT_PAGE_ALLOCATION_GRANULARITY / sizeof(MEMORY_MAP); Index++) {
+      for (Index = 0; Index < DEFAULT_PAGE_ALLOCATION_GRANULARITY / sizeof (MEMORY_MAP); Index++) {
         FreeDescriptorEntries[Index].Signature = MEMORY_MAP_SIGNATURE;
         InsertTailList (&mFreeMemoryMapEntryList, &FreeDescriptorEntries[Index].Link);
       }
@@ -300,6 +307,7 @@ AllocateMemoryMapEntry (
       return NULL;
     }
   }
+
   //
   // dequeue the first descriptor from the list
   //
@@ -308,7 +316,6 @@ AllocateMemoryMapEntry (
 
   return Entry;
 }
-
 
 /**
   Internal function.  Moves any memory descriptors that are on the
@@ -320,9 +327,9 @@ CoreFreeMemoryMapStack (
   VOID
   )
 {
-  MEMORY_MAP      *Entry;
-  MEMORY_MAP      *Entry2;
-  LIST_ENTRY      *Link2;
+  MEMORY_MAP  *Entry;
+  MEMORY_MAP  *Entry2;
+  LIST_ENTRY  *Link2;
 
   ASSERT_LOCKED (&gMemoryLock);
 
@@ -330,7 +337,7 @@ CoreFreeMemoryMapStack (
   // If already freeing the map stack, then return
   //
   if (mFreeMapStack != 0) {
-    return ;
+    return;
   }
 
   //
@@ -344,7 +351,12 @@ CoreFreeMemoryMapStack (
     //
     Entry = AllocateMemoryMapEntry ();
 
-    ASSERT (Entry);
+    // If entry allocation failed once, it is unlikely to succeed moving forward
+    // However, we can try since we're in the middle of moving list nodes
+    if (Entry == NULL) {
+      ASSERT (Entry != NULL);
+      continue;
+    }
 
     //
     // Update to proper entry
@@ -352,14 +364,13 @@ CoreFreeMemoryMapStack (
     mMapDepth -= 1;
 
     if (mMapStack[mMapDepth].Link.ForwardLink != NULL) {
-
       //
       // Move this entry to general memory
       //
       RemoveEntryList (&mMapStack[mMapDepth].Link);
       mMapStack[mMapDepth].Link.ForwardLink = NULL;
 
-      CopyMem (Entry , &mMapStack[mMapDepth], sizeof (MEMORY_MAP));
+      CopyMem (Entry, &mMapStack[mMapDepth], sizeof (MEMORY_MAP));
       Entry->FromPages = TRUE;
 
       //
@@ -367,13 +378,12 @@ CoreFreeMemoryMapStack (
       //
       for (Link2 = gMemoryMap.ForwardLink; Link2 != &gMemoryMap; Link2 = Link2->ForwardLink) {
         Entry2 = CR (Link2, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
-        if (Entry2->FromPages && Entry2->Start > Entry->Start) {
+        if (Entry2->FromPages && (Entry2->Start > Entry->Start)) {
           break;
         }
       }
 
       InsertTailList (Link2, &Entry->Link);
-
     } else {
       //
       // This item of mMapStack[mMapDepth] has already been dequeued from gMemoryMap list,
@@ -395,27 +405,27 @@ PromoteMemoryResource (
   VOID
   )
 {
-  LIST_ENTRY                        *Link;
-  EFI_GCD_MAP_ENTRY                 *Entry;
-  BOOLEAN                           Promoted;
-  EFI_PHYSICAL_ADDRESS              StartAddress;
-  EFI_PHYSICAL_ADDRESS              EndAddress;
-  EFI_GCD_MEMORY_SPACE_DESCRIPTOR   Descriptor;
+  LIST_ENTRY                       *Link;
+  EFI_GCD_MAP_ENTRY                *Entry;
+  BOOLEAN                          Promoted;
+  EFI_PHYSICAL_ADDRESS             StartAddress;
+  EFI_PHYSICAL_ADDRESS             EndAddress;
+  EFI_GCD_MEMORY_SPACE_DESCRIPTOR  Descriptor;
 
   DEBUG ((DEBUG_PAGE, "Promote the memory resource\n"));
 
   CoreAcquireGcdMemoryLock ();
 
   Promoted = FALSE;
-  Link = mGcdMemorySpaceMap.ForwardLink;
+  Link     = mGcdMemorySpaceMap.ForwardLink;
   while (Link != &mGcdMemorySpaceMap) {
-
     Entry = CR (Link, EFI_GCD_MAP_ENTRY, Link, EFI_GCD_MAP_SIGNATURE);
 
-    if (Entry->GcdMemoryType == EfiGcdMemoryTypeReserved &&
-        Entry->EndAddress < MAX_ALLOC_ADDRESS &&
-        (Entry->Capabilities & (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED)) ==
-          (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED)) {
+    if ((Entry->GcdMemoryType == EfiGcdMemoryTypeReserved) &&
+        (Entry->EndAddress < MAX_ALLOC_ADDRESS) &&
+        ((Entry->Capabilities & (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED)) ==
+         (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED)))
+    {
       //
       // Update the GCD map
       //
@@ -424,9 +434,10 @@ PromoteMemoryResource (
       } else {
         Entry->GcdMemoryType = EfiGcdMemoryTypeSystemMemory;
       }
+
       Entry->Capabilities |= EFI_MEMORY_TESTED;
-      Entry->ImageHandle  = gDxeCoreImageHandle;
-      Entry->DeviceHandle = NULL;
+      Entry->ImageHandle   = gDxeCoreImageHandle;
+      Entry->DeviceHandle  = NULL;
 
       //
       // Add to allocable system memory resource
@@ -455,19 +466,21 @@ PromoteMemoryResource (
     //
     Promoted = PromoteGuardedFreePages (&StartAddress, &EndAddress);
     if (Promoted) {
-      CoreGetMemorySpaceDescriptor (StartAddress, &Descriptor);
-      CoreAddRange (
-        EfiConventionalMemory,
-        StartAddress,
-        EndAddress,
-        Descriptor.Capabilities & ~(EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED |
-                                    EFI_MEMORY_TESTED | EFI_MEMORY_RUNTIME)
-        );
+      if (!EFI_ERROR (CoreGetMemorySpaceDescriptor (StartAddress, &Descriptor))) {
+        CoreAddRange (
+          EfiConventionalMemory,
+          StartAddress,
+          EndAddress,
+          Descriptor.Capabilities & ~(EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED |
+                                      EFI_MEMORY_TESTED | EFI_MEMORY_RUNTIME)
+          );
+      }
     }
   }
 
   return Promoted;
 }
+
 /**
   This function try to allocate Runtime code & Boot time code memory range. If LMFA enabled, 2 patchable PCD
   PcdLoadFixAddressRuntimeCodePageNumber & PcdLoadFixAddressBootTimeCodePageNumber which are set by tools will record the
@@ -479,58 +492,61 @@ CoreLoadingFixedAddressHook (
   VOID
   )
 {
-   UINT32                     RuntimeCodePageNumber;
-   UINT32                     BootTimeCodePageNumber;
-   EFI_PHYSICAL_ADDRESS       RuntimeCodeBase;
-   EFI_PHYSICAL_ADDRESS       BootTimeCodeBase;
-   EFI_STATUS                 Status;
+  UINT32                RuntimeCodePageNumber;
+  UINT32                BootTimeCodePageNumber;
+  EFI_PHYSICAL_ADDRESS  RuntimeCodeBase;
+  EFI_PHYSICAL_ADDRESS  BootTimeCodeBase;
+  EFI_STATUS            Status;
 
-   //
-   // Make sure these 2 areas are not initialzied.
-   //
-   if (!gLoadFixedAddressCodeMemoryReady) {
-     RuntimeCodePageNumber = PcdGet32(PcdLoadFixAddressRuntimeCodePageNumber);
-     BootTimeCodePageNumber= PcdGet32(PcdLoadFixAddressBootTimeCodePageNumber);
-     RuntimeCodeBase       = (EFI_PHYSICAL_ADDRESS)(gLoadModuleAtFixAddressConfigurationTable.DxeCodeTopAddress - EFI_PAGES_TO_SIZE (RuntimeCodePageNumber));
-     BootTimeCodeBase      = (EFI_PHYSICAL_ADDRESS)(RuntimeCodeBase - EFI_PAGES_TO_SIZE (BootTimeCodePageNumber));
-     //
-     // Try to allocate runtime memory.
-     //
-     Status = CoreAllocatePages (
-                       AllocateAddress,
-                       EfiRuntimeServicesCode,
-                       RuntimeCodePageNumber,
-                       &RuntimeCodeBase
-                       );
-     if (EFI_ERROR(Status)) {
-       //
-       // Runtime memory allocation failed
-       //
-       return;
-     }
-     //
-     // Try to allocate boot memory.
-     //
-     Status = CoreAllocatePages (
-                       AllocateAddress,
-                       EfiBootServicesCode,
-                       BootTimeCodePageNumber,
-                       &BootTimeCodeBase
-                       );
-     if (EFI_ERROR(Status)) {
-       //
-        // boot memory allocation failed. Free Runtime code range and will try the allocation again when
-        // new memory range is installed.
-        //
-        CoreFreePages (
-              RuntimeCodeBase,
-              RuntimeCodePageNumber
-              );
-       return;
-     }
-     gLoadFixedAddressCodeMemoryReady = TRUE;
-   }
-   return;
+  //
+  // Make sure these 2 areas are not initialzied.
+  //
+  if (!gLoadFixedAddressCodeMemoryReady) {
+    RuntimeCodePageNumber  = PcdGet32 (PcdLoadFixAddressRuntimeCodePageNumber);
+    BootTimeCodePageNumber = PcdGet32 (PcdLoadFixAddressBootTimeCodePageNumber);
+    RuntimeCodeBase        = (EFI_PHYSICAL_ADDRESS)(gLoadModuleAtFixAddressConfigurationTable.DxeCodeTopAddress - EFI_PAGES_TO_SIZE (RuntimeCodePageNumber));
+    BootTimeCodeBase       = (EFI_PHYSICAL_ADDRESS)(RuntimeCodeBase - EFI_PAGES_TO_SIZE (BootTimeCodePageNumber));
+    //
+    // Try to allocate runtime memory.
+    //
+    Status = CoreAllocatePages (
+               AllocateAddress,
+               EfiRuntimeServicesCode,
+               RuntimeCodePageNumber,
+               &RuntimeCodeBase
+               );
+    if (EFI_ERROR (Status)) {
+      //
+      // Runtime memory allocation failed
+      //
+      return;
+    }
+
+    //
+    // Try to allocate boot memory.
+    //
+    Status = CoreAllocatePages (
+               AllocateAddress,
+               EfiBootServicesCode,
+               BootTimeCodePageNumber,
+               &BootTimeCodeBase
+               );
+    if (EFI_ERROR (Status)) {
+      //
+      // boot memory allocation failed. Free Runtime code range and will try the allocation again when
+      // new memory range is installed.
+      //
+      CoreFreePages (
+        RuntimeCodeBase,
+        RuntimeCodePageNumber
+        );
+      return;
+    }
+
+    gLoadFixedAddressCodeMemoryReady = TRUE;
+  }
+
+  return;
 }
 
 /**
@@ -556,149 +572,46 @@ CoreAddMemoryDescriptor (
   IN UINT64                Attribute
   )
 {
-  EFI_PHYSICAL_ADDRESS        End;
-  EFI_STATUS                  Status;
-  UINTN                       Index;
-  UINTN                       FreeIndex;
+  EFI_PHYSICAL_ADDRESS  End;
 
   if ((Start & EFI_PAGE_MASK) != 0) {
     return;
   }
 
-  if (Type >= EfiMaxMemoryType && Type < MEMORY_TYPE_OEM_RESERVED_MIN) {
+  if ((Type >= EfiMaxMemoryType) && (Type < MEMORY_TYPE_OEM_RESERVED_MIN)) {
     return;
   }
+
   CoreAcquireMemoryLock ();
   End = Start + LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT) - 1;
   CoreAddRange (Type, Start, End, Attribute);
   CoreFreeMemoryMapStack ();
   CoreReleaseMemoryLock ();
 
-  ApplyMemoryProtectionPolicy (EfiMaxMemoryType, Type, Start,
-    LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT));
+  ApplyMemoryProtectionPolicy (
+    EfiMaxMemoryType,
+    Type,
+    Start,
+    LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT)
+    );
 
   //
   // If Loading Module At Fixed Address feature is enabled. try to allocate memory with Runtime code & Boot time code type
   //
-  if (PcdGet64(PcdLoadModuleAtFixAddressEnable) != 0) {
-    CoreLoadingFixedAddressHook();
+  if (PcdGet64 (PcdLoadModuleAtFixAddressEnable) != 0) {
+    CoreLoadingFixedAddressHook ();
   }
 
-  //
-  // Check to see if the statistics for the different memory types have already been established
-  //
-  if (mMemoryTypeInformationInitialized) {
-    return;
-  }
-
-
-  //
-  // Loop through each memory type in the order specified by the gMemoryTypeInformation[] array
-  //
-  for (Index = 0; gMemoryTypeInformation[Index].Type != EfiMaxMemoryType; Index++) {
-    //
-    // Make sure the memory type in the gMemoryTypeInformation[] array is valid
-    //
-    Type = (EFI_MEMORY_TYPE) (gMemoryTypeInformation[Index].Type);
-    if ((UINT32)Type > EfiMaxMemoryType) {
-      continue;
-    }
-    if (gMemoryTypeInformation[Index].NumberOfPages != 0) {
-      //
-      // Allocate pages for the current memory type from the top of available memory
-      //
-      Status = CoreAllocatePages (
-                 AllocateAnyPages,
-                 Type,
-                 gMemoryTypeInformation[Index].NumberOfPages,
-                 &mMemoryTypeStatistics[Type].BaseAddress
-                 );
-      if (EFI_ERROR (Status)) {
-        //
-        // If an error occurs allocating the pages for the current memory type, then
-        // free all the pages allocates for the previous memory types and return.  This
-        // operation with be retied when/if more memory is added to the system
-        //
-        for (FreeIndex = 0; FreeIndex < Index; FreeIndex++) {
-          //
-          // Make sure the memory type in the gMemoryTypeInformation[] array is valid
-          //
-          Type = (EFI_MEMORY_TYPE) (gMemoryTypeInformation[FreeIndex].Type);
-          if ((UINT32)Type > EfiMaxMemoryType) {
-            continue;
-          }
-
-          if (gMemoryTypeInformation[FreeIndex].NumberOfPages != 0) {
-            CoreFreePages (
-              mMemoryTypeStatistics[Type].BaseAddress,
-              gMemoryTypeInformation[FreeIndex].NumberOfPages
-              );
-            mMemoryTypeStatistics[Type].BaseAddress    = 0;
-            mMemoryTypeStatistics[Type].MaximumAddress = MAX_ALLOC_ADDRESS;
-          }
-        }
-        return;
-      }
-
-      //
-      // Compute the address at the top of the current statistics
-      //
-      mMemoryTypeStatistics[Type].MaximumAddress =
-        mMemoryTypeStatistics[Type].BaseAddress +
-        LShiftU64 (gMemoryTypeInformation[Index].NumberOfPages, EFI_PAGE_SHIFT) - 1;
-
-      //
-      // If the current base address is the lowest address so far, then update the default
-      // maximum address
-      //
-      if (mMemoryTypeStatistics[Type].BaseAddress < mDefaultMaximumAddress) {
-        mDefaultMaximumAddress = mMemoryTypeStatistics[Type].BaseAddress - 1;
-      }
-    }
-  }
-
-  //
-  // There was enough system memory for all the the memory types were allocated.  So,
-  // those memory areas can be freed for future allocations, and all future memory
-  // allocations can occur within their respective bins
-  //
-  for (Index = 0; gMemoryTypeInformation[Index].Type != EfiMaxMemoryType; Index++) {
-    //
-    // Make sure the memory type in the gMemoryTypeInformation[] array is valid
-    //
-    Type = (EFI_MEMORY_TYPE) (gMemoryTypeInformation[Index].Type);
-    if ((UINT32)Type > EfiMaxMemoryType) {
-      continue;
-    }
-    if (gMemoryTypeInformation[Index].NumberOfPages != 0) {
-      CoreFreePages (
-        mMemoryTypeStatistics[Type].BaseAddress,
-        gMemoryTypeInformation[Index].NumberOfPages
-        );
-      mMemoryTypeStatistics[Type].NumberOfPages   = gMemoryTypeInformation[Index].NumberOfPages;
-      gMemoryTypeInformation[Index].NumberOfPages = 0;
-    }
-  }
-
-  //
-  // If the number of pages reserved for a memory type is 0, then all allocations for that type
-  // should be in the default range.
-  //
-  for (Type = (EFI_MEMORY_TYPE) 0; Type < EfiMaxMemoryType; Type++) {
-    for (Index = 0; gMemoryTypeInformation[Index].Type != EfiMaxMemoryType; Index++) {
-      if (Type == (EFI_MEMORY_TYPE)gMemoryTypeInformation[Index].Type) {
-        mMemoryTypeStatistics[Type].InformationIndex = Index;
-      }
-    }
-    mMemoryTypeStatistics[Type].CurrentNumberOfPages = 0;
-    if (mMemoryTypeStatistics[Type].MaximumAddress == MAX_ALLOC_ADDRESS) {
-      mMemoryTypeStatistics[Type].MaximumAddress = mDefaultMaximumAddress;
-    }
-  }
-
-  mMemoryTypeInformationInitialized = TRUE;
+  // Check if we need to allocate the memory bins. This function will immediately return if we have already done so.
+  // Pass FALSE to indicate we don't need to publish the HOB.
+  AllocateMemoryTypeInformationBins (
+    &mMemoryTypeInformationInitialized,
+    gMemoryTypeInformation,
+    mMemoryTypeStatistics,
+    &mDefaultMaximumAddress,
+    FALSE
+    );
 }
-
 
 /**
   Internal function.  Converts a memory range to the specified type or attributes.
@@ -730,26 +643,25 @@ CoreConvertPagesEx (
   IN UINT64           NewAttributes
   )
 {
+  UINT64           NumberOfBytes;
+  UINT64           End;
+  UINT64           RangeEnd;
+  UINT64           Attribute;
+  EFI_MEMORY_TYPE  MemType;
+  LIST_ENTRY       *Link;
+  MEMORY_MAP       *Entry;
 
-  UINT64          NumberOfBytes;
-  UINT64          End;
-  UINT64          RangeEnd;
-  UINT64          Attribute;
-  EFI_MEMORY_TYPE MemType;
-  LIST_ENTRY      *Link;
-  MEMORY_MAP      *Entry;
-
-  Entry = NULL;
+  Entry         = NULL;
   NumberOfBytes = LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT);
-  End = Start + NumberOfBytes - 1;
+  End           = Start + NumberOfBytes - 1;
 
   ASSERT (NumberOfPages);
   ASSERT ((Start & EFI_PAGE_MASK) == 0);
-  ASSERT (End > Start) ;
+  ASSERT (End > Start);
   ASSERT_LOCKED (&gMemoryLock);
-  ASSERT ( (ChangingType == FALSE) || (ChangingAttributes == FALSE) );
+  ASSERT ((ChangingType == FALSE) || (ChangingAttributes == FALSE));
 
-  if (NumberOfPages == 0 || ((Start & EFI_PAGE_MASK) != 0) || (Start >= End)) {
+  if ((NumberOfPages == 0) || ((Start & EFI_PAGE_MASK) != 0) || (Start >= End)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -758,19 +670,18 @@ CoreConvertPagesEx (
   //
 
   while (Start < End) {
-
     //
     // Find the entry that the covers the range
     //
     for (Link = gMemoryMap.ForwardLink; Link != &gMemoryMap; Link = Link->ForwardLink) {
       Entry = CR (Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
 
-      if (Entry->Start <= Start && Entry->End > Start) {
+      if ((Entry->Start <= Start) && (Entry->End > Start)) {
         break;
       }
     }
 
-    if (Link == &gMemoryMap) {
+    if ((Link == &gMemoryMap) || (Entry == NULL)) {
       DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "ConvertPages: failed to find range %lx - %lx\n", Start, End));
       return EFI_NOT_FOUND;
     }
@@ -786,13 +697,17 @@ CoreConvertPagesEx (
         return EFI_NOT_FOUND;
       }
     }
+
     //
     // Convert range to the end, or to the end of the descriptor
     // if that's all we've got
     //
     RangeEnd = End;
+    if (Entry == NULL) {
+      ASSERT (Entry != NULL);
+      return EFI_NOT_FOUND;
+    }
 
-    ASSERT (Entry != NULL);
     if (Entry->End < End) {
       RangeEnd = Entry->End;
     }
@@ -800,6 +715,7 @@ CoreConvertPagesEx (
     if (ChangingType) {
       DEBUG ((DEBUG_PAGE, "ConvertRange: %lx-%lx to type %d\n", Start, RangeEnd, NewType));
     }
+
     if (ChangingAttributes) {
       DEBUG ((DEBUG_PAGE, "ConvertRange: %lx-%lx to attr %lx\n", Start, RangeEnd, NewAttributes));
     }
@@ -808,60 +724,44 @@ CoreConvertPagesEx (
       //
       // Debug code - verify conversion is allowed
       //
-      if (!(NewType == EfiConventionalMemory ? 1 : 0) ^ (Entry->Type == EfiConventionalMemory ? 1 : 0)) {
+      if (!((NewType == EfiConventionalMemory) ? 1 : 0) ^ ((Entry->Type == EfiConventionalMemory) ? 1 : 0)) {
         DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "ConvertPages: Incompatible memory types, "));
         if (Entry->Type == EfiConventionalMemory) {
           DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "the pages to free have been freed\n"));
         } else {
           DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "the pages to allocate have been allocated\n"));
         }
+
         return EFI_NOT_FOUND;
       }
 
-      //
-      // Update counters for the number of pages allocated to each memory type
-      //
-      if ((UINT32)Entry->Type < EfiMaxMemoryType) {
-        if ((Start >= mMemoryTypeStatistics[Entry->Type].BaseAddress && Start <= mMemoryTypeStatistics[Entry->Type].MaximumAddress) ||
-            (Start >= mDefaultBaseAddress && Start <= mDefaultMaximumAddress)                                                          ) {
-          if (NumberOfPages > mMemoryTypeStatistics[Entry->Type].CurrentNumberOfPages) {
-            mMemoryTypeStatistics[Entry->Type].CurrentNumberOfPages = 0;
-          } else {
-            mMemoryTypeStatistics[Entry->Type].CurrentNumberOfPages -= NumberOfPages;
-          }
-        }
-      }
-
-      if ((UINT32)NewType < EfiMaxMemoryType) {
-        if ((Start >= mMemoryTypeStatistics[NewType].BaseAddress && Start <= mMemoryTypeStatistics[NewType].MaximumAddress) ||
-            (Start >= mDefaultBaseAddress && Start <= mDefaultMaximumAddress)                                                  ) {
-          mMemoryTypeStatistics[NewType].CurrentNumberOfPages += NumberOfPages;
-          if (mMemoryTypeStatistics[NewType].CurrentNumberOfPages > gMemoryTypeInformation[mMemoryTypeStatistics[NewType].InformationIndex].NumberOfPages) {
-            gMemoryTypeInformation[mMemoryTypeStatistics[NewType].InformationIndex].NumberOfPages = (UINT32)mMemoryTypeStatistics[NewType].CurrentNumberOfPages;
-          }
-        }
-      }
+      UpdateMemoryStatistics (
+        Entry->Type,
+        NewType,
+        Start,
+        (UINTN)NumberOfPages,
+        &mMemoryTypeInformationInitialized,
+        mMemoryTypeStatistics,
+        gMemoryTypeInformation,
+        mDefaultBaseAddress,
+        mDefaultMaximumAddress
+        );
     }
 
     //
     // Pull range out of descriptor
     //
     if (Entry->Start == Start) {
-
       //
       // Clip start
       //
       Entry->Start = RangeEnd + 1;
-
     } else if (Entry->End == RangeEnd) {
-
       //
       // Clip end
       //
       Entry->End = Start - 1;
-
     } else {
-
       //
       // Pull it out of the center, clip current
       //
@@ -870,7 +770,7 @@ CoreConvertPagesEx (
       // Add a new one
       //
       mMapStack[mMapDepth].Signature = MEMORY_MAP_SIGNATURE;
-      mMapStack[mMapDepth].FromPages  = FALSE;
+      mMapStack[mMapDepth].FromPages = FALSE;
       mMapStack[mMapDepth].Type      = Entry->Type;
       mMapStack[mMapDepth].Start     = RangeEnd+1;
       mMapStack[mMapDepth].End       = Entry->End;
@@ -896,10 +796,10 @@ CoreConvertPagesEx (
     //
     if (ChangingType) {
       Attribute = Entry->Attribute;
-      MemType = NewType;
+      MemType   = NewType;
     } else {
       Attribute = NewAttributes;
-      MemType = Entry->Type;
+      MemType   = Entry->Type;
     }
 
     //
@@ -916,7 +816,8 @@ CoreConvertPagesEx (
     //
     if (!IsHeapGuardEnabled (GUARD_HEAP_TYPE_FREED) ||
         !ChangingType ||
-        MemType != EfiConventionalMemory) {
+        (MemType != EfiConventionalMemory))
+    {
       CoreAddRange (MemType, Start, RangeEnd, Attribute);
     }
 
@@ -928,10 +829,10 @@ CoreConvertPagesEx (
       //
       if (Start == 0) {
         if (RangeEnd > EFI_PAGE_SIZE) {
-          DEBUG_CLEAR_MEMORY ((VOID *)(UINTN) EFI_PAGE_SIZE, (UINTN) (RangeEnd - EFI_PAGE_SIZE + 1));
+          DEBUG_CLEAR_MEMORY ((VOID *)(UINTN)EFI_PAGE_SIZE, (UINTN)(RangeEnd - EFI_PAGE_SIZE + 1));
         }
       } else {
-        DEBUG_CLEAR_MEMORY ((VOID *)(UINTN) Start, (UINTN) (RangeEnd - Start + 1));
+        DEBUG_CLEAR_MEMORY ((VOID *)(UINTN)Start, (UINTN)(RangeEnd - Start + 1));
       }
     }
 
@@ -952,7 +853,6 @@ CoreConvertPagesEx (
 
   return EFI_SUCCESS;
 }
-
 
 /**
   Internal function.  Converts a memory range to the specified type.
@@ -977,9 +877,8 @@ CoreConvertPages (
   IN EFI_MEMORY_TYPE  NewType
   )
 {
-  return CoreConvertPagesEx(Start, NumberOfPages, TRUE, NewType, FALSE, 0);
+  return CoreConvertPagesEx (Start, NumberOfPages, TRUE, NewType, FALSE, 0);
 }
-
 
 /**
   Internal function.  Converts a memory range to use new attributes.
@@ -1002,11 +901,10 @@ CoreUpdateMemoryAttributes (
   //
   // Update the attributes to the new value
   //
-  CoreConvertPagesEx(Start, NumberOfPages, FALSE, (EFI_MEMORY_TYPE)0, TRUE, NewAttributes);
+  CoreConvertPagesEx (Start, NumberOfPages, FALSE, (EFI_MEMORY_TYPE)0, TRUE, NewAttributes);
 
   CoreReleaseMemoryLock ();
 }
-
 
 /**
   Internal function. Finds a consecutive free page range below
@@ -1033,20 +931,21 @@ CoreFindFreePagesI (
   IN BOOLEAN          NeedGuard
   )
 {
-  UINT64          NumberOfBytes;
-  UINT64          Target;
-  UINT64          DescStart;
-  UINT64          DescEnd;
-  UINT64          DescNumberOfBytes;
-  LIST_ENTRY      *Link;
-  MEMORY_MAP      *Entry;
+  UINT64      NumberOfBytes;
+  UINT64      Target;
+  UINT64      DescStart;
+  UINT64      DescEnd;
+  UINT64      DescNumberOfBytes;
+  LIST_ENTRY  *Link;
+  MEMORY_MAP  *Entry;
+  UINT64      ProposedStart;
+  UINT64      ProposedSize;
 
-  if ((MaxAddress < EFI_PAGE_MASK) ||(NumberOfPages == 0)) {
+  if ((MaxAddress < EFI_PAGE_MASK) || (NumberOfPages == 0)) {
     return 0;
   }
 
   if ((MaxAddress & EFI_PAGE_MASK) != EFI_PAGE_MASK) {
-
     //
     // If MaxAddress is not aligned to the end of a page
     //
@@ -1068,7 +967,7 @@ CoreFindFreePagesI (
   }
 
   NumberOfBytes = LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT);
-  Target = 0;
+  Target        = 0;
 
   for (Link = gMemoryMap.ForwardLink; Link != &gMemoryMap; Link = Link->ForwardLink) {
     Entry = CR (Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
@@ -1080,8 +979,15 @@ CoreFindFreePagesI (
       continue;
     }
 
+    //
+    // Don't allocate out of Special-Purpose memory.
+    //
+    if ((Entry->Attribute & EFI_MEMORY_SP) != 0) {
+      continue;
+    }
+
     DescStart = Entry->Start;
-    DescEnd = Entry->End;
+    DescEnd   = Entry->End;
 
     //
     // If desc is past max allowed address or below min allowed address, skip it
@@ -1097,7 +1003,7 @@ CoreFindFreePagesI (
       DescEnd = MaxAddress;
     }
 
-    DescEnd = ((DescEnd + 1) & (~(Alignment - 1))) - 1;
+    DescEnd = ((DescEnd + 1) & (~((UINT64)Alignment - 1))) - 1;
 
     // Skip if DescEnd is less than DescStart after alignment clipping
     if (DescEnd < DescStart) {
@@ -1123,12 +1029,17 @@ CoreFindFreePagesI (
       //
       if (DescEnd > Target) {
         if (NeedGuard) {
-          DescEnd = AdjustMemoryS (
-                      DescEnd + 1 - DescNumberOfBytes,
-                      DescNumberOfBytes,
-                      NumberOfBytes
-                      );
-          if (DescEnd == 0) {
+          ProposedStart = DescEnd + 1 - DescNumberOfBytes;
+          ProposedSize  = NumberOfBytes;
+          DescEnd       = AdjustMemoryS (
+                            &ProposedStart,
+                            DescNumberOfBytes,
+                            &ProposedSize
+                            );
+
+          // Check if there was not enough space in the descriptor for the allocation after adjusting for the guard
+          // or if the adjusted range is outside of the bin we are searching within
+          if ((DescEnd == 0) || (ProposedStart < MinAddress) || (ProposedStart + ProposedSize - 1 > MaxAddress)) {
             continue;
           }
         }
@@ -1153,7 +1064,6 @@ CoreFindFreePagesI (
   return Target;
 }
 
-
 /**
   Internal function.  Finds a consecutive free page range below
   the requested address
@@ -1170,19 +1080,19 @@ CoreFindFreePagesI (
 **/
 UINT64
 FindFreePages (
-    IN UINT64           MaxAddress,
-    IN UINT64           NoPages,
-    IN EFI_MEMORY_TYPE  NewType,
-    IN UINTN            Alignment,
-    IN BOOLEAN          NeedGuard
-    )
+  IN UINT64           MaxAddress,
+  IN UINT64           NoPages,
+  IN EFI_MEMORY_TYPE  NewType,
+  IN UINTN            Alignment,
+  IN BOOLEAN          NeedGuard
+  )
 {
-  UINT64   Start;
+  UINT64  Start;
 
   //
   // Attempt to find free pages in the preferred bin based on the requested memory type
   //
-  if ((UINT32)NewType < EfiMaxMemoryType && MaxAddress >= mMemoryTypeStatistics[NewType].MaximumAddress) {
+  if (((UINT32)NewType < EfiMaxMemoryType) && (MaxAddress >= mMemoryTypeStatistics[NewType].MaximumAddress)) {
     Start = CoreFindFreePagesI (
               mMemoryTypeStatistics[NewType].MaximumAddress,
               mMemoryTypeStatistics[NewType].BaseAddress,
@@ -1200,12 +1110,19 @@ FindFreePages (
   // Attempt to find free pages in the default allocation bin
   //
   if (MaxAddress >= mDefaultMaximumAddress) {
-    Start = CoreFindFreePagesI (mDefaultMaximumAddress, 0, NoPages, NewType,
-                                Alignment, NeedGuard);
+    Start = CoreFindFreePagesI (
+              mDefaultMaximumAddress,
+              0,
+              NoPages,
+              NewType,
+              Alignment,
+              NeedGuard
+              );
     if (Start != 0) {
       if (Start < mDefaultBaseAddress) {
-        mDefaultBaseAddress = Start;
+        mDefaultBaseAddress = NeedGuard ? Start - EFI_PAGE_SIZE : Start;
       }
+
       return Start;
     }
   }
@@ -1216,8 +1133,14 @@ FindFreePages (
   // address range.  If this allocation fails, then there are not enough
   // resources anywhere to satisfy the request.
   //
-  Start = CoreFindFreePagesI (MaxAddress, 0, NoPages, NewType, Alignment,
-                              NeedGuard);
+  Start = CoreFindFreePagesI (
+            MaxAddress,
+            0,
+            NoPages,
+            NewType,
+            Alignment,
+            NeedGuard
+            );
   if (Start != 0) {
     return Start;
   }
@@ -1234,7 +1157,6 @@ FindFreePages (
   //
   return FindFreePages (MaxAddress, NoPages, NewType, Alignment, NeedGuard);
 }
-
 
 /**
   Allocates pages from the memory map.
@@ -1258,11 +1180,11 @@ FindFreePages (
 EFI_STATUS
 EFIAPI
 CoreInternalAllocatePages (
-  IN EFI_ALLOCATE_TYPE      Type,
-  IN EFI_MEMORY_TYPE        MemoryType,
-  IN UINTN                  NumberOfPages,
+  IN EFI_ALLOCATE_TYPE         Type,
+  IN EFI_MEMORY_TYPE           MemoryType,
+  IN UINTN                     NumberOfPages,
   IN OUT EFI_PHYSICAL_ADDRESS  *Memory,
-  IN BOOLEAN                NeedGuard
+  IN BOOLEAN                   NeedGuard
   )
 {
   EFI_STATUS       Status;
@@ -1277,8 +1199,9 @@ CoreInternalAllocatePages (
     return EFI_INVALID_PARAMETER;
   }
 
-  if ((MemoryType >= EfiMaxMemoryType && MemoryType < MEMORY_TYPE_OEM_RESERVED_MIN) ||
-       (MemoryType == EfiConventionalMemory) || (MemoryType == EfiPersistentMemory)) {
+  if (((MemoryType >= EfiMaxMemoryType) && (MemoryType < MEMORY_TYPE_OEM_RESERVED_MIN)) ||
+      (MemoryType == EfiConventionalMemory) || (MemoryType == EfiPersistentMemory) || (MemoryType == EfiUnacceptedMemoryType))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -1288,12 +1211,23 @@ CoreInternalAllocatePages (
 
   Alignment = DEFAULT_PAGE_ALLOCATION_GRANULARITY;
 
-  if  (MemoryType == EfiACPIReclaimMemory   ||
-       MemoryType == EfiACPIMemoryNVS       ||
-       MemoryType == EfiRuntimeServicesCode ||
-       MemoryType == EfiRuntimeServicesData) {
-
+  if ((MemoryType == EfiReservedMemoryType) ||
+      (MemoryType == EfiACPIMemoryNVS) ||
+      (MemoryType == EfiRuntimeServicesCode) ||
+      (MemoryType == EfiRuntimeServicesData))
+  {
     Alignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
+  }
+
+  //
+  // The heap guard system does not support non-EFI_PAGE_SIZE alignments.
+  // Architectures that require larger RUNTIME_PAGE_ALLOCATION_GRANULARITY
+  // will have the runtime memory regions unguarded. OSes do not
+  // map guard pages anyway, so this is a minimal loss. Not guarding prevents
+  // alignment mismatches
+  //
+  if (Alignment != EFI_PAGE_SIZE) {
+    NeedGuard = FALSE;
   }
 
   if (Type == AllocateAddress) {
@@ -1326,16 +1260,24 @@ CoreInternalAllocatePages (
   // return EFI_NOT_FOUND.
   //
   if (Type == AllocateAddress) {
-    if ((NumberOfPages == 0) ||
-        (NumberOfPages > RShiftU64 (MaxAddress, EFI_PAGE_SHIFT))) {
+    // Page 0 is not allowed to be allocated as it is reserved for null pointer detection
+    if (Start == 0) {
       return EFI_NOT_FOUND;
     }
+
+    if ((NumberOfPages == 0) ||
+        (NumberOfPages > RShiftU64 (MaxAddress, EFI_PAGE_SHIFT)))
+    {
+      return EFI_NOT_FOUND;
+    }
+
     NumberOfBytes = LShiftU64 (NumberOfPages, EFI_PAGE_SHIFT);
-    End = Start + NumberOfBytes - 1;
+    End           = Start + NumberOfBytes - 1;
 
     if ((Start >= End) ||
         (Start > MaxAddress) ||
-        (End > MaxAddress)) {
+        (End > MaxAddress))
+    {
       return EFI_NOT_FOUND;
     }
 
@@ -1347,20 +1289,26 @@ CoreInternalAllocatePages (
     // fragmented.
     //
 
-    for (CheckType = (EFI_MEMORY_TYPE) 0; CheckType < EfiMaxMemoryType; CheckType++) {
-      if (MemoryType != CheckType &&
+    for (CheckType = (EFI_MEMORY_TYPE)0; CheckType < EfiMaxMemoryType; CheckType++) {
+      if ((MemoryType != CheckType) &&
           mMemoryTypeStatistics[CheckType].Special &&
-          mMemoryTypeStatistics[CheckType].NumberOfPages > 0) {
-        if (Start >= mMemoryTypeStatistics[CheckType].BaseAddress &&
-            Start <= mMemoryTypeStatistics[CheckType].MaximumAddress) {
+          (mMemoryTypeStatistics[CheckType].NumberOfPages > 0))
+      {
+        if ((Start >= mMemoryTypeStatistics[CheckType].BaseAddress) &&
+            (Start <= mMemoryTypeStatistics[CheckType].MaximumAddress))
+        {
           return EFI_NOT_FOUND;
         }
-        if (End >= mMemoryTypeStatistics[CheckType].BaseAddress &&
-            End <= mMemoryTypeStatistics[CheckType].MaximumAddress) {
+
+        if ((End >= mMemoryTypeStatistics[CheckType].BaseAddress) &&
+            (End <= mMemoryTypeStatistics[CheckType].MaximumAddress))
+        {
           return EFI_NOT_FOUND;
         }
-        if (Start < mMemoryTypeStatistics[CheckType].BaseAddress &&
-            End   > mMemoryTypeStatistics[CheckType].MaximumAddress) {
+
+        if ((Start < mMemoryTypeStatistics[CheckType].BaseAddress) &&
+            (End   > mMemoryTypeStatistics[CheckType].MaximumAddress))
+        {
           return EFI_NOT_FOUND;
         }
       }
@@ -1377,8 +1325,13 @@ CoreInternalAllocatePages (
   // If not a specific address, then find an address to allocate
   //
   if (Type != AllocateAddress) {
-    Start = FindFreePages (MaxAddress, NumberOfPages, MemoryType, Alignment,
-                           NeedGuard);
+    Start = FindFreePages (
+              MaxAddress,
+              NumberOfPages,
+              MemoryType,
+              Alignment,
+              NeedGuard
+              );
     if (Start == 0) {
       Status = EFI_OUT_OF_RESOURCES;
       goto Done;
@@ -1389,9 +1342,23 @@ CoreInternalAllocatePages (
   // Convert pages from FreeMemory to the requested type
   //
   if (NeedGuard) {
-    Status = CoreConvertPagesWithGuard(Start, NumberOfPages, MemoryType);
+    Status = CoreConvertPagesWithGuard (Start, NumberOfPages, MemoryType);
   } else {
-    Status = CoreConvertPages(Start, NumberOfPages, MemoryType);
+    Status = CoreConvertPages (Start, NumberOfPages, MemoryType);
+  }
+
+  if (EFI_ERROR (Status)) {
+    //
+    // If requested memory region is unavailable it may be untested memory
+    // Attempt to promote memory resources, then re-attempt the allocation
+    //
+    if (PromoteMemoryResource ()) {
+      if (NeedGuard) {
+        Status = CoreConvertPagesWithGuard (Start, NumberOfPages, MemoryType);
+      } else {
+        Status = CoreConvertPages (Start, NumberOfPages, MemoryType);
+      }
+    }
   }
 
 Done:
@@ -1401,6 +1368,7 @@ Done:
     if (NeedGuard) {
       SetGuardForMemory (Start, NumberOfPages);
     }
+
     *Memory = Start;
   }
 
@@ -1438,21 +1406,31 @@ CoreAllocatePages (
   BOOLEAN     NeedGuard;
 
   NeedGuard = IsPageTypeToGuard (MemoryType, Type) && !mOnGuarding;
-  Status = CoreInternalAllocatePages (Type, MemoryType, NumberOfPages, Memory,
-                                      NeedGuard);
+  Status    = CoreInternalAllocatePages (
+                Type,
+                MemoryType,
+                NumberOfPages,
+                Memory,
+                NeedGuard
+                );
   if (!EFI_ERROR (Status)) {
     CoreUpdateProfile (
-      (EFI_PHYSICAL_ADDRESS) (UINTN) RETURN_ADDRESS (0),
+      (EFI_PHYSICAL_ADDRESS)(UINTN)RETURN_ADDRESS (0),
       MemoryProfileActionAllocatePages,
       MemoryType,
       EFI_PAGES_TO_SIZE (NumberOfPages),
-      (VOID *) (UINTN) *Memory,
+      (VOID *)(UINTN)*Memory,
       NULL
       );
     InstallMemoryAttributesTableOnMemoryAllocation (MemoryType);
-    ApplyMemoryProtectionPolicy (EfiConventionalMemory, MemoryType, *Memory,
-      EFI_PAGES_TO_SIZE (NumberOfPages));
+    ApplyMemoryProtectionPolicy (
+      EfiConventionalMemory,
+      MemoryType,
+      *Memory,
+      EFI_PAGES_TO_SIZE (NumberOfPages)
+      );
   }
+
   return Status;
 }
 
@@ -1471,16 +1449,16 @@ CoreAllocatePages (
 EFI_STATUS
 EFIAPI
 CoreInternalFreePages (
-  IN EFI_PHYSICAL_ADDRESS   Memory,
-  IN UINTN                  NumberOfPages,
-  OUT EFI_MEMORY_TYPE       *MemoryType OPTIONAL
+  IN EFI_PHYSICAL_ADDRESS  Memory,
+  IN UINTN                 NumberOfPages,
+  OUT EFI_MEMORY_TYPE      *MemoryType OPTIONAL
   )
 {
-  EFI_STATUS      Status;
-  LIST_ENTRY      *Link;
-  MEMORY_MAP      *Entry;
-  UINTN           Alignment;
-  BOOLEAN         IsGuarded;
+  EFI_STATUS  Status;
+  LIST_ENTRY  *Link;
+  MEMORY_MAP  *Entry;
+  UINTN       Alignment;
+  BOOLEAN     IsGuarded;
 
   //
   // Free the range
@@ -1491,28 +1469,33 @@ CoreInternalFreePages (
   // Find the entry that the covers the range
   //
   IsGuarded = FALSE;
-  Entry = NULL;
+  Entry     = NULL;
   for (Link = gMemoryMap.ForwardLink; Link != &gMemoryMap; Link = Link->ForwardLink) {
-    Entry = CR(Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
-    if (Entry->Start <= Memory && Entry->End > Memory) {
-        break;
+    Entry = CR (Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
+    if ((Entry->Start <= Memory) && (Entry->End > Memory)) {
+      break;
     }
   }
+
   if (Link == &gMemoryMap) {
+    Status = EFI_NOT_FOUND;
+    goto Done;
+  }
+
+  if (Entry == NULL) {
+    ASSERT (Entry != NULL);
     Status = EFI_NOT_FOUND;
     goto Done;
   }
 
   Alignment = DEFAULT_PAGE_ALLOCATION_GRANULARITY;
 
-  ASSERT (Entry != NULL);
-  if  (Entry->Type == EfiACPIReclaimMemory   ||
-       Entry->Type == EfiACPIMemoryNVS       ||
-       Entry->Type == EfiRuntimeServicesCode ||
-       Entry->Type == EfiRuntimeServicesData) {
-
+  if ((Entry->Type == EfiReservedMemoryType) ||
+      (Entry->Type == EfiACPIMemoryNVS) ||
+      (Entry->Type == EfiRuntimeServicesCode) ||
+      (Entry->Type == EfiRuntimeServicesData))
+  {
     Alignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
-
   }
 
   if ((Memory & (Alignment - 1)) != 0) {
@@ -1530,8 +1513,11 @@ CoreInternalFreePages (
   IsGuarded = IsPageTypeToGuard (Entry->Type, AllocateAnyPages) &&
               IsMemoryGuarded (Memory);
   if (IsGuarded) {
-    Status = CoreConvertPagesWithGuard (Memory, NumberOfPages,
-                                        EfiConventionalMemory);
+    Status = CoreConvertPagesWithGuard (
+               Memory,
+               NumberOfPages,
+               EfiConventionalMemory
+               );
   } else {
     Status = CoreConvertPages (Memory, NumberOfPages, EfiConventionalMemory);
   }
@@ -1559,24 +1545,63 @@ CoreFreePages (
   IN UINTN                 NumberOfPages
   )
 {
-  EFI_STATUS        Status;
-  EFI_MEMORY_TYPE   MemoryType;
+  EFI_STATUS       Status;
+  EFI_MEMORY_TYPE  MemoryType;
+  UINT64           Attributes;
+
+  // check if this memory is returned to the core as RW at a minimum. If the memory attribute protocol is not installed,
+  // then we assume that the memory is RW by default and continue to free it.
+  if (gMemoryAttributeProtocol != NULL) {
+    Status = gMemoryAttributeProtocol->GetMemoryAttributes (
+                                         gMemoryAttributeProtocol,
+                                         Memory,
+                                         EFI_PAGES_TO_SIZE (NumberOfPages),
+                                         &Attributes
+                                         );
+
+    // if we failed to get the attributes, or if the memory is read-only or read-protected,
+    // then we leak the memory and return success. This is done because the UEFI spec does not specify whether pages
+    // should be freed with any specific permission attributes. As such, there exist bootloaders in the wild that will
+    // free memory that is marked RO, which can crash the core if DebugClearMemory is enabled or can be passed out to a
+    // driver in the next AllocatePages() call, which can cause a crash later on. It is deemed lower risk to leak the
+    // memory than to attempt to fix up the attributes as that requires syncing the GCD and the page table.
+    if ((Status == EFI_NO_MAPPING) ||
+        (!EFI_ERROR (Status) && ((Attributes & EFI_MEMORY_RO) || (Attributes & EFI_MEMORY_RP))))
+    {
+      DEBUG ((
+        DEBUG_WARN,
+        "%a: Memory %llx for %llx Pages failed to get attributes with status %r or it is read-only or read-protected. "
+        "Attributes: %llx. Leaking memory!\n",
+        __func__,
+        Memory,
+        NumberOfPages,
+        Status,
+        Attributes
+        ));
+      return EFI_SUCCESS;
+    }
+  }
 
   Status = CoreInternalFreePages (Memory, NumberOfPages, &MemoryType);
   if (!EFI_ERROR (Status)) {
     GuardFreedPagesChecked (Memory, NumberOfPages);
     CoreUpdateProfile (
-      (EFI_PHYSICAL_ADDRESS) (UINTN) RETURN_ADDRESS (0),
+      (EFI_PHYSICAL_ADDRESS)(UINTN)RETURN_ADDRESS (0),
       MemoryProfileActionFreePages,
       MemoryType,
       EFI_PAGES_TO_SIZE (NumberOfPages),
-      (VOID *) (UINTN) Memory,
+      (VOID *)(UINTN)Memory,
       NULL
       );
     InstallMemoryAttributesTableOnMemoryAllocation (MemoryType);
-    ApplyMemoryProtectionPolicy (MemoryType, EfiConventionalMemory, Memory,
-      EFI_PAGES_TO_SIZE (NumberOfPages));
+    ApplyMemoryProtectionPolicy (
+      MemoryType,
+      EfiConventionalMemory,
+      Memory,
+      EFI_PAGES_TO_SIZE (NumberOfPages)
+      );
   }
+
   return Status;
 }
 
@@ -1604,7 +1629,7 @@ MergeMemoryMapDescriptor (
   //
   // Traverse the array of descriptors in MemoryMap
   //
-  for (; MemoryMap != MemoryMapDescriptor; MemoryMap = NEXT_MEMORY_DESCRIPTOR (MemoryMap, DescriptorSize)) {
+  for ( ; MemoryMap != MemoryMapDescriptor; MemoryMap = NEXT_MEMORY_DESCRIPTOR (MemoryMap, DescriptorSize)) {
     //
     // Check to see if the Type fields are identical.
     //
@@ -1662,6 +1687,126 @@ MergeMemoryMapDescriptor (
 }
 
 /**
+  Sets the memory type for an EFI memory descriptor and updates its attributes.
+
+  This function sets the Type field of the provided EFI_MEMORY_DESCRIPTOR and
+  then updates the memory map entry attributes based on the memory type statistics.
+
+  @param  MemoryMap  Pointer to the EFI_MEMORY_DESCRIPTOR to update
+  @param  Type       The memory type to set
+
+**/
+static
+VOID
+SetEfiMemoryDescriptorType (
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN EFI_MEMORY_TYPE        Type
+  )
+{
+  if (MemoryMap == NULL) {
+    ASSERT (MemoryMap != NULL);
+    return;
+  }
+
+  MemoryMap->Type = Type;
+  if (MemoryMap->Type >= EfiMaxMemoryType) {
+    return;
+  }
+
+  if (mMemoryTypeStatistics[MemoryMap->Type].Runtime) {
+    MemoryMap->Attribute |= EFI_MEMORY_RUNTIME;
+  } else {
+    MemoryMap->Attribute &= ~EFI_MEMORY_RUNTIME;
+  }
+}
+
+/**
+  Helper function to perform additional validation on the memory map. This routine
+  verifies memory map entries do not cross special memory-type bin boundaries.
+
+  It is intended for debugging and validation purposes only and should not be used
+  in production paths.
+
+  @param  MemoryMap        Pointer to the buffer containing the current memory map.
+  @param  MemoryMapSize    Size, in bytes, of the memory map buffer.
+  @param  DescriptorSize  Size, in bytes, of an EFI_MEMORY_DESCRIPTOR.
+**/
+static
+VOID
+CoreMemoryMapSanityCheck (
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  CONST IN UINTN            MemoryMapSize,
+  CONST IN UINTN            DescriptorSize
+  )
+{
+  EFI_MEMORY_DESCRIPTOR  *CurrentMemoryMap;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  UINT64                 EntryStart;
+  UINT64                 EntryEnd;
+  EFI_MEMORY_TYPE        Type;
+
+  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMap + MemoryMapSize);
+
+  CurrentMemoryMap = MemoryMap;
+  while (CurrentMemoryMap < MemoryMapEnd) {
+    // Verify that any memory map entry that overlaps with a special memory type
+    // bin must be completely contained within the bin and have the same type as
+    // the bin.
+    EntryStart = CurrentMemoryMap->PhysicalStart;
+    EntryEnd   = EntryStart + LShiftU64 (CurrentMemoryMap->NumberOfPages, EFI_PAGE_SHIFT) - 1;
+    for (Type = (EFI_MEMORY_TYPE)0; Type < EfiMaxMemoryType; Type++) {
+      // Check if this memory map entry overlaps with a special memory type bin.
+      if (mMemoryTypeStatistics[Type].Special &&
+          (mMemoryTypeStatistics[Type].NumberOfPages > 0) &&
+          MemoryRegionsIntersect (
+            EntryStart,
+            EntryEnd,
+            mMemoryTypeStatistics[Type].BaseAddress,
+            mMemoryTypeStatistics[Type].MaximumAddress
+            )
+          )
+      {
+        // Verify that it is completely contained within the bin.
+        if ((EntryStart < mMemoryTypeStatistics[Type].BaseAddress) ||
+            (EntryEnd > mMemoryTypeStatistics[Type].MaximumAddress))
+        {
+          DEBUG ((
+            DEBUG_ERROR,
+            "%a: Memory Map entry (Type %d, Start 0x%lx, End 0x%lx) does not fit within special memory type bin (Type %d, Start 0x%lx, End 0x%lx).\n",
+            __func__,
+            CurrentMemoryMap->Type,
+            EntryStart,
+            EntryEnd,
+            Type,
+            mMemoryTypeStatistics[Type].BaseAddress,
+            mMemoryTypeStatistics[Type].MaximumAddress
+            ));
+
+          ASSERT (FALSE);
+        }
+
+        // It is contained within the bin, the type must match the bin type.
+        if (CurrentMemoryMap->Type != (UINT32)Type) {
+          DEBUG ((
+            DEBUG_ERROR,
+            "%a: Memory Map entry type does not match special memory type bin. Bin Type %d, Type %d, Start 0x%lx, End 0x%lx\n",
+            __func__,
+            Type,
+            CurrentMemoryMap->Type,
+            EntryStart,
+            EntryEnd
+            ));
+
+          ASSERT (FALSE);
+        }
+      }
+    }
+
+    CurrentMemoryMap = NEXT_MEMORY_DESCRIPTOR (CurrentMemoryMap, DescriptorSize);
+  }
+}
+
+/**
   This function returns a copy of the current memory map. The map is an array of
   memory descriptors, each of which describes a contiguous block of memory.
 
@@ -1701,17 +1846,22 @@ CoreGetMemoryMap (
   OUT UINT32                    *DescriptorVersion
   )
 {
-  EFI_STATUS                        Status;
-  UINTN                             Size;
-  UINTN                             BufferSize;
-  UINTN                             NumberOfEntries;
-  LIST_ENTRY                        *Link;
-  MEMORY_MAP                        *Entry;
-  EFI_GCD_MAP_ENTRY                 *GcdMapEntry;
-  EFI_GCD_MAP_ENTRY                 MergeGcdMapEntry;
-  EFI_MEMORY_TYPE                   Type;
-  EFI_MEMORY_DESCRIPTOR             *MemoryMapStart;
-  EFI_MEMORY_DESCRIPTOR             *MemoryMapEnd;
+  EFI_STATUS             Status;
+  UINTN                  Size;
+  UINTN                  BufferSize;
+  UINTN                  NumberOfEntries;
+  LIST_ENTRY             *Link;
+  MEMORY_MAP             *Entry;
+  EFI_GCD_MAP_ENTRY      *GcdMapEntry;
+  EFI_GCD_MAP_ENTRY      MergeGcdMapEntry;
+  EFI_MEMORY_TYPE        Type;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapStart;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  UINT64                 BinStart;
+  UINT64                 BinEnd;
+  UINT64                 EntryStart;
+  UINT64                 EntryEnd;
+  BOOLEAN                Modified;
 
   //
   // Make sure the parameters are valid
@@ -1731,9 +1881,11 @@ CoreGetMemoryMap (
     GcdMapEntry = CR (Link, EFI_GCD_MAP_ENTRY, Link, EFI_GCD_MAP_SIGNATURE);
     if ((GcdMapEntry->GcdMemoryType == EfiGcdMemoryTypePersistent) ||
         (GcdMapEntry->GcdMemoryType == EfiGcdMemoryTypeReserved) ||
+        (GcdMapEntry->GcdMemoryType == EfiGcdMemoryTypeUnaccepted) ||
         ((GcdMapEntry->GcdMemoryType == EfiGcdMemoryTypeMemoryMappedIo) &&
-        ((GcdMapEntry->Attributes & EFI_MEMORY_RUNTIME) == EFI_MEMORY_RUNTIME))) {
-      NumberOfEntries ++;
+         ((GcdMapEntry->Attributes & EFI_MEMORY_RUNTIME) == EFI_MEMORY_RUNTIME)))
+    {
+      NumberOfEntries++;
     }
   }
 
@@ -1744,7 +1896,7 @@ CoreGetMemoryMap (
   // prevent people from having pointer math bugs in their code.
   // now you have to use *DescriptorSize to make things work.
   //
-  Size += sizeof(UINT64) - (Size % sizeof (UINT64));
+  Size += sizeof (UINT64) - (Size % sizeof (UINT64));
 
   if (DescriptorSize != NULL) {
     *DescriptorSize = Size;
@@ -1764,6 +1916,19 @@ CoreGetMemoryMap (
     BufferSize += Size;
   }
 
+  //
+  // Add extra entries for each non-zero sized special memory type bin that may
+  // be split. Worst case is that a memory entry overlaps entire bin and
+  // requires an extra entry below the bin and an extra entry above the bin.
+  //
+  for (Type = (EFI_MEMORY_TYPE)0; Type < EfiMaxMemoryType; Type++) {
+    if (mMemoryTypeStatistics[Type].Special &&
+        (mMemoryTypeStatistics[Type].NumberOfPages > 0))
+    {
+      BufferSize += 2 * Size;
+    }
+  }
+
   if (*MemoryMapSize < BufferSize) {
     Status = EFI_BUFFER_TOO_SMALL;
     goto Done;
@@ -1779,48 +1944,198 @@ CoreGetMemoryMap (
   //
   ZeroMem (MemoryMap, BufferSize);
   MemoryMapStart = MemoryMap;
+  MemoryMapEnd   = MemoryMapStart;
   for (Link = gMemoryMap.ForwardLink; Link != &gMemoryMap; Link = Link->ForwardLink) {
     Entry = CR (Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
     ASSERT (Entry->VirtualStart == 0);
+    MemoryMapEnd->PhysicalStart = Entry->Start;
+    MemoryMapEnd->VirtualStart  = 0;
+    MemoryMapEnd->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(Entry->End - Entry->Start + 1));
+    MemoryMapEnd->Attribute     = Entry->Attribute;
+    SetEfiMemoryDescriptorType (MemoryMapEnd, Entry->Type);
+    MemoryMapEnd = MergeMemoryMapDescriptor (MemoryMapStart, MemoryMapEnd, Size);
+    if ((UINTN)((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+      Status = EFI_BUFFER_TOO_SMALL;
+      goto Done;
+    }
+  }
 
+  //
+  // Loop through all memory bins and split memory entries of type
+  // EfiConventionalMemory if the memory map entry overlaps the beginning or end
+  // of a memory bin. Convert memory map entries of type EfiConventionalMemory
+  // that are completely contained within a memory bin to the memory bin type.
+  //
+  for (Type = (EFI_MEMORY_TYPE)0; Type < EfiMaxMemoryType; Type++) {
     //
-    // Convert internal map into an EFI_MEMORY_DESCRIPTOR
+    // If memory bin is empty or not special, then no split or conversion is required
     //
-    MemoryMap->Type           = Entry->Type;
-    MemoryMap->PhysicalStart  = Entry->Start;
-    MemoryMap->VirtualStart   = Entry->VirtualStart;
-    MemoryMap->NumberOfPages  = RShiftU64 (Entry->End - Entry->Start + 1, EFI_PAGE_SHIFT);
-    //
-    // If the memory type is EfiConventionalMemory, then determine if the range is part of a
-    // memory type bin and needs to be converted to the same memory type as the rest of the
-    // memory type bin in order to minimize EFI Memory Map changes across reboots.  This
-    // improves the chances for a successful S4 resume in the presence of minor page allocation
-    // differences across reboots.
-    //
-    if (MemoryMap->Type == EfiConventionalMemory) {
-      for (Type = (EFI_MEMORY_TYPE) 0; Type < EfiMaxMemoryType; Type++) {
-        if (mMemoryTypeStatistics[Type].Special                        &&
-            mMemoryTypeStatistics[Type].NumberOfPages > 0              &&
-            Entry->Start >= mMemoryTypeStatistics[Type].BaseAddress    &&
-            Entry->End   <= mMemoryTypeStatistics[Type].MaximumAddress) {
-          MemoryMap->Type = Type;
+    if (mMemoryTypeStatistics[Type].NumberOfPages == 0) {
+      continue;
+    }
+
+    if (!mMemoryTypeStatistics[Type].Special) {
+      continue;
+    }
+
+    BinStart = mMemoryTypeStatistics[Type].BaseAddress;
+    BinEnd   = mMemoryTypeStatistics[Type].MaximumAddress;
+
+    Modified = TRUE;
+    while (Modified) {
+      BufferSize = ((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMapStart);
+      MergeMemoryMap (MemoryMapStart, &BufferSize, Size);
+      MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMapStart + BufferSize);
+
+      Modified = FALSE;
+      for (MemoryMap = MemoryMapStart; MemoryMap < MemoryMapEnd; MemoryMap = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size)) {
+        //
+        // If the memory map entry is not EfiConventionalMemory, then no split or conversion is required
+        //
+        if (MemoryMap->Type != EfiConventionalMemory) {
+          continue;
+        }
+
+        EntryStart = MemoryMap->PhysicalStart;
+        EntryEnd   = EntryStart + EFI_PAGES_TO_SIZE ((UINTN)MemoryMap->NumberOfPages) - 1;
+
+        //
+        // If the memory map entry does not overlap the memory bin, then no
+        // split or conversion is required
+        //
+        if ((EntryEnd < BinStart) || (EntryStart > BinEnd)) {
+          continue;
+        }
+
+        //
+        // If the memory map entry is completely contained within the memory
+        // bin, then no split is needed and only the type should be converted.
+        //
+        if ((EntryStart >= BinStart) && (EntryEnd <= BinEnd)) {
+          SetEfiMemoryDescriptorType (MemoryMap, Type);
+          //
+          // Memory map was modified. Restart processing from the beginning.
+          //
+          Modified = TRUE;
+          break;
+        }
+
+        //
+        // If the memory map entry starts below the memory bin start, then split
+        // at the memory bin start.
+        //
+        if (EntryStart < BinStart) {
+          //
+          // Shrink original entry to end at the beginning of the bin and
+          // keep the original EfiConventionalMemory type and PhysicalAddress
+          //
+          MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(BinStart - EntryStart));
+
+          //
+          // Insert a new entry of type memory bin type for the part after the memory bin start
+          // Copy the current memory map entry contents into the inserted entry
+          //
+          CopyMem (
+            NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size),
+            MemoryMap,
+            ((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMap)
+            );
+          MemoryMap    = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size);
+          MemoryMapEnd = NEXT_MEMORY_DESCRIPTOR (MemoryMapEnd, Size);
+          if ((UINTN)((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+            //
+            // Unexpected condition since max expected size for worst case splits was
+            // computed and returned.
+            //
+            Status = EFI_BUFFER_TOO_SMALL;
+            goto Done;
+          }
+
+          MemoryMap->PhysicalStart = BinStart;
+          MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(EntryEnd - BinStart + 1));
+          SetEfiMemoryDescriptorType (MemoryMap, Type);
+
+          if (EntryEnd > BinEnd) {
+            //
+            // Shrink new entry to only cover the memory bin
+            //
+            MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(BinEnd - BinStart + 1));
+
+            //
+            // The new entry extends beyond the memory bin end.
+            // Create a new entry of type EfiConventionalMemory.
+            //
+            CopyMem (
+              NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size),
+              MemoryMap,
+              ((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMap)
+              );
+            MemoryMap    = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size);
+            MemoryMapEnd = NEXT_MEMORY_DESCRIPTOR (MemoryMapEnd, Size);
+            if ((UINTN)((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+              //
+              // Unexpected condition since max expected size for worst case splits was
+              // computed and returned.
+              //
+              Status = EFI_BUFFER_TOO_SMALL;
+              goto Done;
+            }
+
+            MemoryMap->PhysicalStart = BinEnd + 1;
+            MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(EntryEnd - BinEnd));
+            SetEfiMemoryDescriptorType (MemoryMap, EfiConventionalMemory);
+          }
+
+          //
+          // Memory map was modified. Restart processing from the beginning
+          //
+          Modified = TRUE;
+          break;
+        }
+
+        //
+        // If the memory map entry ends above the memory bin end, then split at the memory bin end
+        //
+        if (EntryEnd > BinEnd) {
+          //
+          // Shrink the original entry for part before the memory bin end
+          //
+          MemoryMap->PhysicalStart = EntryStart;
+          MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(BinEnd - EntryStart + 1));
+          SetEfiMemoryDescriptorType (MemoryMap, Type);
+
+          //
+          // Create new entry for the part before the memory bin end
+          // EntryStart is guaranteed to be >= BinStart here, so the entire
+          // entry can be converted to the memory bin type
+          //
+          CopyMem (
+            NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size),
+            MemoryMap,
+            ((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMap)
+            );
+          MemoryMap    = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size);
+          MemoryMapEnd = NEXT_MEMORY_DESCRIPTOR (MemoryMapEnd, Size);
+          if ((UINTN)((UINT8 *)MemoryMapEnd - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+            Status = EFI_BUFFER_TOO_SMALL;
+            goto Done;
+          }
+
+          MemoryMap->PhysicalStart = BinEnd + 1;
+          MemoryMap->NumberOfPages = EFI_SIZE_TO_PAGES ((UINTN)(EntryEnd - BinEnd));
+          SetEfiMemoryDescriptorType (MemoryMap, EfiConventionalMemory);
+
+          //
+          // Memory map was modified, so restart processing from the beginning
+          //
+          Modified = TRUE;
+          break;
         }
       }
     }
-    MemoryMap->Attribute = Entry->Attribute;
-    if (MemoryMap->Type < EfiMaxMemoryType) {
-      if (mMemoryTypeStatistics[MemoryMap->Type].Runtime) {
-        MemoryMap->Attribute |= EFI_MEMORY_RUNTIME;
-      }
-    }
-
-    //
-    // Check to see if the new Memory Map Descriptor can be merged with an
-    // existing descriptor if they are adjacent and have the same attributes
-    //
-    MemoryMap = MergeMemoryMapDescriptor (MemoryMapStart, MemoryMap, Size);
   }
 
+  MemoryMap = MemoryMapEnd;
 
   ZeroMem (&MergeGcdMapEntry, sizeof (MergeGcdMapEntry));
   GcdMapEntry = NULL;
@@ -1834,15 +2149,17 @@ CoreGetMemoryMap (
       if ((MergeGcdMapEntry.Capabilities == GcdMapEntry->Capabilities) &&
           (MergeGcdMapEntry.Attributes == GcdMapEntry->Attributes) &&
           (MergeGcdMapEntry.GcdMemoryType == GcdMapEntry->GcdMemoryType) &&
-          (MergeGcdMapEntry.GcdIoType == GcdMapEntry->GcdIoType)) {
-        MergeGcdMapEntry.EndAddress  = GcdMapEntry->EndAddress;
+          (MergeGcdMapEntry.GcdIoType == GcdMapEntry->GcdIoType))
+      {
+        MergeGcdMapEntry.EndAddress = GcdMapEntry->EndAddress;
         continue;
       }
     }
 
     if ((MergeGcdMapEntry.GcdMemoryType == EfiGcdMemoryTypeReserved) ||
         ((MergeGcdMapEntry.GcdMemoryType == EfiGcdMemoryTypeMemoryMappedIo) &&
-        ((MergeGcdMapEntry.Attributes & EFI_MEMORY_RUNTIME) == EFI_MEMORY_RUNTIME))) {
+         ((MergeGcdMapEntry.Attributes & EFI_MEMORY_RUNTIME) == EFI_MEMORY_RUNTIME)))
+    {
       //
       // Page Align GCD range is required. When it is converted to EFI_MEMORY_DESCRIPTOR,
       // it will be recorded as page PhysicalStart and NumberOfPages.
@@ -1857,7 +2174,7 @@ CoreGetMemoryMap (
       MemoryMap->VirtualStart  = 0;
       MemoryMap->NumberOfPages = RShiftU64 ((MergeGcdMapEntry.EndAddress - MergeGcdMapEntry.BaseAddress + 1), EFI_PAGE_SHIFT);
       MemoryMap->Attribute     = (MergeGcdMapEntry.Attributes & ~EFI_MEMORY_PORT_IO) |
-                                (MergeGcdMapEntry.Capabilities & (EFI_CACHE_ATTRIBUTE_MASK | EFI_MEMORY_ATTRIBUTE_MASK));
+                                 (MergeGcdMapEntry.Capabilities & (EFI_CACHE_ATTRIBUTE_MASK | EFI_MEMORY_ATTRIBUTE_MASK));
 
       if (MergeGcdMapEntry.GcdMemoryType == EfiGcdMemoryTypeReserved) {
         MemoryMap->Type = EfiReservedMemoryType;
@@ -1874,6 +2191,14 @@ CoreGetMemoryMap (
       // existing descriptor if they are adjacent and have the same attributes
       //
       MemoryMap = MergeMemoryMapDescriptor (MemoryMapStart, MemoryMap, Size);
+      if ((UINTN)((UINT8 *)MemoryMap - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+        //
+        // Unexpected condition since max expected size for worst case splits was
+        // computed and returned.
+        //
+        Status = EFI_BUFFER_TOO_SMALL;
+        goto Done;
+      }
     }
 
     if (MergeGcdMapEntry.GcdMemoryType == EfiGcdMemoryTypePersistent) {
@@ -1891,21 +2216,65 @@ CoreGetMemoryMap (
       MemoryMap->VirtualStart  = 0;
       MemoryMap->NumberOfPages = RShiftU64 ((MergeGcdMapEntry.EndAddress - MergeGcdMapEntry.BaseAddress + 1), EFI_PAGE_SHIFT);
       MemoryMap->Attribute     = MergeGcdMapEntry.Attributes | EFI_MEMORY_NV |
-                                (MergeGcdMapEntry.Capabilities & (EFI_CACHE_ATTRIBUTE_MASK | EFI_MEMORY_ATTRIBUTE_MASK));
-      MemoryMap->Type          = EfiPersistentMemory;
+                                 (MergeGcdMapEntry.Capabilities & (EFI_CACHE_ATTRIBUTE_MASK | EFI_MEMORY_ATTRIBUTE_MASK));
+      MemoryMap->Type = EfiPersistentMemory;
 
       //
       // Check to see if the new Memory Map Descriptor can be merged with an
       // existing descriptor if they are adjacent and have the same attributes
       //
       MemoryMap = MergeMemoryMapDescriptor (MemoryMapStart, MemoryMap, Size);
+      if ((UINTN)((UINT8 *)MemoryMap - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+        //
+        // Unexpected condition since max expected size for worst case splits was
+        // computed and returned.
+        //
+        Status = EFI_BUFFER_TOO_SMALL;
+        goto Done;
+      }
     }
+
+    if (MergeGcdMapEntry.GcdMemoryType == EfiGcdMemoryTypeUnaccepted) {
+      //
+      // Page Align GCD range is required. When it is converted to EFI_MEMORY_DESCRIPTOR,
+      // it will be recorded as page PhysicalStart and NumberOfPages.
+      //
+      ASSERT ((MergeGcdMapEntry.BaseAddress & EFI_PAGE_MASK) == 0);
+      ASSERT (((MergeGcdMapEntry.EndAddress - MergeGcdMapEntry.BaseAddress + 1) & EFI_PAGE_MASK) == 0);
+
+      //
+      // Create EFI_MEMORY_DESCRIPTOR for every Unaccepted GCD entries
+      //
+      MemoryMap->PhysicalStart = MergeGcdMapEntry.BaseAddress;
+      MemoryMap->VirtualStart  = 0;
+      MemoryMap->NumberOfPages = RShiftU64 ((MergeGcdMapEntry.EndAddress - MergeGcdMapEntry.BaseAddress + 1), EFI_PAGE_SHIFT);
+      MemoryMap->Attribute     = MergeGcdMapEntry.Attributes |
+                                 (MergeGcdMapEntry.Capabilities & (EFI_MEMORY_RP | EFI_MEMORY_WP | EFI_MEMORY_XP | EFI_MEMORY_RO |
+                                                                   EFI_MEMORY_UC | EFI_MEMORY_UCE | EFI_MEMORY_WC | EFI_MEMORY_WT | EFI_MEMORY_WB));
+      MemoryMap->Type = EfiUnacceptedMemoryType;
+
+      //
+      // Check to see if the new Memory Map Descriptor can be merged with an
+      // existing descriptor if they are adjacent and have the same attributes
+      //
+      MemoryMap = MergeMemoryMapDescriptor (MemoryMapStart, MemoryMap, Size);
+      if ((UINTN)((UINT8 *)MemoryMap - (UINT8 *)MemoryMapStart) > *MemoryMapSize) {
+        //
+        // Unexpected condition since max expected size for worst case splits was
+        // computed and returned.
+        //
+        Status = EFI_BUFFER_TOO_SMALL;
+        goto Done;
+      }
+    }
+
     if (Link == &mGcdMemorySpaceMap) {
       //
       // break loop when arrive at head.
       //
       break;
     }
+
     if (GcdMapEntry != NULL) {
       //
       // Copy new GCD map entry for the following GCD range merge
@@ -1931,13 +2300,18 @@ CoreGetMemoryMap (
   //       all supported OSs.
   //
   MemoryMapEnd = MemoryMap;
-  MemoryMap = MemoryMapStart;
+  MemoryMap    = MemoryMapStart;
   while (MemoryMap < MemoryMapEnd) {
     MemoryMap->Attribute &= ~(UINT64)EFI_MEMORY_ACCESS_MASK;
-    MemoryMap = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size);
+    MemoryMap             = NEXT_MEMORY_DESCRIPTOR (MemoryMap, Size);
   }
+
   MergeMemoryMap (MemoryMapStart, &BufferSize, Size);
   MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMapStart + BufferSize);
+
+  DEBUG_CODE_BEGIN ();
+  CoreMemoryMapSanityCheck (MemoryMapStart, BufferSize, *DescriptorSize);
+  DEBUG_CODE_END ();
 
   Status = EFI_SUCCESS;
 
@@ -1957,11 +2331,10 @@ Done:
 
   DEBUG_CODE (
     DumpGuardedMemoryBitmap ();
-  );
+    );
 
   return Status;
 }
-
 
 /**
   Internal function.  Used by the pool functions to allocate pages
@@ -1977,19 +2350,24 @@ Done:
 **/
 VOID *
 CoreAllocatePoolPages (
-  IN EFI_MEMORY_TYPE    PoolType,
-  IN UINTN              NumberOfPages,
-  IN UINTN              Alignment,
-  IN BOOLEAN            NeedGuard
+  IN EFI_MEMORY_TYPE  PoolType,
+  IN UINTN            NumberOfPages,
+  IN UINTN            Alignment,
+  IN BOOLEAN          NeedGuard
   )
 {
-  UINT64            Start;
+  UINT64  Start;
 
   //
   // Find the pages to convert
   //
-  Start = FindFreePages (MAX_ALLOC_ADDRESS, NumberOfPages, PoolType, Alignment,
-                         NeedGuard);
+  Start = FindFreePages (
+            MAX_ALLOC_ADDRESS,
+            NumberOfPages,
+            PoolType,
+            Alignment,
+            NeedGuard
+            );
 
   //
   // Convert it to boot services data
@@ -2004,9 +2382,8 @@ CoreAllocatePoolPages (
     }
   }
 
-  return (VOID *)(UINTN) Start;
+  return (VOID *)(UINTN)Start;
 }
-
 
 /**
   Internal function.  Frees pool pages allocated via AllocatePoolPages ()
@@ -2017,14 +2394,12 @@ CoreAllocatePoolPages (
 **/
 VOID
 CoreFreePoolPages (
-  IN EFI_PHYSICAL_ADDRESS   Memory,
-  IN UINTN                  NumberOfPages
+  IN EFI_PHYSICAL_ADDRESS  Memory,
+  IN UINTN                 NumberOfPages
   )
 {
   CoreConvertPages (Memory, NumberOfPages, EfiConventionalMemory);
 }
-
-
 
 /**
   Make sure the memory map is following all the construction rules,
@@ -2039,19 +2414,18 @@ CoreFreePoolPages (
 **/
 EFI_STATUS
 CoreTerminateMemoryMap (
-  IN UINTN          MapKey
+  IN UINTN  MapKey
   )
 {
-  EFI_STATUS        Status;
-  LIST_ENTRY        *Link;
-  MEMORY_MAP        *Entry;
+  EFI_STATUS  Status;
+  LIST_ENTRY  *Link;
+  MEMORY_MAP  *Entry;
 
   Status = EFI_SUCCESS;
 
   CoreAcquireMemoryLock ();
 
   if (MapKey == mMemoryMapKey) {
-
     //
     // Make sure the memory map is following all the construction rules
     // This is the last chance we will be able to display any messages on
@@ -2059,18 +2433,19 @@ CoreTerminateMemoryMap (
     //
 
     for (Link = gMemoryMap.ForwardLink; Link != &gMemoryMap; Link = Link->ForwardLink) {
-      Entry = CR(Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
+      Entry = CR (Link, MEMORY_MAP, Link, MEMORY_MAP_SIGNATURE);
       if (Entry->Type < EfiMaxMemoryType) {
         if (mMemoryTypeStatistics[Entry->Type].Runtime) {
           ASSERT (Entry->Type != EfiACPIReclaimMemory);
           ASSERT (Entry->Type != EfiACPIMemoryNVS);
-          if ((Entry->Start & (RUNTIME_PAGE_ALLOCATION_GRANULARITY - 1)) != 0) {
-            DEBUG((DEBUG_ERROR | DEBUG_PAGE, "ExitBootServices: A RUNTIME memory entry is not on a proper alignment.\n"));
+          if (!IS_ALIGNED (Entry->Start, RUNTIME_PAGE_ALLOCATION_GRANULARITY)) {
+            DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "ExitBootServices: A RUNTIME memory entry is not on a proper alignment.\n"));
             Status =  EFI_INVALID_PARAMETER;
             goto Done;
           }
-          if (((Entry->End + 1) & (RUNTIME_PAGE_ALLOCATION_GRANULARITY - 1)) != 0) {
-            DEBUG((DEBUG_ERROR | DEBUG_PAGE, "ExitBootServices: A RUNTIME memory entry is not on a proper alignment.\n"));
+
+          if (!IS_ALIGNED (Entry->End + 1, RUNTIME_PAGE_ALLOCATION_GRANULARITY)) {
+            DEBUG ((DEBUG_ERROR | DEBUG_PAGE, "ExitBootServices: A RUNTIME memory entry is not on a proper alignment.\n"));
             Status =  EFI_INVALID_PARAMETER;
             goto Done;
           }
@@ -2094,12 +2469,3 @@ Done:
 
   return Status;
 }
-
-
-
-
-
-
-
-
-

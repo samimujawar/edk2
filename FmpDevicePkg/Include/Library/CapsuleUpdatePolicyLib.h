@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef __CAPSULE_UPDATE_POLICY_LIB__
-#define __CAPSULE_UPDATE_POLICY_LIB__
+#pragma once
 
 /**
   Determine if the system power state supports a capsule update.
@@ -46,7 +45,7 @@ CheckSystemPower (
 EFI_STATUS
 EFIAPI
 CheckSystemThermal (
-  OUT BOOLEAN   *Good
+  OUT BOOLEAN  *Good
   );
 
 /**
@@ -65,7 +64,7 @@ CheckSystemThermal (
 EFI_STATUS
 EFIAPI
 CheckSystemEnvironment (
-  OUT BOOLEAN   *Good
+  OUT BOOLEAN  *Good
   );
 
 /**
@@ -99,5 +98,3 @@ EFIAPI
 IsLockFmpDeviceAtLockEventGuidRequired (
   VOID
   );
-
-#endif

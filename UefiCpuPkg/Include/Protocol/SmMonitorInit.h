@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _SM_MONITOR_INIT_PROTOCOL_H_
-#define _SM_MONITOR_INIT_PROTOCOL_H_
+#pragma once
 
 #include <PiSmm.h>
 #include <Register/Intel/StmApi.h>
@@ -34,7 +33,7 @@
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SM_MONITOR_LOAD_MONITOR) (
+(EFIAPI *EFI_SM_MONITOR_LOAD_MONITOR)(
   IN EFI_PHYSICAL_ADDRESS StmImage,
   IN UINTN                StmImageSize
   );
@@ -48,13 +47,13 @@ EFI_STATUS
                        If 0, list must be terminated by END_OF_RESOURCES.
 
   @retval EFI_SUCCESS            If resources are added
-  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failer
+  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failure
   @retval EFI_OUT_OF_RESOURCES   If nested procedure returned it and we cannot allocate more areas.
 
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SM_MONITOR_ADD_PI_RESOURCE) (
+(EFIAPI *EFI_SM_MONITOR_ADD_PI_RESOURCE)(
   IN STM_RSC *ResourceList,
   IN UINT32   NumEntries OPTIONAL
   );
@@ -69,12 +68,12 @@ EFI_STATUS
                        If 0, list must be terminated by END_OF_RESOURCES.
 
   @retval EFI_SUCCESS            If resources are deleted
-  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failer
+  @retval EFI_INVALID_PARAMETER  If nested procedure detected resource failure
 
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SM_MONITOR_DELETE_PI_RESOURCE) (
+(EFIAPI *EFI_SM_MONITOR_DELETE_PI_RESOURCE)(
   IN STM_RSC *ResourceList OPTIONAL,
   IN UINT32   NumEntries OPTIONAL
   );
@@ -94,14 +93,14 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SM_MONITOR_GET_PI_RESOURCE) (
+(EFIAPI *EFI_SM_MONITOR_GET_PI_RESOURCE)(
   OUT    STM_RSC *ResourceList,
   IN OUT UINT32  *ResourceSize
   );
 
 typedef UINT32 EFI_SM_MONITOR_STATE;
-#define EFI_SM_MONITOR_STATE_ENABLED     0x1
-#define EFI_SM_MONITOR_STATE_ACTIVATED   0x2
+#define EFI_SM_MONITOR_STATE_ENABLED    0x1
+#define EFI_SM_MONITOR_STATE_ACTIVATED  0x2
 
 /**
 
@@ -112,7 +111,7 @@ typedef UINT32 EFI_SM_MONITOR_STATE;
 **/
 typedef
 EFI_SM_MONITOR_STATE
-(EFIAPI *EFI_SM_MONITOR_GET_MONITOR_STATE) (
+(EFIAPI *EFI_SM_MONITOR_GET_MONITOR_STATE)(
   VOID
   );
 
@@ -120,16 +119,14 @@ typedef struct _EFI_SM_MONITOR_INIT_PROTOCOL {
   //
   // Valid at boot-time only
   //
-  EFI_SM_MONITOR_LOAD_MONITOR                      LoadMonitor;
-  EFI_SM_MONITOR_ADD_PI_RESOURCE                   AddPiResource;
-  EFI_SM_MONITOR_DELETE_PI_RESOURCE                DeletePiResource;
-  EFI_SM_MONITOR_GET_PI_RESOURCE                   GetPiResource;
+  EFI_SM_MONITOR_LOAD_MONITOR          LoadMonitor;
+  EFI_SM_MONITOR_ADD_PI_RESOURCE       AddPiResource;
+  EFI_SM_MONITOR_DELETE_PI_RESOURCE    DeletePiResource;
+  EFI_SM_MONITOR_GET_PI_RESOURCE       GetPiResource;
   //
   // Valid at runtime
   //
-  EFI_SM_MONITOR_GET_MONITOR_STATE                 GetMonitorState;
+  EFI_SM_MONITOR_GET_MONITOR_STATE     GetMonitorState;
 } EFI_SM_MONITOR_INIT_PROTOCOL;
 
-extern EFI_GUID gEfiSmMonitorInitProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiSmMonitorInitProtocolGuid;

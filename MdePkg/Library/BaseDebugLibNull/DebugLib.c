@@ -34,7 +34,6 @@ DebugPrint (
 {
 }
 
-
 /**
   Prints a debug message to the debug output device if the specified
   error level is enabled.
@@ -53,13 +52,12 @@ DebugPrint (
 VOID
 EFIAPI
 DebugVPrint (
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaListMarker
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
+  IN  VA_LIST      VaListMarker
   )
 {
 }
-
 
 /**
   Prints a debug message to the debug output device if the specified
@@ -81,13 +79,12 @@ DebugVPrint (
 VOID
 EFIAPI
 DebugBPrint (
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *Format,
-  IN  BASE_LIST     BaseListMarker
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
+  IN  BASE_LIST    BaseListMarker
   )
 {
 }
-
 
 /**
   Prints an assert message containing a filename, line number, and description.
@@ -95,8 +92,8 @@ DebugBPrint (
 
   Print a message of the form "ASSERT <FileName>(<LineNumber>): <Description>\n"
   to the debug output device.  If DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED bit of
-  PcdDebugProperyMask is set then CpuBreakpoint() is called. Otherwise, if
-  DEBUG_PROPERTY_ASSERT_DEADLOOP_ENABLED bit of PcdDebugProperyMask is set then
+  PcdDebugPropertyMask is set then CpuBreakpoint() is called. Otherwise, if
+  DEBUG_PROPERTY_ASSERT_DEADLOOP_ENABLED bit of PcdDebugPropertyMask is set then
   CpuDeadLoop() is called.  If neither of these bits are set, then this function
   returns immediately after the message is printed to the debug output device.
   DebugAssert() must actively prevent recursion.  If DebugAssert() is called while
@@ -119,7 +116,6 @@ DebugAssert (
   )
 {
 }
-
 
 /**
   Fills a target buffer with PcdDebugClearMemoryValue, and returns the target buffer.
@@ -146,15 +142,14 @@ DebugClearMemory (
   return Buffer;
 }
 
-
 /**
   Returns TRUE if ASSERT() macros are enabled.
 
   This function returns TRUE if the DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED bit of
-  PcdDebugProperyMask is set.  Otherwise FALSE is returned.
+  PcdDebugPropertyMask is set.  Otherwise FALSE is returned.
 
-  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED bit of PcdDebugProperyMask is set.
-  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED bit of PcdDebugProperyMask is clear.
+  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED bit of PcdDebugPropertyMask is set.
+  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED bit of PcdDebugPropertyMask is clear.
 
 **/
 BOOLEAN
@@ -166,15 +161,14 @@ DebugAssertEnabled (
   return FALSE;
 }
 
-
 /**
   Returns TRUE if DEBUG() macros are enabled.
 
   This function returns TRUE if the DEBUG_PROPERTY_DEBUG_PRINT_ENABLED bit of
-  PcdDebugProperyMask is set.  Otherwise FALSE is returned.
+  PcdDebugPropertyMask is set.  Otherwise FALSE is returned.
 
-  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_PRINT_ENABLED bit of PcdDebugProperyMask is set.
-  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_PRINT_ENABLED bit of PcdDebugProperyMask is clear.
+  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_PRINT_ENABLED bit of PcdDebugPropertyMask is set.
+  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_PRINT_ENABLED bit of PcdDebugPropertyMask is clear.
 
 **/
 BOOLEAN
@@ -186,15 +180,14 @@ DebugPrintEnabled (
   return FALSE;
 }
 
-
 /**
   Returns TRUE if DEBUG_CODE() macros are enabled.
 
   This function returns TRUE if the DEBUG_PROPERTY_DEBUG_CODE_ENABLED bit of
-  PcdDebugProperyMask is set.  Otherwise FALSE is returned.
+  PcdDebugPropertyMask is set.  Otherwise FALSE is returned.
 
-  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_CODE_ENABLED bit of PcdDebugProperyMask is set.
-  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_CODE_ENABLED bit of PcdDebugProperyMask is clear.
+  @retval  TRUE    The DEBUG_PROPERTY_DEBUG_CODE_ENABLED bit of PcdDebugPropertyMask is set.
+  @retval  FALSE   The DEBUG_PROPERTY_DEBUG_CODE_ENABLED bit of PcdDebugPropertyMask is clear.
 
 **/
 BOOLEAN
@@ -206,15 +199,14 @@ DebugCodeEnabled (
   return FALSE;
 }
 
-
 /**
   Returns TRUE if DEBUG_CLEAR_MEMORY() macro is enabled.
 
   This function returns TRUE if the DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED bit of
-  PcdDebugProperyMask is set.  Otherwise FALSE is returned.
+  PcdDebugPropertyMask is set.  Otherwise FALSE is returned.
 
-  @retval  TRUE    The DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED bit of PcdDebugProperyMask is set.
-  @retval  FALSE   The DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED bit of PcdDebugProperyMask is clear.
+  @retval  TRUE    The DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED bit of PcdDebugPropertyMask is set.
+  @retval  FALSE   The DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED bit of PcdDebugPropertyMask is clear.
 
 **/
 BOOLEAN
@@ -238,9 +230,8 @@ DebugClearMemoryEnabled (
 BOOLEAN
 EFIAPI
 DebugPrintLevelEnabled (
-  IN  CONST UINTN        ErrorLevel
+  IN  CONST UINTN  ErrorLevel
   )
 {
   return FALSE;
 }
-

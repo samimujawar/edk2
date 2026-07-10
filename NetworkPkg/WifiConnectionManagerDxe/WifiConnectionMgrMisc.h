@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __EFI_WIFI_MGR_MISC_H__
-#define __EFI_WIFI_MGR_MISC_H__
+#pragma once
 
 /**
   Empty function for event process function.
@@ -20,8 +19,8 @@
 VOID
 EFIAPI
 WifiMgrInternalEmptyFunction (
-  IN  EFI_EVENT   Event,
-  IN  VOID        *Context
+  IN  EFI_EVENT  Event,
+  IN  VOID       *Context
   );
 
 /**
@@ -34,9 +33,9 @@ WifiMgrInternalEmptyFunction (
 **/
 VOID
 WifiMgrMacAddrToStr (
-  IN  EFI_80211_MAC_ADDRESS     *Mac,
-  IN  UINT32                    StrSize,
-  OUT CHAR16                    *Str
+  IN  EFI_80211_MAC_ADDRESS  *Mac,
+  IN  UINT32                 StrSize,
+  OUT CHAR16                 *Str
   );
 
 /**
@@ -53,11 +52,10 @@ WifiMgrMacAddrToStr (
 **/
 EFI_STATUS
 WifiMgrReadFileToBuffer (
-  IN   WIFI_MGR_FILE_CONTEXT          *FileContext,
-  OUT  VOID                           **PrivateKeyDataAddr,
-  OUT  UINTN                          *PrivateKeyDataSize
+  IN   WIFI_MGR_FILE_CONTEXT  *FileContext,
+  OUT  VOID                   **PrivateKeyDataAddr,
+  OUT  UINTN                  *PrivateKeyDataSize
   );
-
 
 /**
   Get the Nic data by the NicIndex.
@@ -70,8 +68,8 @@ WifiMgrReadFileToBuffer (
 **/
 WIFI_MGR_DEVICE_DATA *
 WifiMgrGetNicByIndex (
-  IN WIFI_MGR_PRIVATE_DATA      *Private,
-  IN UINT32                     NicIndex
+  IN WIFI_MGR_PRIVATE_DATA  *Private,
+  IN UINT32                 NicIndex
   );
 
 /**
@@ -86,9 +84,9 @@ WifiMgrGetNicByIndex (
 **/
 WIFI_MGR_NETWORK_PROFILE *
 WifiMgrGetProfileByUnicodeSSId (
-  IN  CHAR16                         *SSId,
-  IN  UINT8                          SecurityType,
-  IN  LIST_ENTRY                     *ProfileList
+  IN  CHAR16      *SSId,
+  IN  UINT8       SecurityType,
+  IN  LIST_ENTRY  *ProfileList
   );
 
 /**
@@ -103,9 +101,9 @@ WifiMgrGetProfileByUnicodeSSId (
 **/
 WIFI_MGR_NETWORK_PROFILE *
 WifiMgrGetProfileByAsciiSSId (
-  IN  CHAR8                          *SSId,
-  IN  UINT8                          SecurityType,
-  IN  LIST_ENTRY                     *ProfileList
+  IN  CHAR8       *SSId,
+  IN  UINT8       SecurityType,
+  IN  LIST_ENTRY  *ProfileList
   );
 
 /**
@@ -119,8 +117,8 @@ WifiMgrGetProfileByAsciiSSId (
 **/
 WIFI_MGR_NETWORK_PROFILE *
 WifiMgrGetProfileByProfileIndex (
-  IN UINT32                     ProfileIndex,
-  IN LIST_ENTRY                 *ProfileList
+  IN UINT32      ProfileIndex,
+  IN LIST_ENTRY  *ProfileList
   );
 
 /**
@@ -135,9 +133,9 @@ WifiMgrGetProfileByProfileIndex (
 **/
 BOOLEAN
 WifiMgrSupportAKMSuite (
-  IN  UINT16                              SupportedAKMSuiteCount,
-  IN  UINT32                              *SupportedAKMSuiteList,
-  IN  UINT32                              *AKMSuite
+  IN  UINT16  SupportedAKMSuiteCount,
+  IN  UINT32  *SupportedAKMSuiteList,
+  IN  UINT32  *AKMSuite
   );
 
 /**
@@ -152,9 +150,9 @@ WifiMgrSupportAKMSuite (
 **/
 BOOLEAN
 WifiMgrSupportCipherSuite (
-  IN  UINT16                              SupportedCipherSuiteCount,
-  IN  UINT32                              *SupportedCipherSuiteList,
-  IN  UINT32                              *CipherSuite
+  IN  UINT16  SupportedCipherSuiteCount,
+  IN  UINT32  *SupportedCipherSuiteList,
+  IN  UINT32  *CipherSuite
   );
 
 /**
@@ -178,12 +176,12 @@ WifiMgrSupportCipherSuite (
 **/
 EFI_STATUS
 WifiMgrCheckRSN (
-  IN    EFI_80211_AKM_SUITE_SELECTOR      *AKMList,
-  IN    EFI_80211_CIPHER_SUITE_SELECTOR   *CipherList,
-  IN    WIFI_MGR_DEVICE_DATA              *Nic,
-  OUT   UINT8                             *SecurityType,
-  OUT   BOOLEAN                           *AKMSuiteSupported,
-  OUT   BOOLEAN                           *CipherSuiteSupported
+  IN    EFI_80211_AKM_SUITE_SELECTOR     *AKMList,
+  IN    EFI_80211_CIPHER_SUITE_SELECTOR  *CipherList,
+  IN    WIFI_MGR_DEVICE_DATA             *Nic,
+  OUT   UINT8                            *SecurityType,
+  OUT   BOOLEAN                          *AKMSuiteSupported,
+  OUT   BOOLEAN                          *CipherSuiteSupported
   );
 
 /**
@@ -197,8 +195,8 @@ WifiMgrCheckRSN (
 **/
 UINT8
 WifiMgrGetSecurityType (
-  IN    UINT32                          *AKMSuite,
-  IN    UINT32                          *CipherSuite
+  IN    UINT32  *AKMSuite,
+  IN    UINT32  *CipherSuite
   );
 
 /**
@@ -212,7 +210,7 @@ WifiMgrGetSecurityType (
 **/
 EFI_STATUS
 WifiMgrGetSupportedSuites (
-  IN    WIFI_MGR_DEVICE_DATA            *Nic
+  IN    WIFI_MGR_DEVICE_DATA  *Nic
   );
 
 /**
@@ -223,7 +221,7 @@ WifiMgrGetSupportedSuites (
 **/
 VOID
 WifiMgrCleanProfileSecrets (
-  IN  WIFI_MGR_NETWORK_PROFILE       *Profile
+  IN  WIFI_MGR_NETWORK_PROFILE  *Profile
   );
 
 /**
@@ -234,7 +232,7 @@ WifiMgrCleanProfileSecrets (
 **/
 VOID
 WifiMgrFreeProfileList (
-  IN  LIST_ENTRY               *ProfileList
+  IN  LIST_ENTRY  *ProfileList
   );
 
 /**
@@ -245,7 +243,7 @@ WifiMgrFreeProfileList (
 **/
 VOID
 WifiMgrFreeHiddenList (
-  IN  LIST_ENTRY                     *HiddenList
+  IN  LIST_ENTRY  *HiddenList
   );
 
 /**
@@ -256,7 +254,5 @@ WifiMgrFreeHiddenList (
 **/
 VOID
 WifiMgrFreeToken (
-  IN   WIFI_MGR_MAC_CONFIG_TOKEN        *ConfigToken
+  IN   WIFI_MGR_MAC_CONFIG_TOKEN  *ConfigToken
   );
-
-#endif

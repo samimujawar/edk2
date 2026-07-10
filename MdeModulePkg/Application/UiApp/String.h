@@ -6,10 +6,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _STRING_H_
-#define _STRING_H_
+#pragma once
 
-extern EFI_HII_HANDLE gStringPackHandle;
+extern EFI_HII_HANDLE  gStringPackHandle;
 
 //
 // This is the VFR compiler generated header file which defines the
@@ -38,7 +37,7 @@ extern UINT8  BdsDxeStrings[];
 **/
 CHAR16 *
 GetStringById (
-  IN  EFI_STRING_ID   Id
+  IN  EFI_STRING_ID  Id
   );
 
 /**
@@ -67,5 +66,3 @@ EFI_HII_HANDLE
 ExportFonts (
   VOID
   );
-
-#endif // _STRING_H_

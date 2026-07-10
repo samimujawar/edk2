@@ -59,9 +59,9 @@
   MemoryAllocationLib
   DxeServicesLib
   ReportStatusCodeLib
-  PerformanceLib
   HiiLib
   SortLib
+  VariablePolicyHelperLib
 
 [Guids]
   ## SOMETIMES_CONSUMES ## SystemTable (The identifier of memory type information type in system table)
@@ -84,6 +84,7 @@
   gEfiDiskInfoIdeInterfaceGuid                  ## SOMETIMES_CONSUMES ## GUID
   gEfiDiskInfoScsiInterfaceGuid                 ## SOMETIMES_CONSUMES ## GUID
   gEfiDiskInfoSdMmcInterfaceGuid                ## SOMETIMES_CONSUMES ## GUID
+  gEfiDiskInfoUfsInterfaceGuid                  ## SOMETIMES_CONSUMES ## GUID
 
 [Protocols]
   gEfiPciRootBridgeIoProtocolGuid               ## CONSUMES
@@ -99,7 +100,7 @@
   gEfiDevicePathProtocolGuid                    ## SOMETIMES_CONSUMES
   gEfiBootLogoProtocolGuid                      ## SOMETIMES_CONSUMES
   gEfiSimpleTextInputExProtocolGuid             ## SOMETIMES_CONSUMES
-  gEdkiiVariableLockProtocolGuid                ## SOMETIMES_CONSUMES
+  gEdkiiVariablePolicyProtocolGuid              ## SOMETIMES_CONSUMES ## NOTIFY
   gEfiGraphicsOutputProtocolGuid                ## SOMETIMES_CONSUMES
   gEfiUsbIoProtocolGuid                         ## SOMETIMES_CONSUMES
   gEfiNvmExpressPassThruProtocolGuid            ## SOMETIMES_CONSUMES

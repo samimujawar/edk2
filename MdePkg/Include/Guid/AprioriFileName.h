@@ -11,12 +11,10 @@
 
 **/
 
-#ifndef __PEI_APRIORI_FILE_NAME_H__
-#define __PEI_APRIORI_FILE_NAME_H__
+#pragma once
 
 #define PEI_APRIORI_FILE_NAME_GUID \
   { 0x1b45cc0a, 0x156a, 0x428a, { 0x62, 0XAF, 0x49, 0x86, 0x4d, 0xa0, 0xe6, 0xe6 } }
-
 
 ///
 ///  This file must be of type EFI_FV_FILETYPE_FREEFORM and must
@@ -29,10 +27,7 @@ typedef struct {
   /// An array of zero or more EFI_GUID type entries that match the file names of PEIM
   /// modules in the same Firmware Volume. The maximum number of entries.
   ///
-  EFI_GUID  FileNamesWithinVolume[1];
+  EFI_GUID    FileNamesWithinVolume[1];
 } PEI_APRIORI_FILE_CONTENTS;
 
-extern EFI_GUID gPeiAprioriFileNameGuid;
-
-#endif
-
+extern EFI_GUID  gPeiAprioriFileNameGuid;

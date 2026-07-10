@@ -19,8 +19,7 @@
 
 **/
 
-#ifndef _PEI_DEVICE_RECOVERY_MODULE_PPI_H_
-#define _PEI_DEVICE_RECOVERY_MODULE_PPI_H_
+#pragma once
 
 #define EFI_PEI_DEVICE_RECOVERY_MODULE_PPI_GUID \
   { \
@@ -128,11 +127,9 @@ EFI_STATUS
 /// regardless of the underlying device(s).
 ///
 struct _EFI_PEI_DEVICE_RECOVERY_MODULE_PPI {
-  EFI_PEI_DEVICE_GET_NUMBER_RECOVERY_CAPSULE  GetNumberRecoveryCapsules;    ///< Returns the number of DXE capsules residing on the device.
-  EFI_PEI_DEVICE_GET_RECOVERY_CAPSULE_INFO    GetRecoveryCapsuleInfo;       ///< Returns the size and type of the requested recovery capsule.
-  EFI_PEI_DEVICE_LOAD_RECOVERY_CAPSULE        LoadRecoveryCapsule;          ///< Loads a DXE capsule from some media into memory.
+  EFI_PEI_DEVICE_GET_NUMBER_RECOVERY_CAPSULE    GetNumberRecoveryCapsules;  ///< Returns the number of DXE capsules residing on the device.
+  EFI_PEI_DEVICE_GET_RECOVERY_CAPSULE_INFO      GetRecoveryCapsuleInfo;     ///< Returns the size and type of the requested recovery capsule.
+  EFI_PEI_DEVICE_LOAD_RECOVERY_CAPSULE          LoadRecoveryCapsule;        ///< Loads a DXE capsule from some media into memory.
 };
 
-extern EFI_GUID gEfiPeiDeviceRecoveryModulePpiGuid;
-
-#endif  /* _PEI_DEVICE_RECOVERY_MODULE_PPI_H_ */
+extern EFI_GUID  gEfiPeiDeviceRecoveryModulePpiGuid;

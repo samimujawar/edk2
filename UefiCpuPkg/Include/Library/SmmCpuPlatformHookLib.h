@@ -1,22 +1,21 @@
 /** @file
   Public include file for the SMM CPU Platform Hook Library.
 
-  Copyright (c) 2010 - 2015, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2010 - 2024, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __SMM_CPU_PLATFORM_HOOK_LIB_H__
-#define __SMM_CPU_PLATFORM_HOOK_LIB_H__
+#pragma once
 
 ///
 /// SMM Page Size Type
 ///
 typedef enum {
-    SmmPageSize4K,
-    SmmPageSize2M,
-    SmmPageSize1G,
-    MaxSmmPageSizeType
+  SmmPageSize4K,
+  SmmPageSize2M,
+  SmmPageSize1G,
+  MaxSmmPageSizeType
 } SMM_PAGE_SIZE_TYPE;
 
 /**
@@ -74,7 +73,7 @@ ClearTopLevelSmiStatus (
 EFI_STATUS
 EFIAPI
 PlatformSmmBspElection (
-  OUT BOOLEAN     *IsBsp
+  OUT BOOLEAN  *IsBsp
   );
 
 /**
@@ -94,10 +93,43 @@ PlatformSmmBspElection (
 EFI_STATUS
 EFIAPI
 GetPlatformPageTableAttribute (
-  IN  UINT64                Address,
-  OUT SMM_PAGE_SIZE_TYPE    *PageSize,
-  OUT UINTN                 *NumOfPages,
-  OUT UINTN                 *PageAttribute
+  IN  UINT64              Address,
+  OUT SMM_PAGE_SIZE_TYPE  *PageSize,
+  OUT UINTN               *NumOfPages,
+  OUT UINTN               *PageAttribute
   );
 
-#endif
+/**
+  SMM CPU Platform Hook before executing MMI Handler.
+
+  This function can be used to perform the platform specific items before executing MMI Handler.
+
+  @retval EFI_SUCCESS      The smm cpu platform hook before executing MMI Handler is executed successfully.
+  @retval EFI_UNSUPPORTED  The smm cpu platform hook before executing MMI Handler is unsupported.
+
+**/
+EFI_STATUS
+EFIAPI
+SmmCpuPlatformHookBeforeMmiHandler (
+  VOID
+  );
+
+/**
+  This function determines whether the first CPU Synchronization should be executed unconditionally
+  when a SMI occurs.
+
+  If the function returns true, it indicates that there is no need to check the system configuration
+  and status, and the first CPU Synchronization should be executed unconditionally.
+
+  If the function returns false, it indicates that the first CPU Synchronization is not executed
+  unconditionally, and the decision to synchronize should be based on the system configuration and status.
+
+  @retval TRUE   The first CPU Synchronization is executed unconditionally.
+  @retval FALSE  The first CPU Synchronization is not executed unconditionally.
+
+**/
+BOOLEAN
+EFIAPI
+IsCpuSyncAlwaysNeeded (
+  VOID
+  );

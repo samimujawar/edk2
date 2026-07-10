@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __EFI_REST_PROTOCOL_H__
-#define __EFI_REST_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/Http.h>
 
@@ -43,7 +42,7 @@ typedef struct _EFI_REST_PROTOCOL EFI_REST_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_REST_SEND_RECEIVE) (
+(EFIAPI *EFI_REST_SEND_RECEIVE)(
   IN  EFI_REST_PROTOCOL         *This,
   IN  EFI_HTTP_MESSAGE          *RequestMessage,
   OUT EFI_HTTP_MESSAGE          *ResponseMessage
@@ -66,7 +65,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_REST_GET_TIME) (
+(EFIAPI *EFI_REST_GET_TIME)(
   IN  EFI_REST_PROTOCOL         *This,
   OUT EFI_TIME                  *Time
   );
@@ -79,10 +78,8 @@ EFI_STATUS
 /// interfaces that abstract HTTP access to the resources.
 ///
 struct _EFI_REST_PROTOCOL {
-  EFI_REST_SEND_RECEIVE         SendReceive;
-  EFI_REST_GET_TIME             GetServiceTime;
+  EFI_REST_SEND_RECEIVE    SendReceive;
+  EFI_REST_GET_TIME        GetServiceTime;
 };
 
-extern EFI_GUID gEfiRestProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiRestProtocolGuid;

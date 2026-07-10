@@ -12,7 +12,9 @@ import re
 from collections import OrderedDict
 from Common.Misc import CopyDict,ArrayIndex
 import copy
+from CommonDataClass.DataClass import *
 import Common.EdkLogger as EdkLogger
+import Common.GlobalData as GlobalData
 from Common.BuildToolError import OPTION_VALUE_INVALID
 from Common.caching import cached_property
 StructPattern = re.compile(r'[_a-zA-Z][0-9A-Za-z_\[\]]*$')
@@ -140,11 +142,6 @@ class PcdClassObject(object):
         if self.DatumType in [TAB_UINT8, TAB_UINT16, TAB_UINT32, TAB_UINT64, TAB_VOID, "BOOLEAN"]:
             return False
         if self.IsArray() or StructPattern.match(self.DatumType):
-            return True
-        return False
-
-    def IsSimpleTypeArray(self):
-        if self.IsArray() and self.BaseDatumType in [TAB_UINT8, TAB_UINT16, TAB_UINT32, TAB_UINT64, "BOOLEAN"]:
             return True
         return False
 
@@ -288,7 +285,6 @@ class StructurePcd(PcdClassObject):
         self.PackageDecs = Packages
         self.DefaultStoreName = [default_store]
         self.DefaultValues = OrderedDict()
-        self.PcdMode = None
         self.SkuOverrideValues = OrderedDict()
         self.StructName = None
         self.PcdDefineLineNo = 0
@@ -332,9 +328,6 @@ class StructurePcd(PcdClassObject):
         self.PcdFiledValueFromDscComponent[ModuleGuid][DimensionAttr][FieldName] =  [Value.strip(), FileName, LineNo]
         return self.PcdFiledValueFromDscComponent[ModuleGuid][DimensionAttr][FieldName]
 
-    def SetPcdMode (self, PcdMode):
-        self.PcdMode = PcdMode
-
     def copy(self, PcdObject):
         self.TokenCName = PcdObject.TokenCName if PcdObject.TokenCName else self.TokenCName
         self.TokenSpaceGuidCName = PcdObject.TokenSpaceGuidCName if PcdObject.TokenSpaceGuidCName else PcdObject.TokenSpaceGuidCName
@@ -363,7 +356,6 @@ class StructurePcd(PcdClassObject):
             self.StructuredPcdIncludeFile = PcdObject.StructuredPcdIncludeFile if PcdObject.StructuredPcdIncludeFile else self.StructuredPcdIncludeFile
             self.PackageDecs = PcdObject.PackageDecs if PcdObject.PackageDecs else self.PackageDecs
             self.DefaultValues = PcdObject.DefaultValues if PcdObject.DefaultValues else self.DefaultValues
-            self.PcdMode = PcdObject.PcdMode if PcdObject.PcdMode else self.PcdMode
             self.DefaultValueFromDec = PcdObject.DefaultValueFromDec if PcdObject.DefaultValueFromDec else self.DefaultValueFromDec
             self.DefaultValueFromDecInfo = PcdObject.DefaultValueFromDecInfo if PcdObject.DefaultValueFromDecInfo else self.DefaultValueFromDecInfo
             self.SkuOverrideValues = PcdObject.SkuOverrideValues if PcdObject.SkuOverrideValues else self.SkuOverrideValues
@@ -381,7 +373,6 @@ class StructurePcd(PcdClassObject):
 
         new_pcd.DefaultValueFromDec = self.DefaultValueFromDec
         new_pcd.DefaultValueFromDecInfo = self.DefaultValueFromDecInfo
-        new_pcd.PcdMode = self.PcdMode
         new_pcd.StructName = self.DatumType
         new_pcd.PcdDefineLineNo = self.PcdDefineLineNo
         new_pcd.PkgPath = self.PkgPath
@@ -397,6 +388,67 @@ class StructurePcd(PcdClassObject):
         return new_pcd
 
 LibraryClassObject = namedtuple('LibraryClassObject', ['LibraryClass','SupModList'])
+
+class BuildData(object):
+    # dict used to convert PCD type in database to string used by build tool
+
+    _PCD_TYPE_STRING_ = {
+        MODEL_PCD_FIXED_AT_BUILD        :   TAB_PCDS_FIXED_AT_BUILD,
+        MODEL_PCD_PATCHABLE_IN_MODULE   :   TAB_PCDS_PATCHABLE_IN_MODULE,
+        MODEL_PCD_FEATURE_FLAG          :   TAB_PCDS_FEATURE_FLAG,
+        MODEL_PCD_DYNAMIC               :   TAB_PCDS_DYNAMIC,
+        MODEL_PCD_DYNAMIC_DEFAULT       :   TAB_PCDS_DYNAMIC,
+        MODEL_PCD_DYNAMIC_HII           :   TAB_PCDS_DYNAMIC_HII,
+        MODEL_PCD_DYNAMIC_VPD           :   TAB_PCDS_DYNAMIC_VPD,
+        MODEL_PCD_DYNAMIC_EX            :   TAB_PCDS_DYNAMIC_EX,
+        MODEL_PCD_DYNAMIC_EX_DEFAULT    :   TAB_PCDS_DYNAMIC_EX,
+        MODEL_PCD_DYNAMIC_EX_HII        :   TAB_PCDS_DYNAMIC_EX_HII,
+        MODEL_PCD_DYNAMIC_EX_VPD        :   TAB_PCDS_DYNAMIC_EX_VPD,
+    }
+
+    def UpdatePcdTypeDict(self):
+        if GlobalData.gCommandLineDefines.get(TAB_DSC_DEFINES_PCD_DYNAMIC_AS_DYNAMICEX,"FALSE").upper() == "TRUE":
+            self._PCD_TYPE_STRING_ = {
+                MODEL_PCD_FIXED_AT_BUILD        :   TAB_PCDS_FIXED_AT_BUILD,
+                MODEL_PCD_PATCHABLE_IN_MODULE   :   TAB_PCDS_PATCHABLE_IN_MODULE,
+                MODEL_PCD_FEATURE_FLAG          :   TAB_PCDS_FEATURE_FLAG,
+                MODEL_PCD_DYNAMIC               :   TAB_PCDS_DYNAMIC_EX,
+                MODEL_PCD_DYNAMIC_DEFAULT       :   TAB_PCDS_DYNAMIC_EX,
+                MODEL_PCD_DYNAMIC_HII           :   TAB_PCDS_DYNAMIC_EX_HII,
+                MODEL_PCD_DYNAMIC_VPD           :   TAB_PCDS_DYNAMIC_EX_VPD,
+                MODEL_PCD_DYNAMIC_EX            :   TAB_PCDS_DYNAMIC_EX,
+                MODEL_PCD_DYNAMIC_EX_DEFAULT    :   TAB_PCDS_DYNAMIC_EX,
+                MODEL_PCD_DYNAMIC_EX_HII        :   TAB_PCDS_DYNAMIC_EX_HII,
+                MODEL_PCD_DYNAMIC_EX_VPD        :   TAB_PCDS_DYNAMIC_EX_VPD,
+            }
+
+    ## Convert the class to a string
+    #
+    #  Convert member MetaFile of the class to a string
+    #
+    #  @retval string Formatted String
+    #
+    def __str__(self):
+        return str(self.MetaFile)
+
+    ## Override __eq__ function
+    #
+    # Check whether ModuleBuildClassObjects are the same
+    #
+    # @retval False The two ModuleBuildClassObjects are different
+    # @retval True  The two ModuleBuildClassObjects are the same
+    #
+    def __eq__(self, Other):
+        return self.MetaFile == Other
+
+    ## Override __hash__ function
+    #
+    # Use MetaFile as key in hash table
+    #
+    # @retval string Key for hash table
+    #
+    def __hash__(self):
+        return hash(self.MetaFile)
 
 ## ModuleBuildClassObject
 #
@@ -442,7 +494,7 @@ LibraryClassObject = namedtuple('LibraryClassObject', ['LibraryClass','SupModLis
 #                              { [BuildOptionKey] : BuildOptionValue}
 # @var Depex:                  To store value for Depex
 #
-class ModuleBuildClassObject(object):
+class ModuleBuildClassObject(BuildData):
     def __init__(self):
         self.AutoGenVersion          = 0
         self.MetaFile                = ''
@@ -476,34 +528,6 @@ class ModuleBuildClassObject(object):
         self.StrPcdSet               = []
         self.StrPcdOverallValue      = {}
 
-    ## Convert the class to a string
-    #
-    #  Convert member MetaFile of the class to a string
-    #
-    #  @retval string Formatted String
-    #
-    def __str__(self):
-        return str(self.MetaFile)
-
-    ## Override __eq__ function
-    #
-    # Check whether ModuleBuildClassObjects are the same
-    #
-    # @retval False The two ModuleBuildClassObjects are different
-    # @retval True  The two ModuleBuildClassObjects are the same
-    #
-    def __eq__(self, Other):
-        return self.MetaFile == Other
-
-    ## Override __hash__ function
-    #
-    # Use MetaFile as key in hash table
-    #
-    # @retval string Key for hash table
-    #
-    def __hash__(self):
-        return hash(self.MetaFile)
-
 ## PackageBuildClassObject
 #
 # This Class defines PackageBuildClass
@@ -527,7 +551,7 @@ class ModuleBuildClassObject(object):
 # @var Pcds:            To store value for Pcds, it is a set structure as
 #                       { [(PcdCName, PcdGuidCName)] : PcdClassObject}
 #
-class PackageBuildClassObject(object):
+class PackageBuildClassObject(BuildData):
     def __init__(self):
         self.MetaFile                = ''
         self.PackageName             = ''
@@ -541,34 +565,6 @@ class PackageBuildClassObject(object):
         self.LibraryClasses          = {}
         self.Pcds                    = {}
 
-    ## Convert the class to a string
-    #
-    #  Convert member MetaFile of the class to a string
-    #
-    #  @retval string Formatted String
-    #
-    def __str__(self):
-        return str(self.MetaFile)
-
-    ## Override __eq__ function
-    #
-    # Check whether PackageBuildClassObjects are the same
-    #
-    # @retval False The two PackageBuildClassObjects are different
-    # @retval True  The two PackageBuildClassObjects are the same
-    #
-    def __eq__(self, Other):
-        return self.MetaFile == Other
-
-    ## Override __hash__ function
-    #
-    # Use MetaFile as key in hash table
-    #
-    # @retval string Key for hash table
-    #
-    def __hash__(self):
-        return hash(self.MetaFile)
-
 ## PlatformBuildClassObject
 #
 # This Class defines PlatformBuildClass
@@ -579,11 +575,9 @@ class PackageBuildClassObject(object):
 # @var PlatformName:      To store value for PlatformName
 # @var Guid:              To store value for Guid
 # @var Version:           To store value for Version
-# @var DscSpecification:  To store value for DscSpecification
 # @var OutputDirectory:   To store value for OutputDirectory
 # @var FlashDefinition:   To store value for FlashDefinition
 # @var BuildNumber:       To store value for BuildNumber
-# @var MakefileName:      To store value for MakefileName
 # @var SkuIds:            To store value for SkuIds, it is a set structure as
 #                         { 'SkuName' : SkuId, '!include' : includefilename, ...}
 # @var Modules:           To store value for Modules, it is a list structure as
@@ -597,17 +591,15 @@ class PackageBuildClassObject(object):
 # @var BuildOptions:      To store value for BuildOptions, it is a set structure as
 #                         { [BuildOptionKey] : BuildOptionValue }
 #
-class PlatformBuildClassObject(object):
+class PlatformBuildClassObject(BuildData):
     def __init__(self):
         self.MetaFile                = ''
         self.PlatformName            = ''
         self.Guid                    = ''
         self.Version                 = ''
-        self.DscSpecification        = ''
         self.OutputDirectory         = ''
         self.FlashDefinition         = ''
         self.BuildNumber             = ''
-        self.MakefileName            = ''
 
         self.SkuIds                  = {}
         self.Modules                 = []
@@ -616,31 +608,3 @@ class PlatformBuildClassObject(object):
         self.Libraries               = {}
         self.Pcds                    = {}
         self.BuildOptions            = {}
-
-    ## Convert the class to a string
-    #
-    #  Convert member MetaFile of the class to a string
-    #
-    #  @retval string Formatted String
-    #
-    def __str__(self):
-        return str(self.MetaFile)
-
-    ## Override __eq__ function
-    #
-    # Check whether PlatformBuildClassObjects are the same
-    #
-    # @retval False The two PlatformBuildClassObjects are different
-    # @retval True  The two PlatformBuildClassObjects are the same
-    #
-    def __eq__(self, Other):
-        return self.MetaFile == Other
-
-    ## Override __hash__ function
-    #
-    # Use MetaFile as key in hash table
-    #
-    # @retval string Key for hash table
-    #
-    def __hash__(self):
-        return hash(self.MetaFile)

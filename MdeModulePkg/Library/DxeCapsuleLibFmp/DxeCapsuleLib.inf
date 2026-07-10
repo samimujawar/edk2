@@ -3,7 +3,8 @@
 #
 #  Capsule library instance for DXE_DRIVER module types.
 #
-#  Copyright (c) 2016 - 2019, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2016 - 2021, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
@@ -51,6 +52,7 @@
   DisplayUpdateProgressLib
   FileHandleLib
   UefiBootManagerLib
+  VariablePolicyHelperLib
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdCapsuleMax                               ## CONSUMES
@@ -67,15 +69,19 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdCapsuleOnDiskSupport                     ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdCodRelocationDevPath                     ## SOMETIMES_CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdCoDRelocationFileName                    ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCapsuleEmbeddedDriverSupport             ## CONSUMES
+
+[FeaturePcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset ## CONSUMES
 
 [Protocols]
   gEsrtManagementProtocolGuid                   ## CONSUMES
   gEfiFirmwareManagementProtocolGuid            ## CONSUMES
-  gEdkiiVariableLockProtocolGuid                ## SOMETIMES_CONSUMES
   gEdkiiFirmwareManagementProgressProtocolGuid  ## SOMETIMES_CONSUMES
   gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES
   gEfiBlockIoProtocolGuid                       ## CONSUMES
   gEfiDiskIoProtocolGuid                        ## CONSUMES
+  gEdkiiVariablePolicyProtocolGuid              ## CONSUMES
 
 [Guids]
   gEfiFmpCapsuleGuid                      ## SOMETIMES_CONSUMES ## GUID
@@ -83,10 +89,9 @@
   ## SOMETIMES_CONSUMES ## Variable:L"CapsuleMax"
   ## SOMETIMES_PRODUCES ## Variable:L"CapsuleMax"
   gEfiCapsuleReportGuid
-  gEfiCapsuleVendorGuid                   ## SOMETIMES_CONSUMES ## Variable:L"CapsuleUpdateData"
+  gEfiCapsuleVendorGuid                   ## SOMETIMES_CONSUMES ## Variable:L"CapsuleUpdateData", L"CodRelocationInfo"
   gEfiEndOfDxeEventGroupGuid              ## CONSUMES ## Event
   gEfiPartTypeSystemPartGuid              ## SOMETIMES_CONSUMES
-  gEfiCapsuleVendorGuid                   ## SOMETIMES_CONSUMES ## Variable:L"CodRelocationInfo"
   ## SOMETIMES_CONSUMES ## Variable:L"OsIndications"
   ## SOMETIMES_PRODUCES ## Variable:L"OsIndications"
   ## SOMETIMES_CONSUMES ## Variable:L"BootNext"

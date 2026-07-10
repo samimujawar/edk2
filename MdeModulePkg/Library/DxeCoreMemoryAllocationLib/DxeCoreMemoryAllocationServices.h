@@ -9,9 +9,7 @@
 
 **/
 
-#ifndef _DXE_CORE_MEMORY_ALLOCATION_SERVICES_H_
-#define _DXE_CORE_MEMORY_ALLOCATION_SERVICES_H_
-
+#pragma once
 
 /**
   Allocates pages from the memory map.
@@ -34,13 +32,11 @@
 EFI_STATUS
 EFIAPI
 CoreAllocatePages (
-  IN EFI_ALLOCATE_TYPE      Type,
-  IN EFI_MEMORY_TYPE        MemoryType,
-  IN UINTN                  NumberOfPages,
+  IN EFI_ALLOCATE_TYPE         Type,
+  IN EFI_MEMORY_TYPE           MemoryType,
+  IN UINTN                     NumberOfPages,
   IN OUT EFI_PHYSICAL_ADDRESS  *Memory
   );
-
-
 
 /**
   Frees previous allocated pages.
@@ -56,10 +52,9 @@ CoreAllocatePages (
 EFI_STATUS
 EFIAPI
 CoreFreePages (
-  IN EFI_PHYSICAL_ADDRESS   Memory,
-  IN UINTN                  NumberOfPages
+  IN EFI_PHYSICAL_ADDRESS  Memory,
+  IN UINTN                 NumberOfPages
   );
-
 
 /**
   Allocate pool of a particular type.
@@ -94,7 +89,5 @@ CoreAllocatePool (
 EFI_STATUS
 EFIAPI
 CoreFreePool (
-  IN VOID        *Buffer
+  IN VOID  *Buffer
   );
-
-#endif

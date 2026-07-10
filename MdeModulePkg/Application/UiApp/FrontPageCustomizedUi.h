@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __FRONTPAGE_CUSTOMIZED_UI_H__
-#define __FRONTPAGE_CUSTOMIZED_UI_H__
+#pragma once
 
 /**
   Update the banner string in the front page.
@@ -33,9 +32,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 VOID
 UiCustomizeFrontPageBanner (
-  IN     UINTN          LineIndex,
-  IN     BOOLEAN        LeftOrRight,
-  IN OUT EFI_STRING     *BannerStr
+  IN     UINTN       LineIndex,
+  IN     BOOLEAN     LeftOrRight,
+  IN OUT EFI_STRING  *BannerStr
   );
 
 /**
@@ -71,12 +70,10 @@ UiCustomizeFrontPage (
 **/
 EFI_STATUS
 UiFrontPageCallbackHandler (
-  IN  EFI_HII_HANDLE                         HiiHandle,
-  IN  EFI_BROWSER_ACTION                     Action,
-  IN  EFI_QUESTION_ID                        QuestionId,
-  IN  UINT8                                  Type,
-  IN  EFI_IFR_TYPE_VALUE                     *Value,
-  OUT EFI_BROWSER_ACTION_REQUEST             *ActionRequest
+  IN  EFI_HII_HANDLE              HiiHandle,
+  IN  EFI_BROWSER_ACTION          Action,
+  IN  EFI_QUESTION_ID             QuestionId,
+  IN  UINT8                       Type,
+  IN  EFI_IFR_TYPE_VALUE          *Value,
+  OUT EFI_BROWSER_ACTION_REQUEST  *ActionRequest
   );
-
-#endif

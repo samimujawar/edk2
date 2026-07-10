@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _PCI_SEGMENT_LIB_COMMON_H_
-#define _PCI_SEGMENT_LIB_COMMON_H_
+#pragma once
 
 #include <Base.h>
 #include <IndustryStandard/PciExpress21.h>
@@ -27,7 +26,7 @@
 **/
 UINTN
 PciSegmentLibVirtualAddress (
-  IN UINTN                     Address
+  IN UINTN  Address
   );
 
 /**
@@ -43,9 +42,7 @@ PciSegmentLibVirtualAddress (
 **/
 UINTN
 PciSegmentLibGetEcamAddress (
-  IN UINT64                    Address,
-  IN CONST PCI_SEGMENT_INFO    *SegmentInfo,
-  IN UINTN                     Count
+  IN UINT64                  Address,
+  IN CONST PCI_SEGMENT_INFO  *SegmentInfo,
+  IN UINTN                   Count
   );
-
-#endif

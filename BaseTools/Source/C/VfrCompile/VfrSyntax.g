@@ -1,7 +1,8 @@
 /*++ @file
 Vfr Syntax
 
-Copyright (c) 2004 - 2019, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2004 - 2025, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2025, Loongson Technology Corporation Limited. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 --*/
@@ -111,6 +112,7 @@ VfrParserStart (
 #token CloseBracket("]")                        "\]"
 
 #token LineDefinition                           "#line\ [0-9]+\ \"~[\"]+\"[\ \t]*\n" << gCVfrErrorHandle.ParseFileScopeRecord (begexpr (), line ()); skip (); newline (); >>
+#token GccLineDefinition                        "#\ [0-9]+\ \"~[\"]+\"[\ \t]*([1234][\ \t]*)*\n" << gCVfrErrorHandle.ParseFileScopeRecord (begexpr (), line ()); skip (); newline (); >>
 #token DevicePath("devicepath")                 "devicepath"
 #token FormSet("formset")                       "formset"
 #token FormSetId("formsetid")                   "formsetid"
@@ -265,7 +267,7 @@ vfrProgram > [UINT8 Return] :
      mConstantOnlyInExpression = FALSE;
   >>
   (
-      vfrPragmaPackDefinition
+      vfrPragmaDefinition
     | vfrDataStructDefinition
     | vfrDataUnionDefinition
   )*
@@ -306,14 +308,18 @@ pragmaPackNumber :
                                                     << gCVfrVarDataTypeDB.Pack (LineNum, VFR_PACK_ASSIGN, NULL, PackNumber); >>
   ;
 
-vfrPragmaPackDefinition :
-  "\#pragma" "pack" "\("
-  {
-      pragmaPackShowDef
-    | pragmaPackStackDef
-    | pragmaPackNumber
-  }
-  "\)"
+vfrPragmaDefinition :
+  "\#pragma"
+  (
+    "pack" "\("
+    {
+        pragmaPackShowDef
+      | pragmaPackStackDef
+      | pragmaPackNumber
+    }
+    "\)"
+  | "once"                                          // Skip '#pragma once' in preprocessed output
+  )
   ;
 
   vfrDataUnionDefinition :
@@ -893,8 +899,8 @@ vfrExtensionData[UINT8 *DataBuff, UINT32 Size, CHAR8 *TypeName, UINT32 TypeSize,
               gCVfrVarDataTypeDB.GetDataFieldInfo(TFName, FieldOffset, FieldType, FieldSize, BitField);
               if (BitField) {
                 Mask = (1 << FieldSize) - 1;
-                Offset = FieldOffset / 8;
-                PreBits = FieldOffset % 8;
+                PreBits = FieldOffset % (1 << (FieldType + 3)); ///< Relies on field types for 8,16,32,64 bits having values 0,1,2,3
+                Offset = (FieldOffset - PreBits) / 8;
                 Mask <<= PreBits;
               }
               switch (FieldType) {
@@ -902,7 +908,7 @@ vfrExtensionData[UINT8 *DataBuff, UINT32 Size, CHAR8 *TypeName, UINT32 TypeSize,
                  Data_U8 = _STOU8(RD->getText(), RD->getLine());
                  if (BitField) {
                    //
-                   // Set the value to the bit fileds.
+                   // Set the value to the bit fields.
                    //
                    Value = *(UINT8*) (ByteOffset + Offset);
                    Data_U8 <<= PreBits;
@@ -1617,7 +1623,7 @@ vfrConstantValueField[UINT8 Type, EFI_IFR_TYPE_VALUE &Value, BOOLEAN &ListType] 
                                                            $Value.b      = _STOU8(N1->getText(), N1->getLine());
                                                          break;
                                                          case EFI_IFR_TYPE_STRING :
-                                                           $Value.string = _STOU16(N1->getText(), N1->getLine());
+                                                           _PCATCH (VFR_RETURN_INVALID_PARAMETER, N1->getLine(), "string type can't be numeric constant.");
                                                          break;
                                                          case EFI_IFR_TYPE_TIME :
                                                          case EFI_IFR_TYPE_DATE :
@@ -2930,6 +2936,7 @@ vfrNumericFlags [CIfrNumeric & NObj, UINT32 LineNum] :
                                                             }
                                                             _PCATCH(NObj.SetFlags (HFlags, LFlags, IsDisplaySpecified), LineNum);
                                                           } else if ((_GET_CURRQEST_VARTINFO().mVarStoreId != EFI_VARSTORE_ID_INVALID) && (_GET_CURRQEST_VARTINFO().mIsBitVar)) {
+                                                            LFlags &= EDKII_IFR_DISPLAY_BIT;
                                                             LFlags |= (EDKII_IFR_NUMERIC_SIZE_BIT & (_GET_CURRQEST_VARSIZE()));
                                                             _PCATCH(NObj.SetFlagsForBitField (HFlags, LFlags, IsDisplaySpecified), LineNum);
                                                           }
@@ -3105,6 +3112,8 @@ vfrOneofFlagsField [CIfrOneOf & OObj, UINT32 LineNum] :
                                                             }
                                                             _PCATCH(OObj.SetFlags (HFlags, LFlags), LineNum);
                                                           } else if (_GET_CURRQEST_VARTINFO().mVarStoreId != EFI_VARSTORE_ID_INVALID) {
+                                                            LFlags &= EDKII_IFR_DISPLAY_BIT;
+                                                            LFlags |= (EDKII_IFR_NUMERIC_SIZE_BIT & (_GET_CURRQEST_VARSIZE()));
                                                             _PCATCH(OObj.SetFlagsForBitField (HFlags, LFlags), LineNum);
                                                           }
                                                        >>
@@ -3123,7 +3132,7 @@ vfrStatementString :
      UINT8 StringMaxSize;
   >>
   L:String                                             << SObj.SetLineNo(L->getLine()); gIsStringOp = TRUE;>>
-  vfrQuestionHeader[SObj] ","
+  vfrQuestionHeader[SObj] ","                          << _GET_CURRQEST_VARTINFO().mVarType = EFI_IFR_TYPE_STRING;>>
   { F:FLAGS "=" vfrStringFlagsField[SObj, F->getLine()] "," }
   {
     Key "=" KN:Number ","                              << AssignQuestionKey (SObj, KN); >>

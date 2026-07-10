@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __BOOT_MAINTENANCE_MANAGER_UI_LIB_H__
-#define __BOOT_MAINTENANCE_MANAGER_UI_LIB_H__
+#pragma once
 
 /**
   Create Time Out Menu in the page.
@@ -18,8 +17,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 VOID
 BmmCreateTimeOutMenu (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -30,9 +29,9 @@ BmmCreateTimeOutMenu (
 
 **/
 VOID
-BmmCreateBootNextMenu(
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+BmmCreateBootNextMenu (
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -44,8 +43,8 @@ BmmCreateBootNextMenu(
 **/
 VOID
 BmmCreateBootOptionMenu (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -57,8 +56,8 @@ BmmCreateBootOptionMenu (
 **/
 VOID
 BmmCreateDriverOptionMenu (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -70,8 +69,8 @@ BmmCreateDriverOptionMenu (
 **/
 VOID
 BmmCreateComOptionMenu (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -83,8 +82,8 @@ BmmCreateComOptionMenu (
 **/
 VOID
 BmmCreateBootFromFileMenu (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -96,8 +95,8 @@ BmmCreateBootFromFileMenu (
 **/
 VOID
 BmmCreateEmptyLine (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE  HiiHandle,
+  IN VOID            *StartOpCodeHandle
   );
 
 /**
@@ -116,7 +115,7 @@ EFI_STATUS
   IN  CHAR16                   *DriverName,
   OUT CHAR16                   **NewName,
   OUT BOOLEAN                  *EmptyLineAfter
-);
+  );
 
 /**
   Search the drivers in the system which need to show in the front page
@@ -132,10 +131,8 @@ EFI_STATUS
 **/
 EFI_STATUS
 BmmListThirdPartyDrivers (
-  IN EFI_HII_HANDLE              HiiHandle,
-  IN EFI_GUID                    *ClassGuid,
-  IN DRIVER_SPECIAL_HANDLER      SpecialHandlerFn,
-  IN VOID                        *StartOpCodeHandle
+  IN EFI_HII_HANDLE          HiiHandle,
+  IN EFI_GUID                *ClassGuid,
+  IN DRIVER_SPECIAL_HANDLER  SpecialHandlerFn,
+  IN VOID                    *StartOpCodeHandle
   );
-
-#endif

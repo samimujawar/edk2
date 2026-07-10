@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_MTFTP4_DRIVER_H__
-#define __EFI_MTFTP4_DRIVER_H__
+#pragma once
 
 #include <Uefi.h>
 
@@ -37,9 +36,9 @@ extern EFI_UNICODE_STRING_TABLE      *gMtftp4ControllerNameTable;
 EFI_STATUS
 EFIAPI
 Mtftp4DriverBindingSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   );
 
 /**
@@ -82,10 +81,10 @@ Mtftp4DriverBindingStart (
 EFI_STATUS
 EFIAPI
 Mtftp4DriverBindingStop (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                  Controller,
-  IN UINTN                       NumberOfChildren,
-  IN EFI_HANDLE                  *ChildHandleBuffer
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN UINTN                        NumberOfChildren,
+  IN EFI_HANDLE                   *ChildHandleBuffer
   );
 
 /**
@@ -104,7 +103,7 @@ EFI_STATUS
 EFIAPI
 Mtftp4ServiceBindingCreateChild (
   IN EFI_SERVICE_BINDING_PROTOCOL  *This,
-  IN EFI_HANDLE                *ChildHandle
+  IN EFI_HANDLE                    *ChildHandle
   );
 
 /**
@@ -122,10 +121,6 @@ Mtftp4ServiceBindingCreateChild (
 EFI_STATUS
 EFIAPI
 Mtftp4ServiceBindingDestroyChild (
-  IN EFI_SERVICE_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                   ChildHandle
+  IN EFI_SERVICE_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                    ChildHandle
   );
-
-
-
-#endif

@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _TPM12_DEVICE_LIB_H_
-#define _TPM12_DEVICE_LIB_H_
+#pragma once
 
 #include <IndustryStandard/Tpm12.h>
 
@@ -26,10 +25,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 Tpm12SubmitCommand (
-  IN UINT32            InputParameterBlockSize,
-  IN UINT8             *InputParameterBlock,
-  IN OUT UINT32        *OutputParameterBlockSize,
-  IN UINT8             *OutputParameterBlock
+  IN UINT32      InputParameterBlockSize,
+  IN UINT8       *InputParameterBlock,
+  IN OUT UINT32  *OutputParameterBlockSize,
+  IN UINT8       *OutputParameterBlock
   );
 
 /**
@@ -44,5 +43,3 @@ EFIAPI
 Tpm12RequestUseTpm (
   VOID
   );
-
-#endif

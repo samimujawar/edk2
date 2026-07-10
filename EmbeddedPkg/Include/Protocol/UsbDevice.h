@@ -6,12 +6,11 @@
 
 **/
 
-#ifndef __USB_DEVICE_PROTOCOL_H__
-#define __USB_DEVICE_PROTOCOL_H__
+#pragma once
 
 #include <IndustryStandard/Usb.h>
 
-extern EFI_GUID gUsbDeviceProtocolGuid;
+extern EFI_GUID  gUsbDeviceProtocolGuid;
 
 /*
  * Note: This Protocol is just  the bare minimum for Android Fastboot. It
@@ -30,8 +29,8 @@ extern EFI_GUID gUsbDeviceProtocolGuid;
 typedef
 VOID
 (*USB_DEVICE_RX_CALLBACK) (
-  IN UINTN    Size,
-  IN VOID    *Buffer
+  IN UINTN  Size,
+  IN VOID   *Buffer
   );
 
 /*
@@ -46,7 +45,7 @@ VOID
 typedef
 VOID
 (*USB_DEVICE_TX_CALLBACK) (
-  IN UINT8    EndpointIndex
+  IN UINT8  EndpointIndex
   );
 
 /*
@@ -64,9 +63,9 @@ VOID
 typedef
 EFI_STATUS
 (*USB_DEVICE_SEND) (
-  IN       UINT8    EndpointIndex,
-  IN       UINTN    Size,
-  IN CONST VOID    *Buffer
+  IN       UINT8  EndpointIndex,
+  IN       UINTN  Size,
+  IN CONST VOID   *Buffer
   );
 
 /*
@@ -83,7 +82,7 @@ EFI_STATUS
                                 first interface descriptor. If there are
                                 additional interfaces, their interface
                                 descriptor and endpoint descriptors follow the
-                                first interface’s endpoint descriptors".
+                                first interface's endpoint descriptors".
 
                                 The size of each buffer is the TotalLength
                                 member of the Configuration Descriptor.
@@ -96,17 +95,15 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (*USB_DEVICE_START) (
-  IN USB_DEVICE_DESCRIPTOR     *DeviceDescriptor,
-  IN VOID                     **Descriptors,
-  IN USB_DEVICE_RX_CALLBACK     RxCallback,
-  IN USB_DEVICE_TX_CALLBACK     TxCallback
+  IN USB_DEVICE_DESCRIPTOR   *DeviceDescriptor,
+  IN VOID                    **Descriptors,
+  IN USB_DEVICE_RX_CALLBACK  RxCallback,
+  IN USB_DEVICE_TX_CALLBACK  TxCallback
   );
 
 struct _USB_DEVICE_PROTOCOL {
-  USB_DEVICE_START Start;
-  USB_DEVICE_SEND  Send;
+  USB_DEVICE_START    Start;
+  USB_DEVICE_SEND     Send;
 };
 
 typedef struct _USB_DEVICE_PROTOCOL USB_DEVICE_PROTOCOL;
-
-#endif //ifndef __USB_DEVICE_PROTOCOL_H__

@@ -10,8 +10,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __SMM_FAULT_TOLERANT_WRITE_H__
-#define __SMM_FAULT_TOLERANT_WRITE_H__
+#pragma once
 
 #include <Protocol/FaultTolerantWrite.h>
 
@@ -27,6 +26,4 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 typedef EFI_FAULT_TOLERANT_WRITE_PROTOCOL EFI_SMM_FAULT_TOLERANT_WRITE_PROTOCOL;
 
-extern EFI_GUID gEfiSmmFaultTolerantWriteProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiSmmFaultTolerantWriteProtocolGuid;

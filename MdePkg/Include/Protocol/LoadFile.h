@@ -12,8 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_LOAD_FILE_PROTOCOL_H__
-#define __EFI_LOAD_FILE_PROTOCOL_H__
+#pragma once
 
 #define EFI_LOAD_FILE_PROTOCOL_GUID \
   { \
@@ -23,14 +22,14 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// Protocol Guid defined by EFI1.1.
 ///
-#define LOAD_FILE_PROTOCOL EFI_LOAD_FILE_PROTOCOL_GUID
+#define LOAD_FILE_PROTOCOL  EFI_LOAD_FILE_PROTOCOL_GUID
 
 typedef struct _EFI_LOAD_FILE_PROTOCOL EFI_LOAD_FILE_PROTOCOL;
 
 ///
 /// Backward-compatible with EFI1.1
 ///
-typedef EFI_LOAD_FILE_PROTOCOL  EFI_LOAD_FILE_INTERFACE;
+typedef EFI_LOAD_FILE_PROTOCOL EFI_LOAD_FILE_INTERFACE;
 
 /**
   Causes the driver to load a specified file.
@@ -74,9 +73,7 @@ EFI_STATUS
 /// The EFI_LOAD_FILE_PROTOCOL is a simple protocol used to obtain files from arbitrary devices.
 ///
 struct _EFI_LOAD_FILE_PROTOCOL {
-  EFI_LOAD_FILE LoadFile;
+  EFI_LOAD_FILE    LoadFile;
 };
 
-extern EFI_GUID gEfiLoadFileProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiLoadFileProtocolGuid;

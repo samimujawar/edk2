@@ -12,8 +12,7 @@
 
 **/
 
-#ifndef _MM_STANDBY_BUTTON_DISPATCH_H_
-#define _MM_STANDBY_BUTTON_DISPATCH_H_
+#pragma once
 
 #include <Pi/PiMmCis.h>
 
@@ -39,7 +38,7 @@ typedef struct {
   /// Describes whether the child handler should be invoked upon the entry to the button
   /// activation or upon exit.
   ///
-  EFI_STANDBY_BUTTON_PHASE  Phase;
+  EFI_STANDBY_BUTTON_PHASE    Phase;
 } EFI_MM_STANDBY_BUTTON_REGISTER_CONTEXT;
 
 typedef struct _EFI_MM_STANDBY_BUTTON_DISPATCH_PROTOCOL EFI_MM_STANDBY_BUTTON_DISPATCH_PROTOCOL;
@@ -103,11 +102,8 @@ EFI_STATUS
 /// button MMI source generator.
 ///
 struct _EFI_MM_STANDBY_BUTTON_DISPATCH_PROTOCOL {
-  EFI_MM_STANDBY_BUTTON_REGISTER    Register;
-  EFI_MM_STANDBY_BUTTON_UNREGISTER  UnRegister;
+  EFI_MM_STANDBY_BUTTON_REGISTER      Register;
+  EFI_MM_STANDBY_BUTTON_UNREGISTER    UnRegister;
 };
 
-extern EFI_GUID gEfiMmStandbyButtonDispatchProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiMmStandbyButtonDispatchProtocolGuid;

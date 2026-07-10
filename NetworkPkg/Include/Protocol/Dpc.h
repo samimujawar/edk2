@@ -7,9 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
-#ifndef __DPC_H__
-#define __DPC_H__
+#pragma once
 
 //
 // DPC Protocol GUID value
@@ -22,8 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Forward reference for pure ANSI compatibility
 //
-typedef struct _EFI_DPC_PROTOCOL  EFI_DPC_PROTOCOL;
-
+typedef struct _EFI_DPC_PROTOCOL EFI_DPC_PROTOCOL;
 
 /**
   Invoke a Deferred Procedure Call.
@@ -86,13 +83,11 @@ EFI_STATUS
 /// DPC Protocol structure.
 ///
 struct _EFI_DPC_PROTOCOL {
-  EFI_DPC_QUEUE_DPC     QueueDpc;
-  EFI_DPC_DISPATCH_DPC  DispatchDpc;
+  EFI_DPC_QUEUE_DPC       QueueDpc;
+  EFI_DPC_DISPATCH_DPC    DispatchDpc;
 };
 
 ///
 /// DPC Protocol GUID variable.
 ///
-extern EFI_GUID gEfiDpcProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiDpcProtocolGuid;

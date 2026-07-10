@@ -28,7 +28,7 @@
 
 **/
 #if !defined (MDEPKG_NDEBUG)
-  #define ASSERT_VERIFY_NODE_IN_VALID_LIST(FirstEntry, SecondEntry, InList)  \
+#define ASSERT_VERIFY_NODE_IN_VALID_LIST(FirstEntry, SecondEntry, InList)  \
     do {                                                                     \
       if (FeaturePcdGet (PcdVerifyNodeInList)) {                             \
         ASSERT (InList == IsNodeInList ((FirstEntry), (SecondEntry)));       \
@@ -37,7 +37,7 @@
       }                                                                      \
     } while (FALSE)
 #else
-  #define ASSERT_VERIFY_NODE_IN_VALID_LIST(FirstEntry, SecondEntry, InList)
+#define ASSERT_VERIFY_NODE_IN_VALID_LIST(FirstEntry, SecondEntry, InList)
 #endif
 
 /**
@@ -119,8 +119,8 @@ InternalBaseLibIsListValid (
 BOOLEAN
 EFIAPI
 IsNodeInList (
-  IN      CONST LIST_ENTRY      *FirstEntry,
-  IN      CONST LIST_ENTRY      *SecondEntry
+  IN      CONST LIST_ENTRY  *FirstEntry,
+  IN      CONST LIST_ENTRY  *SecondEntry
   )
 {
   UINTN             Count;
@@ -180,14 +180,14 @@ IsNodeInList (
 LIST_ENTRY *
 EFIAPI
 InitializeListHead (
-  IN OUT  LIST_ENTRY                *ListHead
+  IN OUT  LIST_ENTRY  *ListHead
   )
 
 {
   ASSERT (ListHead != NULL);
 
   ListHead->ForwardLink = ListHead;
-  ListHead->BackLink = ListHead;
+  ListHead->BackLink    = ListHead;
   return ListHead;
 }
 
@@ -200,7 +200,7 @@ InitializeListHead (
 
   If ListHead is NULL, then ASSERT().
   If Entry is NULL, then ASSERT().
-  If ListHead was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If ListHead was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and prior to insertion the number
   of nodes in ListHead, including the ListHead node, is greater than or
@@ -216,8 +216,8 @@ InitializeListHead (
 LIST_ENTRY *
 EFIAPI
 InsertHeadList (
-  IN OUT  LIST_ENTRY                *ListHead,
-  IN OUT  LIST_ENTRY                *Entry
+  IN OUT  LIST_ENTRY  *ListHead,
+  IN OUT  LIST_ENTRY  *Entry
   )
 {
   //
@@ -225,10 +225,10 @@ InsertHeadList (
   //
   ASSERT_VERIFY_NODE_IN_VALID_LIST (ListHead, Entry, FALSE);
 
-  Entry->ForwardLink = ListHead->ForwardLink;
-  Entry->BackLink = ListHead;
+  Entry->ForwardLink           = ListHead->ForwardLink;
+  Entry->BackLink              = ListHead;
   Entry->ForwardLink->BackLink = Entry;
-  ListHead->ForwardLink = Entry;
+  ListHead->ForwardLink        = Entry;
   return ListHead;
 }
 
@@ -241,7 +241,7 @@ InsertHeadList (
 
   If ListHead is NULL, then ASSERT().
   If Entry is NULL, then ASSERT().
-  If ListHead was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If ListHead was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and prior to insertion the number
   of nodes in ListHead, including the ListHead node, is greater than or
@@ -257,8 +257,8 @@ InsertHeadList (
 LIST_ENTRY *
 EFIAPI
 InsertTailList (
-  IN OUT  LIST_ENTRY                *ListHead,
-  IN OUT  LIST_ENTRY                *Entry
+  IN OUT  LIST_ENTRY  *ListHead,
+  IN OUT  LIST_ENTRY  *Entry
   )
 {
   //
@@ -266,10 +266,10 @@ InsertTailList (
   //
   ASSERT_VERIFY_NODE_IN_VALID_LIST (ListHead, Entry, FALSE);
 
-  Entry->ForwardLink = ListHead;
-  Entry->BackLink = ListHead->BackLink;
+  Entry->ForwardLink           = ListHead;
+  Entry->BackLink              = ListHead->BackLink;
   Entry->BackLink->ForwardLink = Entry;
-  ListHead->BackLink = Entry;
+  ListHead->BackLink           = Entry;
   return ListHead;
 }
 
@@ -277,11 +277,11 @@ InsertTailList (
   Retrieves the first node of a doubly-linked list.
 
   Returns the first node of a doubly-linked list.  List must have been
-  initialized with INTIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
+  initialized with INITIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
   If List is empty, then List is returned.
 
   If List is NULL, then ASSERT().
-  If List was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If List was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and the number of nodes
   in List, including the List node, is greater than or equal to
@@ -296,7 +296,7 @@ InsertTailList (
 LIST_ENTRY *
 EFIAPI
 GetFirstNode (
-  IN      CONST LIST_ENTRY          *List
+  IN      CONST LIST_ENTRY  *List
   )
 {
   //
@@ -311,12 +311,12 @@ GetFirstNode (
   Retrieves the next node of a doubly-linked list.
 
   Returns the node of a doubly-linked list that follows Node.
-  List must have been initialized with INTIALIZE_LIST_HEAD_VARIABLE()
+  List must have been initialized with INITIALIZE_LIST_HEAD_VARIABLE()
   or InitializeListHead().  If List is empty, then List is returned.
 
   If List is NULL, then ASSERT().
   If Node is NULL, then ASSERT().
-  If List was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If List was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and List contains more than
   PcdMaximumLinkedListLength nodes, then ASSERT().
@@ -331,8 +331,8 @@ GetFirstNode (
 LIST_ENTRY *
 EFIAPI
 GetNextNode (
-  IN      CONST LIST_ENTRY          *List,
-  IN      CONST LIST_ENTRY          *Node
+  IN      CONST LIST_ENTRY  *List,
+  IN      CONST LIST_ENTRY  *Node
   )
 {
   //
@@ -347,12 +347,12 @@ GetNextNode (
   Retrieves the previous node of a doubly-linked list.
 
   Returns the node of a doubly-linked list that precedes Node.
-  List must have been initialized with INTIALIZE_LIST_HEAD_VARIABLE()
+  List must have been initialized with INITIALIZE_LIST_HEAD_VARIABLE()
   or InitializeListHead().  If List is empty, then List is returned.
 
   If List is NULL, then ASSERT().
   If Node is NULL, then ASSERT().
-  If List was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If List was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and List contains more than
   PcdMaximumLinkedListLength nodes, then ASSERT().
@@ -367,8 +367,8 @@ GetNextNode (
 LIST_ENTRY *
 EFIAPI
 GetPreviousNode (
-  IN      CONST LIST_ENTRY          *List,
-  IN      CONST LIST_ENTRY          *Node
+  IN      CONST LIST_ENTRY  *List,
+  IN      CONST LIST_ENTRY  *Node
   )
 {
   //
@@ -386,7 +386,7 @@ GetPreviousNode (
   zero nodes, this function returns TRUE. Otherwise, it returns FALSE.
 
   If ListHead is NULL, then ASSERT().
-  If ListHead was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If ListHead was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and the number of nodes
   in List, including the List node, is greater than or equal to
@@ -401,7 +401,7 @@ GetPreviousNode (
 BOOLEAN
 EFIAPI
 IsListEmpty (
-  IN      CONST LIST_ENTRY          *ListHead
+  IN      CONST LIST_ENTRY  *ListHead
   )
 {
   //
@@ -419,11 +419,11 @@ IsListEmpty (
 
   Returns TRUE if Node is equal to List.  Returns FALSE if Node is one of the
   nodes in the doubly-linked list specified by List.  List must have been
-  initialized with INTIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
+  initialized with INITIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
 
   If List is NULL, then ASSERT().
   If Node is NULL, then ASSERT().
-  If List was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead(),
+  If List was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead(),
   then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and the number of nodes
   in List, including the List node, is greater than or equal to
@@ -441,8 +441,8 @@ IsListEmpty (
 BOOLEAN
 EFIAPI
 IsNull (
-  IN      CONST LIST_ENTRY          *List,
-  IN      CONST LIST_ENTRY          *Node
+  IN      CONST LIST_ENTRY  *List,
+  IN      CONST LIST_ENTRY  *Node
   )
 {
   //
@@ -458,11 +458,11 @@ IsNull (
 
   Returns TRUE if Node is the last node in the doubly-linked list specified by
   List. Otherwise, FALSE is returned. List must have been initialized with
-  INTIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
+  INITIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
 
   If List is NULL, then ASSERT().
   If Node is NULL, then ASSERT().
-  If List was not initialized with INTIALIZE_LIST_HEAD_VARIABLE() or
+  If List was not initialized with INITIALIZE_LIST_HEAD_VARIABLE() or
   InitializeListHead(), then ASSERT().
   If PcdMaximumLinkedListLength is not zero, and the number of nodes
   in List, including the List node, is greater than or equal to
@@ -479,8 +479,8 @@ IsNull (
 BOOLEAN
 EFIAPI
 IsNodeAtEnd (
-  IN      CONST LIST_ENTRY          *List,
-  IN      CONST LIST_ENTRY          *Node
+  IN      CONST LIST_ENTRY  *List,
+  IN      CONST LIST_ENTRY  *Node
   )
 {
   //
@@ -499,7 +499,7 @@ IsNodeAtEnd (
   Otherwise, the location of the FirstEntry node is swapped with the location
   of the SecondEntry node in a doubly-linked list. SecondEntry must be in the
   same double linked list as FirstEntry and that double linked list must have
-  been initialized with INTIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
+  been initialized with INITIALIZE_LIST_HEAD_VARIABLE() or InitializeListHead().
   SecondEntry is returned after the nodes are swapped.
 
   If FirstEntry is NULL, then ASSERT().
@@ -520,11 +520,11 @@ IsNodeAtEnd (
 LIST_ENTRY *
 EFIAPI
 SwapListEntries (
-  IN OUT  LIST_ENTRY                *FirstEntry,
-  IN OUT  LIST_ENTRY                *SecondEntry
+  IN OUT  LIST_ENTRY  *FirstEntry,
+  IN OUT  LIST_ENTRY  *SecondEntry
   )
 {
-  LIST_ENTRY                    *Ptr;
+  LIST_ENTRY  *Ptr;
 
   if (FirstEntry == SecondEntry) {
     return SecondEntry;
@@ -588,7 +588,7 @@ SwapListEntries (
 LIST_ENTRY *
 EFIAPI
 RemoveEntryList (
-  IN      CONST LIST_ENTRY          *Entry
+  IN      CONST LIST_ENTRY  *Entry
   )
 {
   ASSERT (!IsListEmpty (Entry));

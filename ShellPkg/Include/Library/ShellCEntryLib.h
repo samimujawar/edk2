@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _SHELL_C_ENTRY_LIB_
-#define _SHELL_C_ENTRY_LIB_
+#pragma once
 
 /**
   UEFI application entry point which has an interface similar to a
@@ -26,9 +25,6 @@
 INTN
 EFIAPI
 ShellAppMain (
-  IN UINTN Argc,
-  IN CHAR16 **Argv
+  IN UINTN   Argc,
+  IN CHAR16  **Argv
   );
-
-#endif
-

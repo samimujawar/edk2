@@ -8,9 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __SEC_H___
-#define __SEC_H___
-
+#pragma once
 
 #include <PiPei.h>
 #include <Library/EmuMagicPageLib.h>
@@ -21,25 +19,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Ppi/TemporaryRamSupport.h>
 
-
-//
-// I think this should be defined in a MdePkg include file?
-//
-VOID
-EFIAPI
-ProcessLibraryConstructorList (
-  VOID
-  );
-
 EFI_STATUS
 EFIAPI
 SecTemporaryRamSupport (
-  IN CONST EFI_PEI_SERVICES   **PeiServices,
-  IN EFI_PHYSICAL_ADDRESS     TemporaryMemoryBase,
-  IN EFI_PHYSICAL_ADDRESS     PermanentMemoryBase,
-  IN UINTN                    CopySize
+  IN CONST EFI_PEI_SERVICES  **PeiServices,
+  IN EFI_PHYSICAL_ADDRESS    TemporaryMemoryBase,
+  IN EFI_PHYSICAL_ADDRESS    PermanentMemoryBase,
+  IN UINTN                   CopySize
   );
-
-
-#endif
-

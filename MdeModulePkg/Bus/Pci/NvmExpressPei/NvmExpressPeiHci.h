@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef _NVM_EXPRESS_PEI_HCI_H_
-#define _NVM_EXPRESS_PEI_HCI_H_
+#pragma once
 
 //
 // NVME host controller registers operation definitions
@@ -43,14 +42,13 @@ enum {
 //
 // All of base memories are 4K(0x1000) alignment
 //
-#define ALIGN(v, a)                          (UINTN)((((v) - 1) | ((a) - 1)) + 1)
-#define NVME_MEM_BASE(Private)               ((UINTN)(Private->Buffer))
-#define NVME_ASQ_BASE(Private)               (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_ASQ))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
-#define NVME_ACQ_BASE(Private)               (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_ACQ))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
-#define NVME_SQ_BASE(Private, Index)         (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_SQ) + ((Index)*(NVME_MAX_QUEUES-1))) * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
-#define NVME_CQ_BASE(Private, Index)         (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_CQ) + ((Index)*(NVME_MAX_QUEUES-1))) * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
-#define NVME_PRP_BASE(Private)               (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_PRP))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
-
+#define ALIGN(v, a)                   (UINTN)((((v) - 1) | ((a) - 1)) + 1)
+#define NVME_MEM_BASE(Private)        ((UINTN)(Private->Buffer))
+#define NVME_ASQ_BASE(Private)        (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_ASQ))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
+#define NVME_ACQ_BASE(Private)        (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_ACQ))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
+#define NVME_SQ_BASE(Private, Index)  (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_SQ) + ((Index)*(NVME_MAX_QUEUES-1))) * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
+#define NVME_CQ_BASE(Private, Index)  (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_CQ) + ((Index)*(NVME_MAX_QUEUES-1))) * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
+#define NVME_PRP_BASE(Private)        (ALIGN (NVME_MEM_BASE(Private) + ((NvmeBaseMemPageOffset (BASEMEM_PRP))                                * EFI_PAGE_SIZE), EFI_PAGE_SIZE))
 
 /**
   Transfer MMIO Data to memory.
@@ -64,9 +62,9 @@ enum {
 **/
 EFI_STATUS
 NvmeMmioRead (
-  IN OUT VOID *MemBuffer,
-  IN     UINTN MmioAddr,
-  IN     UINTN Size
+  IN OUT VOID   *MemBuffer,
+  IN     UINTN  MmioAddr,
+  IN     UINTN  Size
   );
 
 /**
@@ -81,9 +79,9 @@ NvmeMmioRead (
 **/
 EFI_STATUS
 NvmeMmioWrite (
-  IN OUT UINTN MmioAddr,
-  IN     VOID *MemBuffer,
-  IN     UINTN Size
+  IN OUT UINTN  MmioAddr,
+  IN     VOID   *MemBuffer,
+  IN     UINTN  Size
   );
 
 /**
@@ -96,7 +94,7 @@ NvmeMmioWrite (
 **/
 UINT32
 NvmeBaseMemPageOffset (
-  IN UINTN              BaseMemIndex
+  IN UINTN  BaseMemIndex
   );
 
 /**
@@ -110,7 +108,7 @@ NvmeBaseMemPageOffset (
 **/
 EFI_STATUS
 NvmeControllerInit (
-  IN PEI_NVME_CONTROLLER_PRIVATE_DATA    *Private
+  IN PEI_NVME_CONTROLLER_PRIVATE_DATA  *Private
   );
 
 /**
@@ -126,9 +124,9 @@ NvmeControllerInit (
 **/
 EFI_STATUS
 NvmeIdentifyNamespace (
-  IN PEI_NVME_CONTROLLER_PRIVATE_DATA    *Private,
-  IN UINT32                              NamespaceId,
-  IN VOID                                *Buffer
+  IN PEI_NVME_CONTROLLER_PRIVATE_DATA  *Private,
+  IN UINT32                            NamespaceId,
+  IN VOID                              *Buffer
   );
 
 /**
@@ -139,7 +137,5 @@ NvmeIdentifyNamespace (
 **/
 VOID
 NvmeFreeDmaResource (
-  IN PEI_NVME_CONTROLLER_PRIVATE_DATA    *Private
+  IN PEI_NVME_CONTROLLER_PRIVATE_DATA  *Private
   );
-
-#endif

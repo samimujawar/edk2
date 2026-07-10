@@ -1,15 +1,15 @@
 /** @file
   The header files of the driver binding and service binding protocol for HttpDxe driver.
 
-  Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2015 - 2021, Intel Corporation. All rights reserved.<BR>
   (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
+  (c) Copyright 2025 HP Development Company, L.P.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_HTTP_DRIVER_H__
-#define __EFI_HTTP_DRIVER_H__
+#pragma once
 
 #include <Uefi.h>
 #include <IndustryStandard/Http11.h>
@@ -26,6 +26,8 @@
 #include <Library/NetLib.h>
 #include <Library/HttpLib.h>
 #include <Library/DpcLib.h>
+#include <Library/PrintLib.h>
+#include <Library/PcdLib.h>
 
 //
 // UEFI Driver Model Protocols
@@ -47,6 +49,7 @@
 #include <Protocol/Ip6Config.h>
 #include <Protocol/Tls.h>
 #include <Protocol/TlsConfig.h>
+#include <Protocol/HttpCallback.h>
 
 #include <Guid/ImageAuthentication.h>
 //
@@ -62,7 +65,8 @@
 //
 // Driver Version
 //
-#define HTTP_DRIVER_VERSION 0xa
+#define HTTP_DRIVER_VERSION  0xa
+#define URI_STR_MAX_SIZE     255
 
 //
 // Protocol instances
@@ -70,8 +74,8 @@
 extern EFI_DRIVER_BINDING_PROTOCOL  gHttpDxeIp4DriverBinding;
 extern EFI_DRIVER_BINDING_PROTOCOL  gHttpDxeIp6DriverBinding;
 
-extern EFI_COMPONENT_NAME2_PROTOCOL gHttpDxeComponentName2;
-extern EFI_COMPONENT_NAME_PROTOCOL  gHttpDxeComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gHttpDxeComponentName2;
+extern EFI_COMPONENT_NAME_PROTOCOL   gHttpDxeComponentName;
 
 extern EFI_HTTP_UTILITIES_PROTOCOL  *mHttpUtilities;
 
@@ -85,9 +89,9 @@ extern EFI_HTTP_UTILITIES_PROTOCOL  *mHttpUtilities;
 #include "HttpDns.h"
 
 typedef struct {
-  EFI_SERVICE_BINDING_PROTOCOL  *ServiceBinding;
-  UINTN                         NumberOfChildren;
-  EFI_HANDLE                    *ChildHandleBuffer;
+  EFI_SERVICE_BINDING_PROTOCOL    *ServiceBinding;
+  UINTN                           NumberOfChildren;
+  EFI_HANDLE                      *ChildHandleBuffer;
 } HTTP_DESTROY_CHILD_IN_HANDLE_BUF_CONTEXT;
 
 /**
@@ -395,5 +399,3 @@ HttpServiceBindingDestroyChild (
   IN EFI_SERVICE_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                    ChildHandle
   );
-
-#endif

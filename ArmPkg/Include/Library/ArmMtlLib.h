@@ -9,8 +9,7 @@
     DEN0056A_System_Control_and_Management_Interface.pdf
 **/
 
-#ifndef ARM_MTL_LIB_H_
-#define ARM_MTL_LIB_H_
+#pragma once
 
 #include <Uefi/UefiBaseType.h>
 
@@ -18,37 +17,37 @@
 #pragma pack(1)
 
 typedef struct {
-  UINT32 Reserved1;
-  UINT32 ChannelStatus;
-  UINT64 Reserved2;
-  UINT32 Flags;
-  UINT32 Length;
-  UINT32 MessageHeader;
+  UINT32    Reserved1;
+  UINT32    ChannelStatus;
+  UINT64    Reserved2;
+  UINT32    Flags;
+  UINT32    Length;
+  UINT32    MessageHeader;
 
   // NOTE: Since EDK2 does not allow flexible array member [] we declare
   // here array of 1 element length. However below is used as a variable
   // length array.
-  UINT32 Payload[1];    // size less object gives offset to payload.
+  UINT32    Payload[1]; // size less object gives offset to payload.
 } MTL_MAILBOX;
 
 #pragma pack()
 
 // Channel Type, Low-priority, and High-priority
 typedef enum {
-  MTL_CHANNEL_TYPE_LOW = 0,
+  MTL_CHANNEL_TYPE_LOW  = 0,
   MTL_CHANNEL_TYPE_HIGH = 1
 } MTL_CHANNEL_TYPE;
 
 typedef struct {
-  UINT64 PhysicalAddress;
-  UINT32 ModifyMask;
-  UINT32 PreserveMask;
+  UINT64    PhysicalAddress;
+  UINT32    ModifyMask;
+  UINT32    PreserveMask;
 } MTL_DOORBELL;
 
 typedef struct {
-  MTL_CHANNEL_TYPE ChannelType;
-  MTL_MAILBOX      * CONST MailBox;
-  MTL_DOORBELL     DoorBell;
+  MTL_CHANNEL_TYPE           ChannelType;
+  MTL_MAILBOX      *CONST    MailBox;
+  MTL_DOORBELL               DoorBell;
 } MTL_CHANNEL;
 
 /** Wait until channel is free.
@@ -71,7 +70,7 @@ MtlWaitUntilChannelFree (
 
   @retval UINT32*      Pointer to the payload.
 **/
-UINT32*
+UINT32 *
 MtlGetChannelPayload (
   IN MTL_CHANNEL  *Channel
   );
@@ -126,6 +125,3 @@ MtlReceiveMessage (
   OUT UINT32       *MessageHeader,
   OUT UINT32       *PayloadLength
   );
-
-#endif  /* ARM_MTL_LIB_H_ */
-

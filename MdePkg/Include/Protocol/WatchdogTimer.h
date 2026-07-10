@@ -7,8 +7,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef __ARCH_PROTOCOL_WATCHDOG_TIMER_H__
-#define __ARCH_PROTOCOL_WATCHDOG_TIMER_H__
+#pragma once
 
 ///
 /// Global ID for the Watchdog Timer Architectural Protocol
@@ -19,7 +18,7 @@
 ///
 /// Declare forward reference for the Timer Architectural Protocol
 ///
-typedef struct _EFI_WATCHDOG_TIMER_ARCH_PROTOCOL  EFI_WATCHDOG_TIMER_ARCH_PROTOCOL;
+typedef struct _EFI_WATCHDOG_TIMER_ARCH_PROTOCOL EFI_WATCHDOG_TIMER_ARCH_PROTOCOL;
 
 /**
   A function of this type is called when the watchdog timer fires if a
@@ -114,7 +113,6 @@ EFI_STATUS
   OUT UINT64                            *TimerPeriod
   );
 
-
 ///
 /// This protocol provides the services required to implement the Boot Service
 /// SetWatchdogTimer().  It provides a service to set the amount of time to wait
@@ -127,12 +125,9 @@ EFI_STATUS
 /// reset by calling the Runtime Service ResetSystem().
 ///
 struct _EFI_WATCHDOG_TIMER_ARCH_PROTOCOL {
-  EFI_WATCHDOG_TIMER_REGISTER_HANDLER  RegisterHandler;
-  EFI_WATCHDOG_TIMER_SET_TIMER_PERIOD  SetTimerPeriod;
-  EFI_WATCHDOG_TIMER_GET_TIMER_PERIOD  GetTimerPeriod;
+  EFI_WATCHDOG_TIMER_REGISTER_HANDLER    RegisterHandler;
+  EFI_WATCHDOG_TIMER_SET_TIMER_PERIOD    SetTimerPeriod;
+  EFI_WATCHDOG_TIMER_GET_TIMER_PERIOD    GetTimerPeriod;
 };
 
-extern EFI_GUID gEfiWatchdogTimerArchProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiWatchdogTimerArchProtocolGuid;

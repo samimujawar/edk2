@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __EFI_SHELL_PARAMETERS_PROTOCOL_H__
-#define __EFI_SHELL_PARAMETERS_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/Shell.h>
 
@@ -23,32 +22,30 @@ typedef struct _EFI_SHELL_PARAMETERS_PROTOCOL {
   /// path of the executable. Any quotation marks that were used to preserve
   /// whitespace have been removed.
   ///
-  CHAR16 **Argv;
+  CHAR16               **Argv;
 
   ///
   /// The number of elements in the Argv array.
   ///
-  UINTN Argc;
+  UINTN                Argc;
 
   ///
   /// The file handle for the standard input for this executable. This may be different
   /// from the ConInHandle in EFI_SYSTEM_TABLE.
   ///
-  SHELL_FILE_HANDLE StdIn;
+  SHELL_FILE_HANDLE    StdIn;
 
   ///
   /// The file handle for the standard output for this executable. This may be different
   /// from the ConOutHandle in EFI_SYSTEM_TABLE.
   ///
-  SHELL_FILE_HANDLE StdOut;
+  SHELL_FILE_HANDLE    StdOut;
 
   ///
   /// The file handle for the standard error output for this executable. This may be
   /// different from the StdErrHandle in EFI_SYSTEM_TABLE.
   ///
-  SHELL_FILE_HANDLE StdErr;
+  SHELL_FILE_HANDLE    StdErr;
 } EFI_SHELL_PARAMETERS_PROTOCOL;
 
-extern EFI_GUID gEfiShellParametersProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiShellParametersProtocolGuid;

@@ -5,10 +5,18 @@ Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-#ifndef __EFI_HTTP_BOOT_IMPL_H__
-#define __EFI_HTTP_BOOT_IMPL_H__
 
-#define HTTP_BOOT_CHECK_MEDIA_WAITING_TIME          EFI_TIMER_PERIOD_SECONDS(20)
+#pragma once
+
+#define HTTP_BOOT_CHECK_MEDIA_WAITING_TIME  EFI_TIMER_PERIOD_SECONDS(20)
+
+typedef enum {
+  GetBootFileHead,
+  GetBootFileGet,
+  ConnectToProxy,
+  LoadBootFile,
+  GetBootFileError
+} HTTP_GET_BOOT_FILE_STATE;
 
 /**
   Attempt to complete a DHCPv4 D.O.R.A or DHCPv6 S.R.A.A sequence to retrieve the boot resource information.
@@ -24,7 +32,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_STATUS
 HttpBootDhcp (
-  IN HTTP_BOOT_PRIVATE_DATA           *Private
+  IN HTTP_BOOT_PRIVATE_DATA  *Private
   );
 
 /**
@@ -40,9 +48,25 @@ HttpBootDhcp (
 **/
 EFI_STATUS
 HttpBootStop (
-  IN HTTP_BOOT_PRIVATE_DATA           *Private
+  IN HTTP_BOOT_PRIVATE_DATA  *Private
   );
 
 extern EFI_HTTP_BOOT_CALLBACK_PROTOCOL  gHttpBootDxeHttpBootCallback;
 
-#endif
+/**
+  Callback function that is invoked when an HTTP event occurs during HTTP Boot.
+
+  This function handles all HTTP callback events and prints error messages
+  to the screen when an error is encountered during the HTTP Boot process.
+
+  @param[in]  This              Pointer to the EDKII_HTTP_CALLBACK_PROTOCOL instance.
+  @param[in]  Event             The event that occurs in the current state.
+  @param[in]  EventStatus       The Status of Event, EFI_SUCCESS or other errors.
+**/
+VOID
+EFIAPI
+HttpBootHttpCallback (
+  IN EDKII_HTTP_CALLBACK_PROTOCOL  *This,
+  IN EDKII_HTTP_CALLBACK_EVENT     Event,
+  IN EFI_STATUS                    EventStatus
+  );

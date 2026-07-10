@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PLATFORM_SEC_LIB_H__
-#define __PLATFORM_SEC_LIB_H__
+#pragma once
 
 /**
   A developer supplied function to perform platform specific operations.
@@ -30,7 +29,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_PEI_PPI_DESCRIPTOR *
 EFIAPI
 SecPlatformMain (
-  IN OUT   EFI_SEC_PEI_HAND_OFF        *SecCoreData
+  IN OUT   EFI_SEC_PEI_HAND_OFF  *SecCoreData
   );
 
 /**
@@ -47,9 +46,9 @@ SecPlatformMain (
 EFI_STATUS
 EFIAPI
 SecPlatformInformation (
-  IN CONST EFI_PEI_SERVICES                     **PeiServices,
-  IN OUT   UINT64                               *StructureSize,
-     OUT   EFI_SEC_PLATFORM_INFORMATION_RECORD  *PlatformInformationRecord
+  IN CONST EFI_PEI_SERVICES                  **PeiServices,
+  IN OUT   UINT64                            *StructureSize,
+  OUT   EFI_SEC_PLATFORM_INFORMATION_RECORD  *PlatformInformationRecord
   );
 
 /**
@@ -60,5 +59,3 @@ EFIAPI
 SecPlatformDisableTemporaryMemory (
   VOID
   );
-
-#endif

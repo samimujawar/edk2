@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _OPAL_PASSWORD_PEI_H_
-#define _OPAL_PASSWORD_PEI_H_
+#pragma once
 
 #include <PiPei.h>
 
@@ -31,16 +30,15 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "OpalPasswordCommon.h"
 
-
 //
 // The generic command timeout value (unit in us) for Storage Security Command
 // PPI ReceiveData/SendData services
 //
-#define SSC_PPI_GENERIC_TIMEOUT                  30000000
+#define SSC_PPI_GENERIC_TIMEOUT  30000000
 
 #pragma pack(1)
 
-#define OPAL_PEI_DEVICE_SIGNATURE       SIGNATURE_32 ('o', 'p', 'd', 's')
+#define OPAL_PEI_DEVICE_SIGNATURE  SIGNATURE_32 ('o', 'p', 'd', 's')
 
 typedef struct {
   UINTN                                    Signature;
@@ -55,6 +53,3 @@ typedef struct {
   CR (a, OPAL_PEI_DEVICE, Sscp, OPAL_PEI_DEVICE_SIGNATURE)
 
 #pragma pack()
-
-#endif // _OPAL_PASSWORD_PEI_H_
-

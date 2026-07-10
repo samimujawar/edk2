@@ -4,6 +4,7 @@
 
   Based on files under Nt32Pkg/MiscSubClassPlatformDxe/
 
+  Copyright (c) 2022, Ampere Computing LLC. All rights reserved.<BR>
   Copyright (c) 2021, NUVIA Inc. All rights reserved.<BR>
   Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
   Copyright (c) 2015, Hisilicon Limited. All rights reserved.<BR>
@@ -35,30 +36,29 @@
   @retval EFI_OUT_OF_RESOURCES       Failed to allocate required memory.
 
 **/
-SMBIOS_MISC_TABLE_FUNCTION(MiscSystemManufacturer)
-{
-  CHAR8                           *OptionalStrStart;
-  CHAR8                           *StrStart;
-  UINTN                           ManuStrLen;
-  UINTN                           VerStrLen;
-  UINTN                           PdNameStrLen;
-  UINTN                           SerialNumStrLen;
-  UINTN                           SKUNumStrLen;
-  UINTN                           FamilyStrLen;
-  UINTN                           RecordLength;
-  EFI_STRING                      Manufacturer;
-  EFI_STRING                      ProductName;
-  EFI_STRING                      Version;
-  EFI_STRING                      SerialNumber;
-  EFI_STRING                      SKUNumber;
-  EFI_STRING                      Family;
-  EFI_STRING_ID                   TokenToGet;
-  SMBIOS_TABLE_TYPE1              *SmbiosRecord;
-  SMBIOS_TABLE_TYPE1              *InputData;
-  EFI_STATUS                      Status;
-  EFI_STRING_ID                   TokenToUpdate;
-  CHAR16                          *Product;
-  CHAR16                          *pVersion;
+SMBIOS_MISC_TABLE_FUNCTION (MiscSystemManufacturer) {
+  CHAR8               *OptionalStrStart;
+  CHAR8               *StrStart;
+  UINTN               ManuStrLen;
+  UINTN               VerStrLen;
+  UINTN               PdNameStrLen;
+  UINTN               SerialNumStrLen;
+  UINTN               SKUNumStrLen;
+  UINTN               FamilyStrLen;
+  UINTN               RecordLength;
+  EFI_STRING          Manufacturer;
+  EFI_STRING          ProductName;
+  EFI_STRING          Version;
+  EFI_STRING          SerialNumber;
+  EFI_STRING          SKUNumber;
+  EFI_STRING          Family;
+  EFI_STRING_ID       TokenToGet;
+  SMBIOS_TABLE_TYPE1  *SmbiosRecord;
+  SMBIOS_TABLE_TYPE1  *InputData;
+  EFI_STATUS          Status;
+  EFI_STRING_ID       TokenToUpdate;
+  CHAR16              *Product;
+  CHAR16              *pVersion;
 
   Status = EFI_SUCCESS;
 
@@ -71,30 +71,50 @@ SMBIOS_MISC_TABLE_FUNCTION(MiscSystemManufacturer)
 
   InputData = (SMBIOS_TABLE_TYPE1 *)RecordData;
 
-  Product = (CHAR16 *) PcdGetPtr (PcdSystemProductName);
+  Product = (CHAR16 *)PcdGetPtr (PcdSystemProductName);
   if (StrLen (Product) > 0) {
     TokenToUpdate = STRING_TOKEN (STR_MISC_SYSTEM_PRODUCT_NAME);
     HiiSetString (mSmbiosMiscHiiHandle, TokenToUpdate, Product, NULL);
+  } else {
+    OemUpdateSmbiosInfo (
+      mSmbiosMiscHiiHandle,
+      STRING_TOKEN (STR_MISC_SYSTEM_PRODUCT_NAME),
+      ProductNameType01
+      );
   }
 
-  pVersion = (CHAR16 *) PcdGetPtr (PcdSystemVersion);
+  pVersion = (CHAR16 *)PcdGetPtr (PcdSystemVersion);
   if (StrLen (pVersion) > 0) {
     TokenToUpdate = STRING_TOKEN (STR_MISC_SYSTEM_VERSION);
     HiiSetString (mSmbiosMiscHiiHandle, TokenToUpdate, pVersion, NULL);
+  } else {
+    OemUpdateSmbiosInfo (
+      mSmbiosMiscHiiHandle,
+      STRING_TOKEN (STR_MISC_SYSTEM_VERSION),
+      VersionType01
+      );
   }
 
-  OemUpdateSmbiosInfo (mSmbiosMiscHiiHandle,
-                       STRING_TOKEN (STR_MISC_SYSTEM_SERIAL_NUMBER),
-                       SerialNumType01);
-  OemUpdateSmbiosInfo (mSmbiosMiscHiiHandle,
-                       STRING_TOKEN (STR_MISC_SYSTEM_MANUFACTURER),
-                       SystemManufacturerType01);
-  OemUpdateSmbiosInfo (mSmbiosMiscHiiHandle,
-                       STRING_TOKEN (STR_MISC_SYSTEM_SKU_NUMBER),
-                       SkuNumberType01);
-  OemUpdateSmbiosInfo (mSmbiosMiscHiiHandle,
-                       STRING_TOKEN (STR_MISC_SYSTEM_FAMILY),
-                       FamilyType01);
+  OemUpdateSmbiosInfo (
+    mSmbiosMiscHiiHandle,
+    STRING_TOKEN (STR_MISC_SYSTEM_SERIAL_NUMBER),
+    SerialNumType01
+    );
+  OemUpdateSmbiosInfo (
+    mSmbiosMiscHiiHandle,
+    STRING_TOKEN (STR_MISC_SYSTEM_MANUFACTURER),
+    SystemManufacturerType01
+    );
+  OemUpdateSmbiosInfo (
+    mSmbiosMiscHiiHandle,
+    STRING_TOKEN (STR_MISC_SYSTEM_SKU_NUMBER),
+    SkuNumberType01
+    );
+  OemUpdateSmbiosInfo (
+    mSmbiosMiscHiiHandle,
+    STRING_TOKEN (STR_MISC_SYSTEM_FAMILY),
+    FamilyType01
+    );
 
   TokenToGet   = STRING_TOKEN (STR_MISC_SYSTEM_MANUFACTURER);
   Manufacturer = HiiGetPackageString (&gEfiCallerIdGuid, TokenToGet, NULL);
@@ -141,12 +161,12 @@ SMBIOS_MISC_TABLE_FUNCTION(MiscSystemManufacturer)
 
   SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE1);
 
-  CopyGuid(&SmbiosRecord->Uuid, &InputData->Uuid);
+  OemGetSystemUuid (&SmbiosRecord->Uuid);
 
   OptionalStrStart = (CHAR8 *)(SmbiosRecord + 1);
   UnicodeStrToAsciiStrS (Manufacturer, OptionalStrStart, ManuStrLen + 1);
   StrStart = OptionalStrStart + ManuStrLen + 1;
-  UnicodeStrToAsciiStrS (ProductName,  StrStart, PdNameStrLen + 1);
+  UnicodeStrToAsciiStrS (ProductName, StrStart, PdNameStrLen + 1);
   StrStart += PdNameStrLen + 1;
   UnicodeStrToAsciiStrS (Version, StrStart, VerStrLen + 1);
   StrStart += VerStrLen + 1;
@@ -159,10 +179,15 @@ SMBIOS_MISC_TABLE_FUNCTION(MiscSystemManufacturer)
   //
   // Now we have got the full smbios record, call smbios protocol to add this record.
   //
-  Status = SmbiosMiscAddRecord ((UINT8*)SmbiosRecord, NULL);
+  Status = SmbiosMiscAddRecord ((UINT8 *)SmbiosRecord, NULL);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "[%a]:[%dL] Smbios Type01 Table Log Failed! %r \n",
-            __FUNCTION__, __LINE__, Status));
+    DEBUG ((
+      DEBUG_ERROR,
+      "[%a]:[%dL] Smbios Type01 Table Log Failed! %r \n",
+      __func__,
+      DEBUG_LINE_NUMBER,
+      Status
+      ));
   }
 
   FreePool (SmbiosRecord);

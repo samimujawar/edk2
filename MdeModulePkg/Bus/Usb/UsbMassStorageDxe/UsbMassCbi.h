@@ -7,22 +7,21 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_USBMASS_CBI_H_
-#define _EFI_USBMASS_CBI_H_
+#pragma once
 
-extern USB_MASS_TRANSPORT mUsbCbi0Transport;
-extern USB_MASS_TRANSPORT mUsbCbi1Transport;
+extern USB_MASS_TRANSPORT  mUsbCbi0Transport;
+extern USB_MASS_TRANSPORT  mUsbCbi1Transport;
 
-#define USB_CBI_MAX_PACKET_NUM        16
-#define USB_CBI_RESET_CMD_LEN         12
+#define USB_CBI_MAX_PACKET_NUM  16
+#define USB_CBI_RESET_CMD_LEN   12
 //
 // USB CBI retry C/B/I transport times, set by experience
 //
-#define USB_CBI_MAX_RETRY             3
+#define USB_CBI_MAX_RETRY  3
 //
 // Time to wait for USB CBI reset to complete, set by experience
 //
-#define USB_CBI_RESET_DEVICE_STALL    (50 * USB_MASS_1_MILLISECOND)
+#define USB_CBI_RESET_DEVICE_STALL  (50 * USB_MASS_1_MILLISECOND)
 //
 // USB CBI transport timeout, set by experience
 //
@@ -32,17 +31,17 @@ typedef struct {
   //
   // Put Interface at the first field to make it easy to distinguish BOT/CBI Protocol instance
   //
-  EFI_USB_INTERFACE_DESCRIPTOR  Interface;
-  EFI_USB_ENDPOINT_DESCRIPTOR   *BulkInEndpoint;
-  EFI_USB_ENDPOINT_DESCRIPTOR   *BulkOutEndpoint;
-  EFI_USB_ENDPOINT_DESCRIPTOR   *InterruptEndpoint;
-  EFI_USB_IO_PROTOCOL           *UsbIo;
+  EFI_USB_INTERFACE_DESCRIPTOR    Interface;
+  EFI_USB_ENDPOINT_DESCRIPTOR     *BulkInEndpoint;
+  EFI_USB_ENDPOINT_DESCRIPTOR     *BulkOutEndpoint;
+  EFI_USB_ENDPOINT_DESCRIPTOR     *InterruptEndpoint;
+  EFI_USB_IO_PROTOCOL             *UsbIo;
 } USB_CBI_PROTOCOL;
 
 #pragma pack(1)
 typedef struct {
-  UINT8               Type;
-  UINT8               Value;
+  UINT8    Type;
+  UINT8    Value;
 } USB_CBI_STATUS;
 #pragma pack()
 
@@ -63,8 +62,8 @@ typedef struct {
 **/
 EFI_STATUS
 UsbCbiInit (
-  IN  EFI_USB_IO_PROTOCOL   *UsbIo,
-  OUT VOID                  **Context       OPTIONAL
+  IN  EFI_USB_IO_PROTOCOL  *UsbIo,
+  OUT VOID                 **Context       OPTIONAL
   );
 
 /**
@@ -114,8 +113,8 @@ UsbCbiExecCommand (
 **/
 EFI_STATUS
 UsbCbiResetDevice (
-  IN  VOID                    *Context,
-  IN  BOOLEAN                  ExtendedVerification
+  IN  VOID     *Context,
+  IN  BOOLEAN  ExtendedVerification
   );
 
 /**
@@ -128,7 +127,5 @@ UsbCbiResetDevice (
 **/
 EFI_STATUS
 UsbCbiCleanUp (
-  IN  VOID                   *Context
+  IN  VOID  *Context
   );
-
-#endif

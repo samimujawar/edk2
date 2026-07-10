@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _LIB_MISC_H_
-#define _LIB_MISC_H_
+#pragma once
 
 #include "HexEditor.h"
 
@@ -23,7 +22,7 @@
 **/
 HEFI_EDITOR_LINE *
 HMoveLine (
-  IN  INTN Count
+  IN  INTN  Count
   );
 
 /**
@@ -38,7 +37,7 @@ HMoveLine (
 **/
 HEFI_EDITOR_LINE *
 HMoveCurrentLine (
-  IN  INTN Count
+  IN  INTN  Count
   );
 
 /**
@@ -56,8 +55,8 @@ HMoveCurrentLine (
 **/
 EFI_STATUS
 HFreeLines (
-  IN LIST_ENTRY   *ListHead,
-  IN HEFI_EDITOR_LINE *Lines
+  IN LIST_ENTRY        *ListHead,
+  IN HEFI_EDITOR_LINE  *Lines
   );
 
 /**
@@ -69,7 +68,7 @@ HFreeLines (
 **/
 INT32
 HGetTextX (
-  IN INT32 GuidX
+  IN INT32  GuidX
   );
 
 /**
@@ -81,7 +80,5 @@ HGetTextX (
 **/
 INT32
 HGetTextY (
-  IN INT32 GuidY
+  IN INT32  GuidY
   );
-
-#endif

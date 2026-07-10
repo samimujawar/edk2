@@ -8,9 +8,7 @@
 
 **/
 
-#ifndef __S3_PCI_SEGMENT_LIB__
-#define __S3_PCI_SEGMENT_LIB__
-
+#pragma once
 
 /**
   Macro that converts PCI Segment, PCI Bus, PCI Device, PCI Function,
@@ -29,7 +27,7 @@
   @return The address that is compatible with the PCI Segment Library functions.
 
 **/
-#define S3_PCI_SEGMENT_LIB_ADDRESS(Segment,Bus,Device,Function,Register) \
+#define S3_PCI_SEGMENT_LIB_ADDRESS(Segment, Bus, Device, Function, Register) \
   ((Segment != 0) ? \
     ( ((Register) & 0xfff)                 | \
       (((Function) & 0x07) << 12)          | \
@@ -61,7 +59,7 @@
 UINT8
 EFIAPI
 S3PciSegmentRead8 (
-  IN UINT64                    Address
+  IN UINT64  Address
   );
 
 /**
@@ -82,8 +80,8 @@ S3PciSegmentRead8 (
 UINT8
 EFIAPI
 S3PciSegmentWrite8 (
-  IN UINT64                    Address,
-  IN UINT8                     Value
+  IN UINT64  Address,
+  IN UINT8   Value
   );
 
 /**
@@ -107,8 +105,8 @@ S3PciSegmentWrite8 (
 UINT8
 EFIAPI
 S3PciSegmentOr8 (
-  IN UINT64                    Address,
-  IN UINT8                     OrData
+  IN UINT64  Address,
+  IN UINT8   OrData
   );
 
 /**
@@ -131,8 +129,8 @@ S3PciSegmentOr8 (
 UINT8
 EFIAPI
 S3PciSegmentAnd8 (
-  IN UINT64                    Address,
-  IN UINT8                     AndData
+  IN UINT64  Address,
+  IN UINT8   AndData
   );
 
 /**
@@ -159,9 +157,9 @@ S3PciSegmentAnd8 (
 UINT8
 EFIAPI
 S3PciSegmentAndThenOr8 (
-  IN UINT64                    Address,
-  IN UINT8                     AndData,
-  IN UINT8                     OrData
+  IN UINT64  Address,
+  IN UINT8   AndData,
+  IN UINT8   OrData
   );
 
 /**
@@ -189,9 +187,9 @@ S3PciSegmentAndThenOr8 (
 UINT8
 EFIAPI
 S3PciSegmentBitFieldRead8 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit
   );
 
 /**
@@ -222,10 +220,10 @@ S3PciSegmentBitFieldRead8 (
 UINT8
 EFIAPI
 S3PciSegmentBitFieldWrite8 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT8                     Value
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT8   Value
   );
 
 /**
@@ -259,10 +257,10 @@ S3PciSegmentBitFieldWrite8 (
 UINT8
 EFIAPI
 S3PciSegmentBitFieldOr8 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT8                     OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT8   OrData
   );
 
 /**
@@ -296,10 +294,10 @@ S3PciSegmentBitFieldOr8 (
 UINT8
 EFIAPI
 S3PciSegmentBitFieldAnd8 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT8                     AndData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT8   AndData
   );
 
 /**
@@ -336,11 +334,11 @@ S3PciSegmentBitFieldAnd8 (
 UINT8
 EFIAPI
 S3PciSegmentBitFieldAndThenOr8 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT8                     AndData,
-  IN UINT8                     OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT8   AndData,
+  IN UINT8   OrData
   );
 
 /**
@@ -361,7 +359,7 @@ S3PciSegmentBitFieldAndThenOr8 (
 UINT16
 EFIAPI
 S3PciSegmentRead16 (
-  IN UINT64                    Address
+  IN UINT64  Address
   );
 
 /**
@@ -383,8 +381,8 @@ S3PciSegmentRead16 (
 UINT16
 EFIAPI
 S3PciSegmentWrite16 (
-  IN UINT64                    Address,
-  IN UINT16                    Value
+  IN UINT64  Address,
+  IN UINT16  Value
   );
 
 /**
@@ -410,8 +408,8 @@ S3PciSegmentWrite16 (
 UINT16
 EFIAPI
 S3PciSegmentOr16 (
-  IN UINT64                    Address,
-  IN UINT16                    OrData
+  IN UINT64  Address,
+  IN UINT16  OrData
   );
 
 /**
@@ -436,8 +434,8 @@ S3PciSegmentOr16 (
 UINT16
 EFIAPI
 S3PciSegmentAnd16 (
-  IN UINT64                    Address,
-  IN UINT16                    AndData
+  IN UINT64  Address,
+  IN UINT16  AndData
   );
 
 /**
@@ -465,9 +463,9 @@ S3PciSegmentAnd16 (
 UINT16
 EFIAPI
 S3PciSegmentAndThenOr16 (
-  IN UINT64                    Address,
-  IN UINT16                    AndData,
-  IN UINT16                    OrData
+  IN UINT64  Address,
+  IN UINT16  AndData,
+  IN UINT16  OrData
   );
 
 /**
@@ -496,9 +494,9 @@ S3PciSegmentAndThenOr16 (
 UINT16
 EFIAPI
 S3PciSegmentBitFieldRead16 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit
   );
 
 /**
@@ -530,10 +528,10 @@ S3PciSegmentBitFieldRead16 (
 UINT16
 EFIAPI
 S3PciSegmentBitFieldWrite16 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT16                    Value
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT16  Value
   );
 
 /**
@@ -568,10 +566,10 @@ S3PciSegmentBitFieldWrite16 (
 UINT16
 EFIAPI
 S3PciSegmentBitFieldOr16 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT16                    OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT16  OrData
   );
 
 /**
@@ -606,10 +604,10 @@ S3PciSegmentBitFieldOr16 (
 UINT16
 EFIAPI
 S3PciSegmentBitFieldAnd16 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT16                    AndData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT16  AndData
   );
 
 /**
@@ -646,11 +644,11 @@ S3PciSegmentBitFieldAnd16 (
 UINT16
 EFIAPI
 S3PciSegmentBitFieldAndThenOr16 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT16                    AndData,
-  IN UINT16                    OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT16  AndData,
+  IN UINT16  OrData
   );
 
 /**
@@ -671,7 +669,7 @@ S3PciSegmentBitFieldAndThenOr16 (
 UINT32
 EFIAPI
 S3PciSegmentRead32 (
-  IN UINT64                    Address
+  IN UINT64  Address
   );
 
 /**
@@ -693,8 +691,8 @@ S3PciSegmentRead32 (
 UINT32
 EFIAPI
 S3PciSegmentWrite32 (
-  IN UINT64                    Address,
-  IN UINT32                    Value
+  IN UINT64  Address,
+  IN UINT32  Value
   );
 
 /**
@@ -720,8 +718,8 @@ S3PciSegmentWrite32 (
 UINT32
 EFIAPI
 S3PciSegmentOr32 (
-  IN UINT64                    Address,
-  IN UINT32                    OrData
+  IN UINT64  Address,
+  IN UINT32  OrData
   );
 
 /**
@@ -746,8 +744,8 @@ S3PciSegmentOr32 (
 UINT32
 EFIAPI
 S3PciSegmentAnd32 (
-  IN UINT64                    Address,
-  IN UINT32                    AndData
+  IN UINT64  Address,
+  IN UINT32  AndData
   );
 
 /**
@@ -775,9 +773,9 @@ S3PciSegmentAnd32 (
 UINT32
 EFIAPI
 S3PciSegmentAndThenOr32 (
-  IN UINT64                    Address,
-  IN UINT32                    AndData,
-  IN UINT32                    OrData
+  IN UINT64  Address,
+  IN UINT32  AndData,
+  IN UINT32  OrData
   );
 
 /**
@@ -806,9 +804,9 @@ S3PciSegmentAndThenOr32 (
 UINT32
 EFIAPI
 S3PciSegmentBitFieldRead32 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit
   );
 
 /**
@@ -840,10 +838,10 @@ S3PciSegmentBitFieldRead32 (
 UINT32
 EFIAPI
 S3PciSegmentBitFieldWrite32 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT32                    Value
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT32  Value
   );
 
 /**
@@ -878,10 +876,10 @@ S3PciSegmentBitFieldWrite32 (
 UINT32
 EFIAPI
 S3PciSegmentBitFieldOr32 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT32                    OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT32  OrData
   );
 
 /**
@@ -916,10 +914,10 @@ S3PciSegmentBitFieldOr32 (
 UINT32
 EFIAPI
 S3PciSegmentBitFieldAnd32 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT32                    AndData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT32  AndData
   );
 
 /**
@@ -956,11 +954,11 @@ S3PciSegmentBitFieldAnd32 (
 UINT32
 EFIAPI
 S3PciSegmentBitFieldAndThenOr32 (
-  IN UINT64                    Address,
-  IN UINTN                     StartBit,
-  IN UINTN                     EndBit,
-  IN UINT32                    AndData,
-  IN UINT32                    OrData
+  IN UINT64  Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT32  AndData,
+  IN UINT32  OrData
   );
 
 /**
@@ -971,7 +969,7 @@ S3PciSegmentBitFieldAndThenOr32 (
   Size into the buffer specified by Buffer. This function only allows the PCI
   configuration registers from a single PCI function to be read. Size is
   returned. When possible 32-bit PCI configuration read cycles are used to read
-  from StartAdress to StartAddress + Size. Due to alignment restrictions, 8-bit
+  from StartAddress to StartAddress + Size. Due to alignment restrictions, 8-bit
   and 16-bit PCI configuration read cycles may be used at the beginning and the
   end of the range.
 
@@ -990,9 +988,9 @@ S3PciSegmentBitFieldAndThenOr32 (
 UINTN
 EFIAPI
 S3PciSegmentReadBuffer (
-  IN  UINT64                   StartAddress,
-  IN  UINTN                    Size,
-  OUT VOID                     *Buffer
+  IN  UINT64  StartAddress,
+  IN  UINTN   Size,
+  OUT VOID    *Buffer
   );
 
 /**
@@ -1004,7 +1002,7 @@ S3PciSegmentReadBuffer (
   Size from the buffer specified by Buffer. This function only allows the PCI
   configuration registers from a single PCI function to be written. Size is
   returned. When possible 32-bit PCI configuration write cycles are used to
-  write from StartAdress to StartAddress + Size. Due to alignment restrictions,
+  write from StartAddress to StartAddress + Size. Due to alignment restrictions,
   8-bit and 16-bit PCI configuration write cycles may be used at the beginning
   and the end of the range.
 
@@ -1023,9 +1021,7 @@ S3PciSegmentReadBuffer (
 UINTN
 EFIAPI
 S3PciSegmentWriteBuffer (
-  IN UINT64                    StartAddress,
-  IN UINTN                     Size,
-  IN VOID                      *Buffer
+  IN UINT64  StartAddress,
+  IN UINTN   Size,
+  IN VOID    *Buffer
   );
-
-#endif

@@ -5,8 +5,7 @@
 
 **/
 
-#ifndef _EDKII_STORAGE_SECURITY_COMMAND_PPI_H_
-#define _EDKII_STORAGE_SECURITY_COMMAND_PPI_H_
+#pragma once
 
 #include <Protocol/DevicePath.h>
 
@@ -21,7 +20,7 @@
 //
 // Forward declaration for the EDKII_PEI_STORAGE_SECURITY_CMD_PPI.
 //
-typedef struct _EDKII_PEI_STORAGE_SECURITY_CMD_PPI  EDKII_PEI_STORAGE_SECURITY_CMD_PPI;
+typedef struct _EDKII_PEI_STORAGE_SECURITY_CMD_PPI EDKII_PEI_STORAGE_SECURITY_CMD_PPI;
 
 //
 // Revision The revision to which the Storage Security Command interface adheres.
@@ -29,7 +28,6 @@ typedef struct _EDKII_PEI_STORAGE_SECURITY_CMD_PPI  EDKII_PEI_STORAGE_SECURITY_C
 //          If a future version is not back wards compatible it is not the same GUID.
 //
 #define EDKII_STORAGE_SECURITY_PPI_REVISION  0x00010000
-
 
 /**
   Gets the count of storage security devices that one specific driver detects.
@@ -43,7 +41,7 @@ typedef struct _EDKII_PEI_STORAGE_SECURITY_CMD_PPI  EDKII_PEI_STORAGE_SECURITY_C
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_STORAGE_SECURITY_GET_NUMBER_DEVICES) (
+(EFIAPI *EDKII_PEI_STORAGE_SECURITY_GET_NUMBER_DEVICES)(
   IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
   OUT UINTN                                 *NumberofDevices
   );
@@ -75,7 +73,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_STORAGE_SECURITY_GET_DEVICE_PATH) (
+(EFIAPI *EDKII_PEI_STORAGE_SECURITY_GET_DEVICE_PATH)(
   IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
   IN  UINTN                                 DeviceIndex,
   OUT UINTN                                 *DevicePathLength,
@@ -170,7 +168,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_STORAGE_SECURITY_RECEIVE_DATA) (
+(EFIAPI *EDKII_PEI_STORAGE_SECURITY_RECEIVE_DATA)(
   IN  EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
   IN  UINTN                                 DeviceIndex,
   IN  UINT64                                Timeout,
@@ -247,7 +245,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EDKII_PEI_STORAGE_SECURITY_SEND_DATA) (
+(EFIAPI *EDKII_PEI_STORAGE_SECURITY_SEND_DATA)(
   IN EDKII_PEI_STORAGE_SECURITY_CMD_PPI    *This,
   IN UINTN                                 DeviceIndex,
   IN UINT64                                Timeout,
@@ -272,6 +270,4 @@ struct _EDKII_PEI_STORAGE_SECURITY_CMD_PPI {
   EDKII_PEI_STORAGE_SECURITY_SEND_DATA             SendData;
 };
 
-extern EFI_GUID gEdkiiPeiStorageSecurityCommandPpiGuid;
-
-#endif
+extern EFI_GUID  gEdkiiPeiStorageSecurityCommandPpiGuid;

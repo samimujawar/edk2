@@ -10,8 +10,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _PXE_BASE_CODE_CALLBACK_H_
-#define _PXE_BASE_CODE_CALLBACK_H_
+#pragma once
 
 ///
 /// Call Back Definitions.
@@ -24,10 +23,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// UEFI Revision Number Definition.
 ///
-#define EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL_REVISION 0x00010000
+#define EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL_REVISION  0x00010000
 
 ///
-/// EFI 1.1 Revision Number defintion.
+/// EFI 1.1 Revision Number definition.
 ///
 #define EFI_PXE_BASE_CODE_CALLBACK_INTERFACE_REVISION  \
         EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL_REVISION
@@ -35,12 +34,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// UEFI Protocol name.
 ///
-typedef struct _EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL  EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL;
+typedef struct _EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL;
 
 ///
 /// EFI1.1 Protocol name.
 ///
-typedef EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL   EFI_PXE_BASE_CODE_CALLBACK;
+typedef EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL EFI_PXE_BASE_CODE_CALLBACK;
 
 ///
 /// Event type list for PXE Base Code Protocol function.
@@ -114,11 +113,8 @@ struct _EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL {
   ///  be backwards compatible. If a future version is not backwards compatible
   ///  it is not the same GUID.
   ///
-  UINT64            Revision;
-  EFI_PXE_CALLBACK  Callback;
+  UINT64              Revision;
+  EFI_PXE_CALLBACK    Callback;
 };
 
-extern EFI_GUID gEfiPxeBaseCodeCallbackProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiPxeBaseCodeCallbackProtocolGuid;

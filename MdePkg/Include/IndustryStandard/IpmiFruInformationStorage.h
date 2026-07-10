@@ -14,8 +14,7 @@
       https://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/ipmi-platform-mgt-fru-info-storage-def-v1-0-rev-1-3-spec-update.pdf
 **/
 
-#ifndef _IPMI_FRU_INFORMATION_STORAGE_H_
-#define _IPMI_FRU_INFORMATION_STORAGE_H_
+#pragma once
 
 #pragma pack(1)
 
@@ -27,24 +26,24 @@ typedef union {
   /// Individual bit fields
   ///
   struct {
-    UINT8  FormatVersionNumber:4;
-    UINT8  Reserved:4;
+    UINT8    FormatVersionNumber : 4;
+    UINT8    Reserved            : 4;
   } Bits;
   ///
   /// All bit fields as a 8-bit value
   ///
-  UINT8  Uint8;
+  UINT8    Uint8;
 } IPMI_FRU_COMMON_HEADER_FORMAT_VERSION;
 
 typedef struct {
-  IPMI_FRU_COMMON_HEADER_FORMAT_VERSION  FormatVersion;
-  UINT8                                  InternalUseStartingOffset;
-  UINT8                                  ChassisInfoStartingOffset;
-  UINT8                                  BoardAreaStartingOffset;
-  UINT8                                  ProductInfoStartingOffset;
-  UINT8                                  MultiRecInfoStartingOffset;
-  UINT8                                  Pad;
-  UINT8                                  Checksum;
+  IPMI_FRU_COMMON_HEADER_FORMAT_VERSION    FormatVersion;
+  UINT8                                    InternalUseStartingOffset;
+  UINT8                                    ChassisInfoStartingOffset;
+  UINT8                                    BoardAreaStartingOffset;
+  UINT8                                    ProductInfoStartingOffset;
+  UINT8                                    MultiRecInfoStartingOffset;
+  UINT8                                    Pad;
+  UINT8                                    Checksum;
 } IPMI_FRU_COMMON_HEADER;
 
 //
@@ -55,22 +54,22 @@ typedef union {
   /// Individual bit fields
   ///
   struct {
-    UINT8  RecordFormatVersion:4;
-    UINT8  Reserved:3;
-    UINT8  EndofList:1;
+    UINT8    RecordFormatVersion : 4;
+    UINT8    Reserved            : 3;
+    UINT8    EndofList           : 1;
   } Bits;
   ///
   /// All bit fields as a 8-bit value
   ///
-  UINT8  Uint8;
+  UINT8    Uint8;
 } IPMI_FRU_MULTI_RECORD_HEADER_FORMAT_VERSION;
 
 typedef struct {
-  UINT8                                        RecordTypeId;
-  IPMI_FRU_MULTI_RECORD_HEADER_FORMAT_VERSION  FormatVersion;
-  UINT8                                        RecordLength;
-  UINT8                                        RecordChecksum;
-  UINT8                                        HeaderChecksum;
+  UINT8                                          RecordTypeId;
+  IPMI_FRU_MULTI_RECORD_HEADER_FORMAT_VERSION    FormatVersion;
+  UINT8                                          RecordLength;
+  UINT8                                          RecordChecksum;
+  UINT8                                          HeaderChecksum;
 } IPMI_FRU_MULTI_RECORD_HEADER;
 
 //
@@ -83,4 +82,3 @@ typedef struct {
 } IPMI_SYSTEM_UUID_SUB_RECORD_WITH_CHECKSUM;
 
 #pragma pack()
-#endif

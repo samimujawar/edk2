@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef _SMBIOS_PLATFORM_DXE_H_
-#define _SMBIOS_PLATFORM_DXE_H_
+#pragma once
 
 #include <PiDxe.h>
 #include <Protocol/Smbios.h>
@@ -20,7 +19,6 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-
 
 /**
   Locates the bhyve SMBIOS data if it exists
@@ -32,7 +30,6 @@ SMBIOS_TABLE_ENTRY_POINT *
 GetBhyveSmbiosTables (
   VOID
   );
-
 
 /**
   Validates the SMBIOS entry point structure
@@ -47,5 +44,3 @@ BOOLEAN
 IsEntryPointStructureValid (
   IN SMBIOS_TABLE_ENTRY_POINT  *EntryPointStructure
   );
-
-#endif /* _SMBIOS_PLATFORM_DXE_H_ */

@@ -19,8 +19,8 @@
 EFI_STATUS
 EFIAPI
 TestFspMemoryInitApiOutput (
-  IN  VOID        *FspmUpdDataPtr,
-  IN  VOID        **HobListPtr
+  IN  VOID  *FspmUpdDataPtr,
+  IN  VOID  **HobListPtr
   )
 {
   return RETURN_UNSUPPORTED;
@@ -36,7 +36,7 @@ TestFspMemoryInitApiOutput (
 EFI_STATUS
 EFIAPI
 TestFspTempRamExitApiOutput (
-  IN VOID         *TempRamExitParam
+  IN VOID  *TempRamExitParam
   )
 {
   return RETURN_UNSUPPORTED;
@@ -52,8 +52,24 @@ TestFspTempRamExitApiOutput (
 EFI_STATUS
 EFIAPI
 TestFspSiliconInitApiOutput (
-  IN  VOID        *FspsUpdDataPtr
+  IN  VOID  *FspsUpdDataPtr
   )
 {
   return RETURN_UNSUPPORTED;
+}
+
+/**
+  Test the output of FSP API - FspSmmInit.
+
+  @param[in] FspiUpdDataPtr Address pointer to the Smm Init parameters structure.
+
+  @return test result on output of FspSmmInit API.
+**/
+EFI_STATUS
+EFIAPI
+TestFspSmmInitApiOutput (
+  IN  VOID  *FspiUpdDataPtr
+  )
+{
+  return RETURN_SUCCESS;
 }

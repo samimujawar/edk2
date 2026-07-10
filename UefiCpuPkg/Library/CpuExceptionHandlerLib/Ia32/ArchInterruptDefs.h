@@ -6,33 +6,32 @@
 
 **/
 
-#ifndef _ARCH_CPU_INTERRUPT_DEFS_H_
-#define _ARCH_CPU_INTERRUPT_DEFS_H_
+#pragma once
 
 typedef struct {
-  EFI_SYSTEM_CONTEXT_IA32 SystemContext;
-  BOOLEAN                 ExceptionDataFlag;
-  UINTN                   OldIdtHandler;
+  EFI_SYSTEM_CONTEXT_IA32    SystemContext;
+  BOOLEAN                    ExceptionDataFlag;
+  UINTN                      OldIdtHandler;
 } EXCEPTION_HANDLER_CONTEXT;
 
 //
 // Register Structure Definitions
 //
 typedef struct {
-  EFI_STATUS_CODE_DATA      Header;
-  EFI_SYSTEM_CONTEXT_IA32   SystemContext;
+  EFI_STATUS_CODE_DATA       Header;
+  EFI_SYSTEM_CONTEXT_IA32    SystemContext;
 } CPU_STATUS_CODE_TEMPLATE;
 
 typedef struct {
-  SPIN_LOCK   SpinLock;
-  UINT32      ApicId;
-  UINT32      Attribute;
-  UINTN       ExceptonHandler;
-  UINTN       OldFlags;
-  UINTN       OldCs;
-  UINTN       OldIp;
-  UINTN       ExceptionData;
-  UINT8       HookAfterStubHeaderCode[HOOKAFTER_STUB_SIZE];
+  SPIN_LOCK    SpinLock;
+  UINT32       ApicId;
+  UINT32       Attribute;
+  UINTN        ExceptonHandler;
+  UINTN        OldFlags;
+  UINTN        OldCs;
+  UINTN        OldIp;
+  UINTN        ExceptionData;
+  UINT8        HookAfterStubHeaderCode[HOOKAFTER_STUB_SIZE];
 } RESERVED_VECTORS_DATA;
 
 #define CPU_TSS_DESC_SIZE \
@@ -42,5 +41,3 @@ typedef struct {
 #define CPU_TSS_SIZE \
   (sizeof (IA32_TASK_STATE_SEGMENT) * \
    (FixedPcdGetSize (PcdCpuStackSwitchExceptionList) + 1))
-
-#endif

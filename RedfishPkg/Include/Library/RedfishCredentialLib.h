@@ -6,8 +6,8 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-#ifndef REDFISH_CREDENTIAL_LIB_H_
-#define REDFISH_CREDENTIAL_LIB_H_
+
+#pragma once
 
 #include <Uefi.h>
 
@@ -20,7 +20,7 @@ VOID
 EFIAPI
 LibCredentialExitBootServicesNotify (
   IN  EDKII_REDFISH_CREDENTIAL_PROTOCOL  *This
-);
+  );
 
 /**
   Notification of End of DXe.
@@ -31,7 +31,7 @@ VOID
 EFIAPI
 LibCredentialEndOfDxeNotify (
   IN  EDKII_REDFISH_CREDENTIAL_PROTOCOL  *This
-);
+  );
 
 /**
   Retrieve platform's Redfish authentication information.
@@ -64,7 +64,7 @@ LibCredentialGetAuthInfo (
   OUT EDKII_REDFISH_AUTH_METHOD          *AuthMethod,
   OUT CHAR8                              **UserId,
   OUT CHAR8                              **Password
-);
+  );
 
 /**
   Notify the Redfish service provide to stop provide configuration service to this platform.
@@ -85,7 +85,6 @@ LibCredentialGetAuthInfo (
 EFI_STATUS
 EFIAPI
 LibStopRedfishService (
-  IN     EDKII_REDFISH_CREDENTIAL_PROTOCOL          *This,
-  IN     EDKII_REDFISH_CREDENTIAL_STOP_SERVICE_TYPE ServiceStopType
-);
-#endif
+  IN     EDKII_REDFISH_CREDENTIAL_PROTOCOL           *This,
+  IN     EDKII_REDFISH_CREDENTIAL_STOP_SERVICE_TYPE  ServiceStopType
+  );

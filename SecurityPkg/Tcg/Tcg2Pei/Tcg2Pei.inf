@@ -55,6 +55,7 @@
   ReportStatusCodeLib
   ResetSystemLib
   PrintLib
+  Tpm2HelpLib
 
 [Guids]
   gTcgEventEntryHobGuid                                                ## PRODUCES               ## HOB
@@ -86,6 +87,7 @@
   ## SOMETIMES_CONSUMES
   ## SOMETIMES_PRODUCES
   gEfiSecurityPkgTokenSpaceGuid.PcdTpm2HashMask
+  gEfiSecurityPkgTokenSpaceGuid.PcdTcg2HashAlgorithmBitmap                  ## CONSUMES
 
 [Depex]
   gEfiPeiMasterBootModePpiGuid AND

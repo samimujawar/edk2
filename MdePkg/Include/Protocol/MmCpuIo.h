@@ -8,15 +8,14 @@
 
 **/
 
-#ifndef _MM_CPU_IO_H_
-#define _MM_CPU_IO_H_
+#pragma once
 
 #define EFI_MM_CPU_IO_PROTOCOL_GUID \
   { \
     0x3242A9D8, 0xCE70, 0x4AA0, { 0x95, 0x5D, 0x5E, 0x7B, 0x14, 0x0D, 0xE4, 0xD2 } \
   }
 
-typedef struct _EFI_MM_CPU_IO_PROTOCOL  EFI_MM_CPU_IO_PROTOCOL;
+typedef struct _EFI_MM_CPU_IO_PROTOCOL EFI_MM_CPU_IO_PROTOCOL;
 
 ///
 /// Width of the MM CPU I/O operations
@@ -29,7 +28,7 @@ typedef enum {
 } EFI_MM_IO_WIDTH;
 
 /**
-  Provides the basic memory and I/O interfaces used toabstract accesses to devices.
+  Provides the basic memory and I/O interfaces used to abstract accesses to devices.
 
   The I/O operations are carried out exactly as requested.  The caller is
   responsible for any alignment and I/O width issues that the bus, device,
@@ -64,11 +63,11 @@ typedef struct {
   ///
   /// This service provides the various modalities of memory and I/O read.
   ///
-  EFI_MM_CPU_IO  Read;
+  EFI_MM_CPU_IO    Read;
   ///
   /// This service provides the various modalities of memory and I/O write.
   ///
-  EFI_MM_CPU_IO  Write;
+  EFI_MM_CPU_IO    Write;
 } EFI_MM_IO_ACCESS;
 
 ///
@@ -78,13 +77,11 @@ struct _EFI_MM_CPU_IO_PROTOCOL {
   ///
   /// Allows reads and writes to memory-mapped I/O space.
   ///
-  EFI_MM_IO_ACCESS Mem;
+  EFI_MM_IO_ACCESS    Mem;
   ///
   /// Allows reads and writes to I/O space.
   ///
-  EFI_MM_IO_ACCESS Io;
+  EFI_MM_IO_ACCESS    Io;
 };
 
-extern EFI_GUID gEfiMmCpuIoProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiMmCpuIoProtocolGuid;

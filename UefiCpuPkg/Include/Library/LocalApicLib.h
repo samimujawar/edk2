@@ -4,13 +4,12 @@
   Local APIC library assumes local APIC is enabled. It does not
   handles cases where local APIC is disabled.
 
-  Copyright (c) 2010 - 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2010 - 2023, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __LOCAL_APIC_LIB_H__
-#define __LOCAL_APIC_LIB_H__
+#pragma once
 
 #define LOCAL_APIC_MODE_XAPIC   0x1  ///< xAPIC mode.
 #define LOCAL_APIC_MODE_X2APIC  0x2  ///< x2APIC mode.
@@ -38,7 +37,7 @@ GetLocalApicBaseAddress (
 VOID
 EFIAPI
 SetLocalApicBaseAddress (
-  IN UINTN                BaseAddress
+  IN UINTN  BaseAddress
   );
 
 /**
@@ -120,8 +119,8 @@ GetApicVersion (
 VOID
 EFIAPI
 SendFixedIpi (
-  IN UINT32          ApicId,
-  IN UINT8           Vector
+  IN UINT32  ApicId,
+  IN UINT8   Vector
   );
 
 /**
@@ -134,7 +133,7 @@ SendFixedIpi (
 VOID
 EFIAPI
 SendFixedIpiAllExcludingSelf (
-  IN UINT8           Vector
+  IN UINT8  Vector
   );
 
 /**
@@ -147,7 +146,7 @@ SendFixedIpiAllExcludingSelf (
 VOID
 EFIAPI
 SendSmiIpi (
-  IN UINT32          ApicId
+  IN UINT32  ApicId
   );
 
 /**
@@ -171,7 +170,7 @@ SendSmiIpiAllExcludingSelf (
 VOID
 EFIAPI
 SendInitIpi (
-  IN UINT32          ApicId
+  IN UINT32  ApicId
   );
 
 /**
@@ -183,6 +182,21 @@ VOID
 EFIAPI
 SendInitIpiAllExcludingSelf (
   VOID
+  );
+
+/**
+  Send a Start-up IPI to all processors excluding self.
+  This function returns after the IPI has been accepted by the target processors.
+  if StartupRoutine >= 1M, then ASSERT.
+  if StartupRoutine is not multiple of 4K, then ASSERT.
+  @param  StartupRoutine  Points to a start-up routine which is below 1M physical
+                          address and 4K aligned.
+**/
+
+VOID
+EFIAPI
+SendStartupIpiAllExcludingSelf (
+  IN UINT32  StartupRoutine
   );
 
 /**
@@ -200,8 +214,8 @@ SendInitIpiAllExcludingSelf (
 VOID
 EFIAPI
 SendInitSipiSipi (
-  IN UINT32          ApicId,
-  IN UINT32          StartupRoutine
+  IN UINT32  ApicId,
+  IN UINT32  StartupRoutine
   );
 
 /**
@@ -218,7 +232,7 @@ SendInitSipiSipi (
 VOID
 EFIAPI
 SendInitSipiSipiAllExcludingSelf (
-  IN UINT32          StartupRoutine
+  IN UINT32  StartupRoutine
   );
 
 /**
@@ -290,23 +304,23 @@ GetApicTimerCurrentCount (
   @param DivideValue   The divide value for the DCR. It is one of 1,2,4,8,16,32,64,128.
                        If it is 0, then use the current divide value in the DCR.
   @param InitCount     The initial count value.
-  @param PeriodicMode  If TRUE, timer mode is peridoic. Othewise, timer mode is one-shot.
+  @param PeriodicMode  If TRUE, timer mode is periodic. Othewise, timer mode is one-shot.
   @param Vector        The timer interrupt vector number.
 **/
 VOID
 EFIAPI
 InitializeApicTimer (
-  IN UINTN   DivideValue,
-  IN UINT32  InitCount,
-  IN BOOLEAN PeriodicMode,
-  IN UINT8   Vector
+  IN UINTN    DivideValue,
+  IN UINT32   InitCount,
+  IN BOOLEAN  PeriodicMode,
+  IN UINT8    Vector
   );
 
 /**
   Get the state of the local APIC timer.
 
   @param DivideValue   Return the divide value for the DCR. It is one of 1,2,4,8,16,32,64,128.
-  @param PeriodicMode  Return the timer mode. If TRUE, timer mode is peridoic. Othewise, timer mode is one-shot.
+  @param PeriodicMode  Return the timer mode. If TRUE, timer mode is periodic. Othewise, timer mode is one-shot.
   @param Vector        Return the timer interrupt vector number.
 **/
 VOID
@@ -453,5 +467,3 @@ GetProcessorLocation2ByApicId (
   OUT UINT32  *Core     OPTIONAL,
   OUT UINT32  *Thread   OPTIONAL
   );
-#endif
-

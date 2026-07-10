@@ -8,16 +8,16 @@
 
 #include "ReportStatusCodeRouterPei.h"
 
-EFI_PEI_RSC_HANDLER_PPI     mRscHandlerPpi = {
+EFI_PEI_RSC_HANDLER_PPI  mRscHandlerPpi = {
   Register,
   Unregister
-  };
+};
 
-EFI_PEI_PROGRESS_CODE_PPI     mStatusCodePpi = {
+EFI_PEI_PROGRESS_CODE_PPI  mStatusCodePpi = {
   ReportDispatcher
-  };
+};
 
-EFI_PEI_PPI_DESCRIPTOR   mRscHandlerPpiList[] = {
+EFI_PEI_PPI_DESCRIPTOR  mRscHandlerPpiList[] = {
   {
     EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
     &gEfiPeiRscHandlerPpiGuid,
@@ -25,13 +25,45 @@ EFI_PEI_PPI_DESCRIPTOR   mRscHandlerPpiList[] = {
   }
 };
 
-EFI_PEI_PPI_DESCRIPTOR   mStatusCodePpiList[] = {
+EFI_PEI_PPI_DESCRIPTOR  mStatusCodePpiList[] = {
   {
     EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
     &gEfiPeiStatusCodePpiGuid,
     &mStatusCodePpi
   }
 };
+
+//
+// GUID for the Report Status Code Router nest status HOB.
+// This HOB stores the reentrant lock to prevent recursive calls in PEI phase.
+//
+EFI_GUID  mRscRouterNestStatusHobGuid = RSC_ROUTER_NEST_STATUS_HOB_GUID;
+
+typedef struct {
+  UINT32    NestStatus;
+} RSC_ROUTER_NEST_STATUS_HOB;
+
+/**
+  Check the RSC Router nest status HOB.
+
+  @return  Pointer to the RSC_ROUTER_NEST_STATUS_HOB data, or NULL on failure.
+
+**/
+STATIC
+RSC_ROUTER_NEST_STATUS_HOB *
+CheckNestStatusHob (
+  VOID
+  )
+{
+  EFI_HOB_GUID_TYPE  *GuidHob;
+
+  GuidHob = GetFirstGuidHob (&mRscRouterNestStatusHobGuid);
+  if (GuidHob != NULL) {
+    return GET_GUID_HOB_DATA (GuidHob);
+  }
+
+  return NULL;
+}
 
 /**
   Worker function to create one memory status code GUID'ed HOB,
@@ -82,7 +114,7 @@ CreateRscHandlerCallbackPacket (
 EFI_STATUS
 EFIAPI
 Register (
-  IN EFI_PEI_RSC_HANDLER_CALLBACK Callback
+  IN EFI_PEI_RSC_HANDLER_CALLBACK  Callback
   )
 {
   EFI_PEI_HOB_POINTERS          Hob;
@@ -101,15 +133,16 @@ Register (
   FreeEntryIndex = 0;
   while (Hob.Raw != NULL) {
     NumberOfEntries = GET_GUID_HOB_DATA (Hob);
-    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *) (NumberOfEntries + 1);
-    if (FreePacket == NULL && *NumberOfEntries < 64) {
+    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *)(NumberOfEntries + 1);
+    if ((FreePacket == NULL) && (*NumberOfEntries < 64)) {
       //
       // If current total number of handlers does not exceed 64, put new handler
       // at the last of packet
       //
-      FreePacket = NumberOfEntries;
+      FreePacket     = NumberOfEntries;
       FreeEntryIndex = *NumberOfEntries;
     }
+
     for (Index = 0; Index < *NumberOfEntries; Index++) {
       if (CallbackEntry[Index] == Callback) {
         //
@@ -117,24 +150,26 @@ Register (
         //
         return EFI_ALREADY_STARTED;
       }
-      if (FreePacket == NULL && CallbackEntry[Index] == NULL) {
+
+      if ((FreePacket == NULL) && (CallbackEntry[Index] == NULL)) {
         //
         // If the total number of handlers in current packet is max value 64,
         // search an entry with NULL pointer and fill new handler into this entry.
         //
-        FreePacket = NumberOfEntries;
+        FreePacket     = NumberOfEntries;
         FreeEntryIndex = Index;
       }
     }
+
     Hob.Raw = GET_NEXT_HOB (Hob);
     Hob.Raw = GetNextGuidHob (&gStatusCodeCallbackGuid, Hob.Raw);
   }
 
   if (FreePacket == NULL) {
-    FreePacket = CreateRscHandlerCallbackPacket();
+    FreePacket = CreateRscHandlerCallbackPacket ();
   }
 
-  CallbackEntry = (EFI_PEI_RSC_HANDLER_CALLBACK *) (FreePacket + 1);
+  CallbackEntry                 = (EFI_PEI_RSC_HANDLER_CALLBACK *)(FreePacket + 1);
   CallbackEntry[FreeEntryIndex] = Callback;
 
   if (*FreePacket == FreeEntryIndex) {
@@ -164,22 +199,22 @@ Register (
 EFI_STATUS
 EFIAPI
 Unregister (
-  IN EFI_PEI_RSC_HANDLER_CALLBACK Callback
+  IN EFI_PEI_RSC_HANDLER_CALLBACK  Callback
   )
 {
-  EFI_PEI_HOB_POINTERS            Hob;
-  EFI_PEI_RSC_HANDLER_CALLBACK    *CallbackEntry;
-  UINTN                           *NumberOfEntries;
-  UINTN                           Index;
+  EFI_PEI_HOB_POINTERS          Hob;
+  EFI_PEI_RSC_HANDLER_CALLBACK  *CallbackEntry;
+  UINTN                         *NumberOfEntries;
+  UINTN                         Index;
 
   if (Callback == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  Hob.Raw  = GetFirstGuidHob (&gStatusCodeCallbackGuid);
+  Hob.Raw = GetFirstGuidHob (&gStatusCodeCallbackGuid);
   while (Hob.Raw != NULL) {
     NumberOfEntries = GET_GUID_HOB_DATA (Hob);
-    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *) (NumberOfEntries + 1);
+    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *)(NumberOfEntries + 1);
     for (Index = 0; Index < *NumberOfEntries; Index++) {
       if (CallbackEntry[Index] == Callback) {
         //
@@ -189,6 +224,7 @@ Unregister (
         return EFI_SUCCESS;
       }
     }
+
     Hob.Raw = GET_NEXT_HOB (Hob);
     Hob.Raw = GetNextGuidHob (&gStatusCodeCallbackGuid, Hob.Raw);
   }
@@ -225,37 +261,56 @@ Unregister (
 EFI_STATUS
 EFIAPI
 ReportDispatcher (
-  IN CONST EFI_PEI_SERVICES         **PeiServices,
-  IN EFI_STATUS_CODE_TYPE           CodeType,
-  IN EFI_STATUS_CODE_VALUE          Value,
-  IN UINT32                         Instance,
-  IN CONST EFI_GUID                 *CallerId OPTIONAL,
-  IN CONST EFI_STATUS_CODE_DATA     *Data OPTIONAL
+  IN CONST EFI_PEI_SERVICES      **PeiServices,
+  IN EFI_STATUS_CODE_TYPE        CodeType,
+  IN EFI_STATUS_CODE_VALUE       Value,
+  IN UINT32                      Instance,
+  IN CONST EFI_GUID              *CallerId OPTIONAL,
+  IN CONST EFI_STATUS_CODE_DATA  *Data OPTIONAL
   )
 {
-  EFI_PEI_HOB_POINTERS            Hob;
-  EFI_PEI_RSC_HANDLER_CALLBACK    *CallbackEntry;
-  UINTN                           *NumberOfEntries;
-  UINTN                           Index;
+  EFI_PEI_HOB_POINTERS          Hob;
+  EFI_PEI_RSC_HANDLER_CALLBACK  *CallbackEntry;
+  UINTN                         *NumberOfEntries;
+  UINTN                         Index;
+  RSC_ROUTER_NEST_STATUS_HOB    *NestStatusHob;
 
-  Hob.Raw  = GetFirstGuidHob (&gStatusCodeCallbackGuid);
+  //
+  // Use atom operation to avoid the reentant of report.
+  // If current status is not zero, then the function is reentrancy.
+  //
+  NestStatusHob = CheckNestStatusHob ();
+
+  if ((NestStatusHob != NULL) && ((InterlockedCompareExchange32 (&NestStatusHob->NestStatus, 0, 1) == 1))) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  Hob.Raw = GetFirstGuidHob (&gStatusCodeCallbackGuid);
   while (Hob.Raw != NULL) {
     NumberOfEntries = GET_GUID_HOB_DATA (Hob);
-    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *) (NumberOfEntries + 1);
+    CallbackEntry   = (EFI_PEI_RSC_HANDLER_CALLBACK *)(NumberOfEntries + 1);
     for (Index = 0; Index < *NumberOfEntries; Index++) {
       if (CallbackEntry[Index] != NULL) {
-      CallbackEntry[Index](
-        PeiServices,
-        CodeType,
-        Value,
-        Instance,
-        CallerId,
-        Data
-        );
+        CallbackEntry[Index](
+                             PeiServices,
+                             CodeType,
+                             Value,
+                             Instance,
+                             CallerId,
+                             Data
+                             );
       }
     }
+
     Hob.Raw = GET_NEXT_HOB (Hob);
     Hob.Raw = GetNextGuidHob (&gStatusCodeCallbackGuid, Hob.Raw);
+  }
+
+  //
+  // Restore the nest status of report
+  //
+  if (NestStatusHob != NULL) {
+    InterlockedCompareExchange32 (&NestStatusHob->NestStatus, 1, 0);
   }
 
   return EFI_SUCCESS;
@@ -270,7 +325,7 @@ ReportDispatcher (
   @param  FileHandle  Handle of the file being invoked.
   @param  PeiServices Describes the list of possible PEI Services.
 
-  @retval EFI_SUCESS  The entry point of DXE IPL PEIM executes successfully.
+  @retval EFI_SUCCESS The entry point of DXE IPL PEIM executes successfully.
 
 **/
 EFI_STATUS
@@ -280,11 +335,22 @@ GenericStatusCodePeiEntry (
   IN CONST EFI_PEI_SERVICES     **PeiServices
   )
 {
-  EFI_STATUS                 Status;
-  EFI_PEI_PPI_DESCRIPTOR     *OldDescriptor;
-  EFI_PEI_PROGRESS_CODE_PPI  *OldStatusCodePpi;
+  EFI_STATUS                  Status;
+  EFI_PEI_PPI_DESCRIPTOR      *OldDescriptor;
+  EFI_PEI_PROGRESS_CODE_PPI   *OldStatusCodePpi;
+  RSC_ROUTER_NEST_STATUS_HOB  *NestStatusHob;
 
   CreateRscHandlerCallbackPacket ();
+
+  //
+  // Build NestStatus HOB for installing PPIs to avoid recursive calls.
+  //
+  if (GetFirstGuidHob (&mRscRouterNestStatusHobGuid) == NULL) {
+    NestStatusHob = BuildGuidHob (&mRscRouterNestStatusHobGuid, sizeof (RSC_ROUTER_NEST_STATUS_HOB));
+    if (NestStatusHob != NULL) {
+      NestStatusHob->NestStatus = 0;
+    }
+  }
 
   //
   // Install Report Status Code Handler PPI
@@ -302,13 +368,14 @@ GenericStatusCodePeiEntry (
              &gEfiPeiStatusCodePpiGuid,
              0,
              &OldDescriptor,
-             (VOID **) &OldStatusCodePpi
+             (VOID **)&OldStatusCodePpi
              );
   if (!EFI_ERROR (Status)) {
     Status = PeiServicesReInstallPpi (OldDescriptor, mStatusCodePpiList);
   } else {
     Status = PeiServicesInstallPpi (mStatusCodePpiList);
   }
+
   ASSERT_EFI_ERROR (Status);
 
   return EFI_SUCCESS;

@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _LOAD_LINUX_LIB_INCLUDED_
-#define _LOAD_LINUX_LIB_INCLUDED_
+#pragma once
 
 #include <Uefi.h>
 #include <Library/LoadLinuxLib.h>
@@ -26,17 +25,17 @@
 VOID
 EFIAPI
 JumpToKernel (
-  VOID *KernelStart,
-  VOID *KernelBootParams
+  VOID  *KernelStart,
+  VOID  *KernelBootParams
   );
 
 VOID
 EFIAPI
 JumpToUefiKernel (
-  EFI_HANDLE ImageHandle,
-  EFI_SYSTEM_TABLE *SystemTable,
-  VOID *KernelBootParams,
-  VOID *KernelStart
+  EFI_HANDLE        ImageHandle,
+  EFI_SYSTEM_TABLE  *SystemTable,
+  VOID              *KernelBootParams,
+  VOID              *KernelStart
   );
 
 VOID
@@ -48,6 +47,3 @@ VOID
 SetLinuxDescriptorTables (
   VOID
   );
-
-#endif
-

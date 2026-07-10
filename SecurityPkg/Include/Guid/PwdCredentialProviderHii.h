@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PWD_CREDENTIAL_PROVIDER_HII_H__
-#define __PWD_CREDENTIAL_PROVIDER_HII_H__
+#pragma once
 
 //
 // Used for save password credential and form browser.
@@ -18,6 +17,4 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
     0x78b9ec8b, 0xc000, 0x46c5, { 0xac, 0x93, 0x24, 0xa0, 0xc1, 0xbb, 0x0, 0xce } \
   }
 
-extern EFI_GUID gPwdCredentialProviderGuid;
-
-#endif
+extern EFI_GUID  gPwdCredentialProviderGuid;

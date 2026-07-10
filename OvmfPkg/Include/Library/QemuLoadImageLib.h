@@ -7,8 +7,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef QEMU_LOAD_IMAGE_LIB_H__
-#define QEMU_LOAD_IMAGE_LIB_H__
+#pragma once
 
 #include <Uefi/UefiBaseType.h>
 #include <Base.h>
@@ -37,7 +36,7 @@
 EFI_STATUS
 EFIAPI
 QemuLoadKernelImage (
-  OUT EFI_HANDLE          *ImageHandle
+  OUT EFI_HANDLE  *ImageHandle
   );
 
 /**
@@ -59,7 +58,7 @@ QemuLoadKernelImage (
 EFI_STATUS
 EFIAPI
 QemuStartKernelImage (
-  IN  OUT EFI_HANDLE          *ImageHandle
+  IN  OUT EFI_HANDLE  *ImageHandle
   );
 
 /**
@@ -78,7 +77,5 @@ QemuStartKernelImage (
 EFI_STATUS
 EFIAPI
 QemuUnloadKernelImage (
-  IN  EFI_HANDLE          ImageHandle
+  IN  EFI_HANDLE  ImageHandle
   );
-
-#endif

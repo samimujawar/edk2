@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __SPI_SMM_CONFIGURATION_PROTOCOL_H__
-#define __SPI_SMM_CONFIGURATION_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/SpiConfiguration.h>
 
@@ -22,9 +21,7 @@
     { 0xa3, 0xaa, 0xfd, 0x4c, 0x9c, 0x9d, 0xef, 0x59 }}
 
 typedef
-struct _EFI_SPI_CONFIGURATION_PROTOCOL
+  struct _EFI_SPI_CONFIGURATION_PROTOCOL
 EFI_SPI_SMM_CONFIGURATION_PROTOCOL;
 
-extern EFI_GUID gEfiSpiSmmConfigurationProtocolGuid;
-
-#endif // __SPI_SMM_CONFIGURATION_H__
+extern EFI_GUID  gEfiSpiSmmConfigurationProtocolGuid;

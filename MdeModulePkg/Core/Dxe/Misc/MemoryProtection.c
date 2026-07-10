@@ -32,11 +32,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DxeServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
+#include <Library/ImagePropertiesRecordLib.h>
 
 #include <Guid/EventGroup.h>
 #include <Guid/MemoryAttributesTable.h>
 
 #include <Protocol/FirmwareVolume2.h>
+#include <Protocol/MemoryAttribute.h>
 #include <Protocol/SimpleFileSystem.h>
 
 #include "DxeMain.h"
@@ -45,49 +47,28 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Image type definitions
 //
-#define IMAGE_UNKNOWN                         0x00000001
-#define IMAGE_FROM_FV                         0x00000002
+#define IMAGE_UNKNOWN  0x00000001
+#define IMAGE_FROM_FV  0x00000002
 
 //
 // Protection policy bit definition
 //
-#define DO_NOT_PROTECT                         0x00000000
-#define PROTECT_IF_ALIGNED_ELSE_ALLOW          0x00000001
+#define DO_NOT_PROTECT                 0x00000000
+#define PROTECT_IF_ALIGNED_ELSE_ALLOW  0x00000001
 
-#define MEMORY_TYPE_OS_RESERVED_MIN            0x80000000
-#define MEMORY_TYPE_OEM_RESERVED_MIN           0x70000000
+#define MEMORY_TYPE_OS_RESERVED_MIN   0x80000000
+#define MEMORY_TYPE_OEM_RESERVED_MIN  0x70000000
 
 #define PREVIOUS_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
   ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) - (Size)))
 
-UINT32   mImageProtectionPolicy;
+UINT32  mImageProtectionPolicy;
 
-extern LIST_ENTRY         mGcdMemorySpaceMap;
+extern LIST_ENTRY  mGcdMemorySpaceMap;
 
-STATIC LIST_ENTRY         mProtectedImageRecordList;
+STATIC LIST_ENTRY  mProtectedImageRecordList;
 
-/**
-  Sort code section in image record, based upon CodeSegmentBase from low to high.
-
-  @param  ImageRecord    image record to be sorted
-**/
-VOID
-SortImageRecordCodeSection (
-  IN IMAGE_PROPERTIES_RECORD              *ImageRecord
-  );
-
-/**
-  Check if code section in image record is valid.
-
-  @param  ImageRecord    image record to be checked
-
-  @retval TRUE  image record is valid
-  @retval FALSE image record is invalid
-**/
-BOOLEAN
-IsImageRecordCodeSectionValid (
-  IN IMAGE_PROPERTIES_RECORD              *ImageRecord
-  );
+EFI_MEMORY_ATTRIBUTE_PROTOCOL  *gMemoryAttributeProtocol;
 
 /**
   Get the image type.
@@ -99,12 +80,12 @@ IsImageRecordCodeSectionValid (
 **/
 UINT32
 GetImageType (
-  IN  CONST EFI_DEVICE_PATH_PROTOCOL   *File
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *File
   )
 {
-  EFI_STATUS                        Status;
-  EFI_HANDLE                        DeviceHandle;
-  EFI_DEVICE_PATH_PROTOCOL          *TempDevicePath;
+  EFI_STATUS                Status;
+  EFI_HANDLE                DeviceHandle;
+  EFI_DEVICE_PATH_PROTOCOL  *TempDevicePath;
 
   if (File == NULL) {
     return IMAGE_UNKNOWN;
@@ -113,13 +94,13 @@ GetImageType (
   //
   // First check to see if File is from a Firmware Volume
   //
-  DeviceHandle      = NULL;
-  TempDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) File;
-  Status = gBS->LocateDevicePath (
-                  &gEfiFirmwareVolume2ProtocolGuid,
-                  &TempDevicePath,
-                  &DeviceHandle
-                  );
+  DeviceHandle   = NULL;
+  TempDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)File;
+  Status         = gBS->LocateDevicePath (
+                          &gEfiFirmwareVolume2ProtocolGuid,
+                          &TempDevicePath,
+                          &DeviceHandle
+                          );
   if (!EFI_ERROR (Status)) {
     Status = gBS->OpenProtocol (
                     DeviceHandle,
@@ -133,6 +114,7 @@ GetImageType (
       return IMAGE_FROM_FV;
     }
   }
+
   return IMAGE_UNKNOWN;
 }
 
@@ -165,13 +147,13 @@ GetProtectionPolicyFromImageType (
 **/
 UINT32
 GetUefiImageProtectionPolicy (
-  IN EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath
+  IN EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath
   )
 {
-  BOOLEAN     InSmm;
-  UINT32      ImageType;
-  UINT32      ProtectionPolicy;
+  BOOLEAN  InSmm;
+  UINT32   ImageType;
+  UINT32   ProtectionPolicy;
 
   //
   // Check SMM
@@ -180,6 +162,7 @@ GetUefiImageProtectionPolicy (
   if (gSmmBase2 != NULL) {
     gSmmBase2->InSmm (gSmmBase2, &InSmm);
   }
+
   if (InSmm) {
     return FALSE;
   }
@@ -192,10 +175,10 @@ GetUefiImageProtectionPolicy (
   } else {
     ImageType = GetImageType (LoadedImageDevicePath);
   }
+
   ProtectionPolicy = GetProtectionPolicyFromImageType (ImageType);
   return ProtectionPolicy;
 }
-
 
 /**
   Set UEFI image memory attributes.
@@ -206,24 +189,121 @@ GetUefiImageProtectionPolicy (
 **/
 VOID
 SetUefiImageMemoryAttributes (
-  IN UINT64   BaseAddress,
-  IN UINT64   Length,
-  IN UINT64   Attributes
+  IN UINT64  BaseAddress,
+  IN UINT64  Length,
+  IN UINT64  Attributes
   )
 {
   EFI_STATUS                       Status;
   EFI_GCD_MEMORY_SPACE_DESCRIPTOR  Descriptor;
   UINT64                           FinalAttributes;
+  UINT64                           CurrentAddress;
+  UINT64                           CurrentLength;
+  UINT64                           ImageEnd;
+  UINT64                           DescEnd;
 
-  Status = CoreGetMemorySpaceDescriptor(BaseAddress, &Descriptor);
-  ASSERT_EFI_ERROR(Status);
+  CurrentAddress = BaseAddress;
+  ImageEnd       = BaseAddress + Length;
 
-  FinalAttributes = (Descriptor.Attributes & EFI_CACHE_ATTRIBUTE_MASK) | (Attributes & EFI_MEMORY_ATTRIBUTE_MASK);
+  // we loop here because we may have multiple memory space descriptors that overlap the requested range
+  // this will definitely be the case for unprotecting an image, because that calls this function for the entire image,
+  // which we split into different GCD descriptors when we protected it.
+  while (CurrentAddress < BaseAddress + Length) {
+    Status = CoreGetMemorySpaceDescriptor (CurrentAddress, &Descriptor);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a - Failed to get memory space descriptor for address %llx with status %r. Cannot protect image.\n",
+        __func__,
+        CurrentAddress,
+        Status
+        ));
+      ASSERT_EFI_ERROR (Status);
+      return;
+    }
 
-  DEBUG ((DEBUG_INFO, "SetUefiImageMemoryAttributes - 0x%016lx - 0x%016lx (0x%016lx)\n", BaseAddress, Length, FinalAttributes));
+    DescEnd = Descriptor.BaseAddress + Descriptor.Length;
 
-  ASSERT(gCpu != NULL);
-  gCpu->SetMemoryAttributes (gCpu, BaseAddress, Length, FinalAttributes);
+    // ensure that we only change the attributes for the range that we are interested in, not the entire descriptor, we
+    // may also be in the middle of a descriptor, so ensure our length is not larger than the descriptor length
+    if (ImageEnd > DescEnd) {
+      CurrentLength = DescEnd - CurrentAddress;
+    } else {
+      CurrentLength = ImageEnd - CurrentAddress;
+    }
+
+    // Preserve the existing caching and virtual attributes, but remove the hardware access bits
+    FinalAttributes = (Descriptor.Attributes & ~EFI_MEMORY_ACCESS_MASK) | (Attributes & EFI_MEMORY_ATTRIBUTE_MASK);
+
+    DEBUG ((DEBUG_VERBOSE, "SetUefiImageMemoryAttributes - 0x%016lx - 0x%016lx (0x%016lx)\n", CurrentAddress, CurrentLength, FinalAttributes));
+
+    // check to see if the capabilities support the attributes we want to set. If not, set the capabilities appropriately
+    if ((Descriptor.Capabilities & FinalAttributes) != FinalAttributes) {
+      Status = CoreSetMemorySpaceCapabilities (
+                 CurrentAddress,
+                 CurrentLength,
+                 Descriptor.Capabilities | FinalAttributes
+                 );
+
+      // if we failed to set the capabilities, we should try to continue, it is possible we could succeed
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "%a failed setting capabilities on %llx of length %llx with capabilities %llx - %r\n",
+          __func__,
+          CurrentAddress,
+          CurrentLength,
+          Descriptor.Capabilities | FinalAttributes,
+          Status
+          ));
+        ASSERT_EFI_ERROR (Status);
+      }
+    }
+
+    // Call into the GCD to update the attributes there. It will call into the CPU Arch protocol to update the
+    // page table attributes
+    Status = CoreSetMemorySpaceAttributes (
+               CurrentAddress,
+               CurrentLength,
+               FinalAttributes
+               );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a failed on %llx of length %llx with attributes %llx - %r\n",
+        __func__,
+        CurrentAddress,
+        CurrentLength,
+        FinalAttributes,
+        Status
+        ));
+      ASSERT_EFI_ERROR (Status);
+    }
+
+    if (((FinalAttributes & (EFI_MEMORY_ACCESS_MASK | EFI_CACHE_ATTRIBUTE_MASK)) == 0) && (gCpu != NULL)) {
+      // if the passed hardware attributes are 0, CoreSetMemorySpaceAttributes() will not call into the CPU Arch protocol
+      // to set the attributes, so we need to do it manually here. This can be the case when we are unprotecting an
+      // image if no caching attributes are set. If gCpu has not been populated yet, we'll still have updated the GCD
+      // descriptor and we should sync the attributes with the CPU Arch protocol when it is available.
+      Status = gCpu->SetMemoryAttributes (gCpu, CurrentAddress, CurrentLength, 0);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "%a failed to update page table for %llx of length %llx with attributes 0 - %r\n",
+          __func__,
+          CurrentAddress,
+          CurrentLength,
+          Status
+          ));
+        ASSERT_EFI_ERROR (Status);
+      }
+    }
+
+    // we may have started in the middle of a descriptor, so we need to move to the beginning of the next descriptor,
+    // or the end of the image, whichever is smaller
+    CurrentAddress += CurrentLength;
+  }
 }
 
 /**
@@ -233,22 +313,22 @@ SetUefiImageMemoryAttributes (
 **/
 VOID
 SetUefiImageProtectionAttributes (
-  IN IMAGE_PROPERTIES_RECORD     *ImageRecord
+  IN IMAGE_PROPERTIES_RECORD  *ImageRecord
   )
 {
-  IMAGE_PROPERTIES_RECORD_CODE_SECTION      *ImageRecordCodeSection;
-  LIST_ENTRY                                *ImageRecordCodeSectionLink;
-  LIST_ENTRY                                *ImageRecordCodeSectionEndLink;
-  LIST_ENTRY                                *ImageRecordCodeSectionList;
-  UINT64                                    CurrentBase;
-  UINT64                                    ImageEnd;
+  IMAGE_PROPERTIES_RECORD_CODE_SECTION  *ImageRecordCodeSection;
+  LIST_ENTRY                            *ImageRecordCodeSectionLink;
+  LIST_ENTRY                            *ImageRecordCodeSectionEndLink;
+  LIST_ENTRY                            *ImageRecordCodeSectionList;
+  UINT64                                CurrentBase;
+  UINT64                                ImageEnd;
 
   ImageRecordCodeSectionList = &ImageRecord->CodeSegmentList;
 
   CurrentBase = ImageRecord->ImageBase;
   ImageEnd    = ImageRecord->ImageBase + ImageRecord->ImageSize;
 
-  ImageRecordCodeSectionLink = ImageRecordCodeSectionList->ForwardLink;
+  ImageRecordCodeSectionLink    = ImageRecordCodeSectionList->ForwardLink;
   ImageRecordCodeSectionEndLink = ImageRecordCodeSectionList;
   while (ImageRecordCodeSectionLink != ImageRecordCodeSectionEndLink) {
     ImageRecordCodeSection = CR (
@@ -270,6 +350,7 @@ SetUefiImageProtectionAttributes (
         EFI_MEMORY_XP
         );
     }
+
     //
     // CODE
     //
@@ -280,6 +361,7 @@ SetUefiImageProtectionAttributes (
       );
     CurrentBase = ImageRecordCodeSection->CodeSegmentBase + ImageRecordCodeSection->CodeSegmentSize;
   }
+
   //
   // Last DATA
   //
@@ -294,83 +376,48 @@ SetUefiImageProtectionAttributes (
       EFI_MEMORY_XP
       );
   }
-  return ;
+
+  return;
 }
 
 /**
-  Return if the PE image section is aligned.
+  Return the section alignment requirement for the PE image section type.
 
-  @param[in]  SectionAlignment    PE/COFF section alignment
-  @param[in]  MemoryType          PE/COFF image memory type
+  @param[in]  MemoryType  PE/COFF image memory type
 
-  @retval TRUE  The PE image section is aligned.
-  @retval FALSE The PE image section is not aligned.
+  @retval     The required section alignment for this memory type
+
 **/
-BOOLEAN
-IsMemoryProtectionSectionAligned (
-  IN UINT32           SectionAlignment,
+STATIC
+UINT32
+GetMemoryProtectionSectionAlignment (
   IN EFI_MEMORY_TYPE  MemoryType
   )
 {
-  UINT32  PageAlignment;
+  UINT32  SectionAlignment;
 
   switch (MemoryType) {
-  case EfiRuntimeServicesCode:
-  case EfiACPIMemoryNVS:
-    PageAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
-    break;
-  case EfiRuntimeServicesData:
-  case EfiACPIReclaimMemory:
-    ASSERT (FALSE);
-    PageAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
-    break;
-  case EfiBootServicesCode:
-  case EfiLoaderCode:
-  case EfiReservedMemoryType:
-    PageAlignment = EFI_PAGE_SIZE;
-    break;
-  default:
-    ASSERT (FALSE);
-    PageAlignment = EFI_PAGE_SIZE;
-    break;
+    case EfiRuntimeServicesCode:
+    case EfiACPIMemoryNVS:
+    case EfiReservedMemoryType:
+      SectionAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
+      break;
+    case EfiRuntimeServicesData:
+      ASSERT (FALSE);
+      SectionAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
+      break;
+    case EfiBootServicesCode:
+    case EfiLoaderCode:
+      SectionAlignment = EFI_PAGE_SIZE;
+      break;
+    case EfiACPIReclaimMemory:
+    default:
+      ASSERT (FALSE);
+      SectionAlignment = EFI_PAGE_SIZE;
+      break;
   }
 
-  if ((SectionAlignment & (PageAlignment - 1)) != 0) {
-    return FALSE;
-  } else {
-    return TRUE;
-  }
-}
-
-/**
-  Free Image record.
-
-  @param[in]  ImageRecord    A UEFI image record
-**/
-VOID
-FreeImageRecord (
-  IN IMAGE_PROPERTIES_RECORD              *ImageRecord
-  )
-{
-  LIST_ENTRY                           *CodeSegmentListHead;
-  IMAGE_PROPERTIES_RECORD_CODE_SECTION *ImageRecordCodeSection;
-
-  CodeSegmentListHead = &ImageRecord->CodeSegmentList;
-  while (!IsListEmpty (CodeSegmentListHead)) {
-    ImageRecordCodeSection = CR (
-                               CodeSegmentListHead->ForwardLink,
-                               IMAGE_PROPERTIES_RECORD_CODE_SECTION,
-                               Link,
-                               IMAGE_PROPERTIES_RECORD_CODE_SECTION_SIGNATURE
-                               );
-    RemoveEntryList (&ImageRecordCodeSection->Link);
-    FreePool (ImageRecordCodeSection);
-  }
-
-  if (ImageRecord->Link.ForwardLink != NULL) {
-    RemoveEntryList (&ImageRecord->Link);
-  }
-  FreePool (ImageRecord);
+  return SectionAlignment;
 }
 
 /**
@@ -381,193 +428,65 @@ FreeImageRecord (
 **/
 VOID
 ProtectUefiImage (
-  IN EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath
+  IN EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath
   )
 {
-  VOID                                 *ImageAddress;
-  EFI_IMAGE_DOS_HEADER                 *DosHdr;
-  UINT32                               PeCoffHeaderOffset;
-  UINT32                               SectionAlignment;
-  EFI_IMAGE_SECTION_HEADER             *Section;
-  EFI_IMAGE_OPTIONAL_HEADER_PTR_UNION  Hdr;
-  UINT8                                *Name;
-  UINTN                                Index;
-  IMAGE_PROPERTIES_RECORD              *ImageRecord;
-  CHAR8                                *PdbPointer;
-  IMAGE_PROPERTIES_RECORD_CODE_SECTION *ImageRecordCodeSection;
-  BOOLEAN                              IsAligned;
-  UINT32                               ProtectionPolicy;
+  IMAGE_PROPERTIES_RECORD  *ImageRecord;
+  UINT32                   ProtectionPolicy;
+  EFI_STATUS               Status;
+  UINT32                   RequiredAlignment;
 
   DEBUG ((DEBUG_INFO, "ProtectUefiImageCommon - 0x%x\n", LoadedImage));
   DEBUG ((DEBUG_INFO, "  - 0x%016lx - 0x%016lx\n", (EFI_PHYSICAL_ADDRESS)(UINTN)LoadedImage->ImageBase, LoadedImage->ImageSize));
 
   if (gCpu == NULL) {
-    return ;
+    return;
   }
 
   ProtectionPolicy = GetUefiImageProtectionPolicy (LoadedImage, LoadedImageDevicePath);
   switch (ProtectionPolicy) {
-  case DO_NOT_PROTECT:
-    return ;
-  case PROTECT_IF_ALIGNED_ELSE_ALLOW:
-    break;
-  default:
-    ASSERT(FALSE);
-    return ;
+    case DO_NOT_PROTECT:
+      return;
+    case PROTECT_IF_ALIGNED_ELSE_ALLOW:
+      break;
+    default:
+      ASSERT (FALSE);
+      return;
   }
 
-  ImageRecord = AllocateZeroPool (sizeof(*ImageRecord));
+  ImageRecord = AllocateZeroPool (sizeof (*ImageRecord));
   if (ImageRecord == NULL) {
-    return ;
-  }
-  ImageRecord->Signature = IMAGE_PROPERTIES_RECORD_SIGNATURE;
-
-  //
-  // Step 1: record whole region
-  //
-  ImageRecord->ImageBase = (EFI_PHYSICAL_ADDRESS)(UINTN)LoadedImage->ImageBase;
-  ImageRecord->ImageSize = LoadedImage->ImageSize;
-
-  ImageAddress = LoadedImage->ImageBase;
-
-  PdbPointer = PeCoffLoaderGetPdbPointer ((VOID*) (UINTN) ImageAddress);
-  if (PdbPointer != NULL) {
-    DEBUG ((DEBUG_VERBOSE, "  Image - %a\n", PdbPointer));
+    return;
   }
 
-  //
-  // Check PE/COFF image
-  //
-  DosHdr = (EFI_IMAGE_DOS_HEADER *) (UINTN) ImageAddress;
-  PeCoffHeaderOffset = 0;
-  if (DosHdr->e_magic == EFI_IMAGE_DOS_SIGNATURE) {
-    PeCoffHeaderOffset = DosHdr->e_lfanew;
-  }
+  RequiredAlignment = GetMemoryProtectionSectionAlignment (LoadedImage->ImageCodeType);
 
-  Hdr.Pe32 = (EFI_IMAGE_NT_HEADERS32 *)((UINT8 *) (UINTN) ImageAddress + PeCoffHeaderOffset);
-  if (Hdr.Pe32->Signature != EFI_IMAGE_NT_SIGNATURE) {
-    DEBUG ((DEBUG_VERBOSE, "Hdr.Pe32->Signature invalid - 0x%x\n", Hdr.Pe32->Signature));
-    // It might be image in SMM.
+  Status = CreateImagePropertiesRecord (
+             LoadedImage->ImageBase,
+             LoadedImage->ImageSize,
+             &RequiredAlignment,
+             ImageRecord
+             );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a failed to create image properties record\n", __func__));
+
+    // if we failed to create the image properties record, this may mean that the image is not aligned properly
+    // the GCD will believe that this memory is non-executable, because the NX initialization routine doesn't know what
+    // memory is image memory or not, even though the page table has the correct attributes, so we need to set the
+    // attributes here to RWX so that future updates to the GCD do not apply the NX attributes to this memory in the
+    // page table (as can happen when applying virtual attributes). This may have the side effect of marking other
+    // memory as RWX, since this image may not be page aligned, but that is safe to do, it may just remove some
+    // page protections, but it already has to to execute this image.
+    SetUefiImageMemoryAttributes (
+      (UINT64)(UINTN)LoadedImage->ImageBase & ~EFI_PAGE_MASK,
+      (LoadedImage->ImageSize + EFI_PAGE_MASK) & ~EFI_PAGE_MASK,
+      0
+      );
+    FreePool (ImageRecord);
     goto Finish;
   }
-
-  //
-  // Get SectionAlignment
-  //
-  if (Hdr.Pe32->OptionalHeader.Magic == EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
-    SectionAlignment  = Hdr.Pe32->OptionalHeader.SectionAlignment;
-  } else {
-    SectionAlignment  = Hdr.Pe32Plus->OptionalHeader.SectionAlignment;
-  }
-
-  IsAligned = IsMemoryProtectionSectionAligned (SectionAlignment, LoadedImage->ImageCodeType);
-  if (!IsAligned) {
-    DEBUG ((DEBUG_VERBOSE, "!!!!!!!!  ProtectUefiImageCommon - Section Alignment(0x%x) is incorrect  !!!!!!!!\n",
-      SectionAlignment));
-    PdbPointer = PeCoffLoaderGetPdbPointer ((VOID*) (UINTN) ImageAddress);
-    if (PdbPointer != NULL) {
-      DEBUG ((DEBUG_VERBOSE, "!!!!!!!!  Image - %a  !!!!!!!!\n", PdbPointer));
-    }
-    goto Finish;
-  }
-
-  Section = (EFI_IMAGE_SECTION_HEADER *) (
-               (UINT8 *) (UINTN) ImageAddress +
-               PeCoffHeaderOffset +
-               sizeof(UINT32) +
-               sizeof(EFI_IMAGE_FILE_HEADER) +
-               Hdr.Pe32->FileHeader.SizeOfOptionalHeader
-               );
-  ImageRecord->CodeSegmentCount = 0;
-  InitializeListHead (&ImageRecord->CodeSegmentList);
-  for (Index = 0; Index < Hdr.Pe32->FileHeader.NumberOfSections; Index++) {
-    Name = Section[Index].Name;
-    DEBUG ((
-      DEBUG_VERBOSE,
-      "  Section - '%c%c%c%c%c%c%c%c'\n",
-      Name[0],
-      Name[1],
-      Name[2],
-      Name[3],
-      Name[4],
-      Name[5],
-      Name[6],
-      Name[7]
-      ));
-
-    //
-    // Instead of assuming that a PE/COFF section of type EFI_IMAGE_SCN_CNT_CODE
-    // can always be mapped read-only, classify a section as a code section only
-    // if it has the executable attribute set and the writable attribute cleared.
-    //
-    // This adheres more closely to the PE/COFF spec, and avoids issues with
-    // Linux OS loaders that may consist of a single read/write/execute section.
-    //
-    if ((Section[Index].Characteristics & (EFI_IMAGE_SCN_MEM_WRITE | EFI_IMAGE_SCN_MEM_EXECUTE)) == EFI_IMAGE_SCN_MEM_EXECUTE) {
-      DEBUG ((DEBUG_VERBOSE, "  VirtualSize          - 0x%08x\n", Section[Index].Misc.VirtualSize));
-      DEBUG ((DEBUG_VERBOSE, "  VirtualAddress       - 0x%08x\n", Section[Index].VirtualAddress));
-      DEBUG ((DEBUG_VERBOSE, "  SizeOfRawData        - 0x%08x\n", Section[Index].SizeOfRawData));
-      DEBUG ((DEBUG_VERBOSE, "  PointerToRawData     - 0x%08x\n", Section[Index].PointerToRawData));
-      DEBUG ((DEBUG_VERBOSE, "  PointerToRelocations - 0x%08x\n", Section[Index].PointerToRelocations));
-      DEBUG ((DEBUG_VERBOSE, "  PointerToLinenumbers - 0x%08x\n", Section[Index].PointerToLinenumbers));
-      DEBUG ((DEBUG_VERBOSE, "  NumberOfRelocations  - 0x%08x\n", Section[Index].NumberOfRelocations));
-      DEBUG ((DEBUG_VERBOSE, "  NumberOfLinenumbers  - 0x%08x\n", Section[Index].NumberOfLinenumbers));
-      DEBUG ((DEBUG_VERBOSE, "  Characteristics      - 0x%08x\n", Section[Index].Characteristics));
-
-      //
-      // Step 2: record code section
-      //
-      ImageRecordCodeSection = AllocatePool (sizeof(*ImageRecordCodeSection));
-      if (ImageRecordCodeSection == NULL) {
-        return ;
-      }
-      ImageRecordCodeSection->Signature = IMAGE_PROPERTIES_RECORD_CODE_SECTION_SIGNATURE;
-
-      ImageRecordCodeSection->CodeSegmentBase = (UINTN)ImageAddress + Section[Index].VirtualAddress;
-      ImageRecordCodeSection->CodeSegmentSize = ALIGN_VALUE(Section[Index].SizeOfRawData, SectionAlignment);
-
-      DEBUG ((DEBUG_VERBOSE, "ImageCode: 0x%016lx - 0x%016lx\n", ImageRecordCodeSection->CodeSegmentBase, ImageRecordCodeSection->CodeSegmentSize));
-
-      InsertTailList (&ImageRecord->CodeSegmentList, &ImageRecordCodeSection->Link);
-      ImageRecord->CodeSegmentCount++;
-    }
-  }
-
-  if (ImageRecord->CodeSegmentCount == 0) {
-    //
-    // If a UEFI executable consists of a single read+write+exec PE/COFF
-    // section, that isn't actually an error. The image can be launched
-    // alright, only image protection cannot be applied to it fully.
-    //
-    // One example that elicits this is (some) Linux kernels (with the EFI stub
-    // of course).
-    //
-    DEBUG ((DEBUG_WARN, "!!!!!!!!  ProtectUefiImageCommon - CodeSegmentCount is 0  !!!!!!!!\n"));
-    PdbPointer = PeCoffLoaderGetPdbPointer ((VOID*) (UINTN) ImageAddress);
-    if (PdbPointer != NULL) {
-      DEBUG ((DEBUG_WARN, "!!!!!!!!  Image - %a  !!!!!!!!\n", PdbPointer));
-    }
-    goto Finish;
-  }
-
-  //
-  // Final
-  //
-  SortImageRecordCodeSection (ImageRecord);
-  //
-  // Check overlap all section in ImageBase/Size
-  //
-  if (!IsImageRecordCodeSectionValid (ImageRecord)) {
-    DEBUG ((DEBUG_ERROR, "IsImageRecordCodeSectionValid - FAIL\n"));
-    goto Finish;
-  }
-
-  //
-  // Round up the ImageSize, some CPU arch may return EFI_UNSUPPORTED if ImageSize is not aligned.
-  // Given that the loader always allocates full pages, we know the space after the image is not used.
-  //
-  ImageRecord->ImageSize = ALIGN_VALUE(LoadedImage->ImageSize, EFI_PAGE_SIZE);
 
   //
   // CPU ARCH present. Update memory attribute directly.
@@ -580,7 +499,7 @@ ProtectUefiImage (
   InsertTailList (&mProtectedImageRecordList, &ImageRecord->Link);
 
 Finish:
-  return ;
+  return;
 }
 
 /**
@@ -591,17 +510,18 @@ Finish:
 **/
 VOID
 UnprotectUefiImage (
-  IN EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage,
-  IN EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath
+  IN EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath
   )
 {
-  IMAGE_PROPERTIES_RECORD    *ImageRecord;
-  LIST_ENTRY                 *ImageRecordLink;
+  IMAGE_PROPERTIES_RECORD  *ImageRecord;
+  LIST_ENTRY               *ImageRecordLink;
 
-  if (PcdGet32(PcdImageProtectionPolicy) != 0) {
+  if (PcdGet32 (PcdImageProtectionPolicy) != 0) {
     for (ImageRecordLink = mProtectedImageRecordList.ForwardLink;
          ImageRecordLink != &mProtectedImageRecordList;
-         ImageRecordLink = ImageRecordLink->ForwardLink) {
+         ImageRecordLink = ImageRecordLink->ForwardLink)
+    {
       ImageRecord = CR (
                       ImageRecordLink,
                       IMAGE_PROPERTIES_RECORD,
@@ -610,10 +530,12 @@ UnprotectUefiImage (
                       );
 
       if (ImageRecord->ImageBase == (EFI_PHYSICAL_ADDRESS)(UINTN)LoadedImage->ImageBase) {
-        SetUefiImageMemoryAttributes (ImageRecord->ImageBase,
-                                      ImageRecord->ImageSize,
-                                      0);
-        FreeImageRecord (ImageRecord);
+        SetUefiImageMemoryAttributes (
+          ImageRecord->ImageBase,
+          ImageRecord->ImageSize,
+          0
+          );
+        DeleteImagePropertiesRecord (ImageRecord);
         return;
       }
     }
@@ -629,10 +551,10 @@ UnprotectUefiImage (
 STATIC
 UINT64
 GetPermissionAttributeForMemoryType (
-  IN EFI_MEMORY_TYPE    MemoryType
+  IN EFI_MEMORY_TYPE  MemoryType
   )
 {
-  UINT64 TestBit;
+  UINT64  TestBit;
 
   if ((UINT32)MemoryType >= MEMORY_TYPE_OS_RESERVED_MIN) {
     TestBit = BIT63;
@@ -665,27 +587,27 @@ SortMemoryMap (
   IN UINTN                      DescriptorSize
   )
 {
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *NextMemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEnd;
-  EFI_MEMORY_DESCRIPTOR       TempMemoryMap;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *NextMemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  EFI_MEMORY_DESCRIPTOR  TempMemoryMap;
 
-  MemoryMapEntry = MemoryMap;
+  MemoryMapEntry     = MemoryMap;
   NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *) ((UINT8 *) MemoryMap + MemoryMapSize);
+  MemoryMapEnd       = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMap + MemoryMapSize);
   while (MemoryMapEntry < MemoryMapEnd) {
     while (NextMemoryMapEntry < MemoryMapEnd) {
       if (MemoryMapEntry->PhysicalStart > NextMemoryMapEntry->PhysicalStart) {
-        CopyMem (&TempMemoryMap, MemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
-        CopyMem (MemoryMapEntry, NextMemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
-        CopyMem (NextMemoryMapEntry, &TempMemoryMap, sizeof(EFI_MEMORY_DESCRIPTOR));
+        CopyMem (&TempMemoryMap, MemoryMapEntry, sizeof (EFI_MEMORY_DESCRIPTOR));
+        CopyMem (MemoryMapEntry, NextMemoryMapEntry, sizeof (EFI_MEMORY_DESCRIPTOR));
+        CopyMem (NextMemoryMapEntry, &TempMemoryMap, sizeof (EFI_MEMORY_DESCRIPTOR));
       }
 
       NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (NextMemoryMapEntry, DescriptorSize);
     }
 
-    MemoryMapEntry      = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-    NextMemoryMapEntry  = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    MemoryMapEntry     = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
   }
 }
 
@@ -708,29 +630,30 @@ MergeMemoryMapForProtectionPolicy (
   IN UINTN                      DescriptorSize
   )
 {
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEnd;
-  UINT64                      MemoryBlockLength;
-  EFI_MEMORY_DESCRIPTOR       *NewMemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *NextMemoryMapEntry;
-  UINT64                      Attributes;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  UINT64                 MemoryBlockLength;
+  EFI_MEMORY_DESCRIPTOR  *NewMemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *NextMemoryMapEntry;
+  UINT64                 Attributes;
 
   SortMemoryMap (MemoryMap, *MemoryMapSize, DescriptorSize);
 
-  MemoryMapEntry = MemoryMap;
+  MemoryMapEntry    = MemoryMap;
   NewMemoryMapEntry = MemoryMap;
-  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *) ((UINT8 *) MemoryMap + *MemoryMapSize);
+  MemoryMapEnd      = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMap + *MemoryMapSize);
   while ((UINTN)MemoryMapEntry < (UINTN)MemoryMapEnd) {
-    CopyMem (NewMemoryMapEntry, MemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
+    CopyMem (NewMemoryMapEntry, MemoryMapEntry, sizeof (EFI_MEMORY_DESCRIPTOR));
     NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
 
     do {
-      MemoryBlockLength = (UINT64) (EFI_PAGES_TO_SIZE((UINTN)MemoryMapEntry->NumberOfPages));
-      Attributes = GetPermissionAttributeForMemoryType (MemoryMapEntry->Type);
+      MemoryBlockLength = (UINT64)(EFI_PAGES_TO_SIZE ((UINTN)MemoryMapEntry->NumberOfPages));
+      Attributes        = GetPermissionAttributeForMemoryType (MemoryMapEntry->Type);
 
       if (((UINTN)NextMemoryMapEntry < (UINTN)MemoryMapEnd) &&
-          Attributes == GetPermissionAttributeForMemoryType (NextMemoryMapEntry->Type) &&
-          ((MemoryMapEntry->PhysicalStart + MemoryBlockLength) == NextMemoryMapEntry->PhysicalStart)) {
+          (Attributes == GetPermissionAttributeForMemoryType (NextMemoryMapEntry->Type)) &&
+          ((MemoryMapEntry->PhysicalStart + MemoryBlockLength) == NextMemoryMapEntry->PhysicalStart))
+      {
         MemoryMapEntry->NumberOfPages += NextMemoryMapEntry->NumberOfPages;
         if (NewMemoryMapEntry != MemoryMapEntry) {
           NewMemoryMapEntry->NumberOfPages += NextMemoryMapEntry->NumberOfPages;
@@ -744,15 +667,14 @@ MergeMemoryMapForProtectionPolicy (
       }
     } while (TRUE);
 
-    MemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    MemoryMapEntry    = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
     NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (NewMemoryMapEntry, DescriptorSize);
   }
 
   *MemoryMapSize = (UINTN)NewMemoryMapEntry - (UINTN)MemoryMap;
 
-  return ;
+  return;
 }
-
 
 /**
   Remove exec permissions from all regions whose type is identified by
@@ -764,20 +686,20 @@ InitializeDxeNxMemoryProtectionPolicy (
   VOID
   )
 {
-  UINTN                             MemoryMapSize;
-  UINTN                             MapKey;
-  UINTN                             DescriptorSize;
-  UINT32                            DescriptorVersion;
-  EFI_MEMORY_DESCRIPTOR             *MemoryMap;
-  EFI_MEMORY_DESCRIPTOR             *MemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR             *MemoryMapEnd;
-  EFI_STATUS                        Status;
-  UINT64                            Attributes;
-  LIST_ENTRY                        *Link;
-  EFI_GCD_MAP_ENTRY                 *Entry;
-  EFI_PEI_HOB_POINTERS              Hob;
-  EFI_HOB_MEMORY_ALLOCATION         *MemoryHob;
-  EFI_PHYSICAL_ADDRESS              StackBase;
+  UINTN                      MemoryMapSize;
+  UINTN                      MapKey;
+  UINTN                      DescriptorSize;
+  UINT32                     DescriptorVersion;
+  EFI_MEMORY_DESCRIPTOR      *MemoryMap;
+  EFI_MEMORY_DESCRIPTOR      *MemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR      *MemoryMapEnd;
+  EFI_STATUS                 Status;
+  UINT64                     Attributes;
+  LIST_ENTRY                 *Link;
+  EFI_GCD_MAP_ENTRY          *Entry;
+  EFI_PEI_HOB_POINTERS       Hob;
+  EFI_HOB_MEMORY_ALLOCATION  *MemoryHob;
+  EFI_PHYSICAL_ADDRESS       StackBase;
 
   //
   // Get the EFI memory map.
@@ -794,7 +716,7 @@ InitializeDxeNxMemoryProtectionPolicy (
                   );
   ASSERT (Status == EFI_BUFFER_TOO_SMALL);
   do {
-    MemoryMap = (EFI_MEMORY_DESCRIPTOR *) AllocatePool (MemoryMapSize);
+    MemoryMap = (EFI_MEMORY_DESCRIPTOR *)AllocatePool (MemoryMapSize);
     ASSERT (MemoryMap != NULL);
     Status = gBS->GetMemoryMap (
                     &MemoryMapSize,
@@ -807,6 +729,7 @@ InitializeDxeNxMemoryProtectionPolicy (
       FreePool (MemoryMap);
     }
   } while (Status == EFI_BUFFER_TOO_SMALL);
+
   ASSERT_EFI_ERROR (Status);
 
   StackBase = 0;
@@ -817,11 +740,11 @@ InitializeDxeNxMemoryProtectionPolicy (
     Hob.Raw = GetHobList ();
     while ((Hob.Raw = GetNextHob (EFI_HOB_TYPE_MEMORY_ALLOCATION, Hob.Raw)) != NULL) {
       MemoryHob = Hob.MemoryAllocation;
-      if (CompareGuid(&gEfiHobMemoryAllocStackGuid, &MemoryHob->AllocDescriptor.Name)) {
+      if (CompareGuid (&gEfiHobMemoryAllocStackGuid, &MemoryHob->AllocDescriptor.Name)) {
         DEBUG ((
           DEBUG_INFO,
           "%a: StackBase = 0x%016lx  StackSize = 0x%016lx\n",
-          __FUNCTION__,
+          __func__,
           MemoryHob->AllocDescriptor.MemoryBaseAddress,
           MemoryHob->AllocDescriptor.MemoryLength
           ));
@@ -833,6 +756,7 @@ InitializeDxeNxMemoryProtectionPolicy (
         ASSERT ((StackBase & EFI_PAGE_MASK) == 0);
         break;
       }
+
       Hob.Raw = GET_NEXT_HOB (Hob);
     }
 
@@ -846,55 +770,58 @@ InitializeDxeNxMemoryProtectionPolicy (
   DEBUG ((
     DEBUG_INFO,
     "%a: applying strict permissions to active memory regions\n",
-    __FUNCTION__
+    __func__
     ));
 
   MergeMemoryMapForProtectionPolicy (MemoryMap, &MemoryMapSize, DescriptorSize);
 
   MemoryMapEntry = MemoryMap;
-  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *) ((UINT8 *) MemoryMap + MemoryMapSize);
-  while ((UINTN) MemoryMapEntry < (UINTN) MemoryMapEnd) {
-
+  MemoryMapEnd   = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMap + MemoryMapSize);
+  while ((UINTN)MemoryMapEntry < (UINTN)MemoryMapEnd) {
     Attributes = GetPermissionAttributeForMemoryType (MemoryMapEntry->Type);
     if (Attributes != 0) {
       SetUefiImageMemoryAttributes (
         MemoryMapEntry->PhysicalStart,
         LShiftU64 (MemoryMapEntry->NumberOfPages, EFI_PAGE_SHIFT),
-        Attributes);
+        Attributes
+        );
 
       //
       // Add EFI_MEMORY_RP attribute for page 0 if NULL pointer detection is
       // enabled.
       //
-      if (MemoryMapEntry->PhysicalStart == 0 &&
-          PcdGet8 (PcdNullPointerDetectionPropertyMask) != 0) {
-
+      if ((MemoryMapEntry->PhysicalStart == 0) &&
+          (PcdGet8 (PcdNullPointerDetectionPropertyMask) != 0))
+      {
         ASSERT (MemoryMapEntry->NumberOfPages > 0);
         SetUefiImageMemoryAttributes (
           0,
           EFI_PAGES_TO_SIZE (1),
-          EFI_MEMORY_RP | Attributes);
+          EFI_MEMORY_RP | Attributes
+          );
       }
 
       //
       // Add EFI_MEMORY_RP attribute for the first page of the stack if stack
       // guard is enabled.
       //
-      if (StackBase != 0 &&
-          (StackBase >= MemoryMapEntry->PhysicalStart &&
-           StackBase <  MemoryMapEntry->PhysicalStart +
-                        LShiftU64 (MemoryMapEntry->NumberOfPages, EFI_PAGE_SHIFT)) &&
-          PcdGetBool (PcdCpuStackGuard)) {
-
+      if ((StackBase != 0) &&
+          ((StackBase >= MemoryMapEntry->PhysicalStart) &&
+           (StackBase <  MemoryMapEntry->PhysicalStart +
+            LShiftU64 (MemoryMapEntry->NumberOfPages, EFI_PAGE_SHIFT))) &&
+          PcdGetBool (PcdCpuStackGuard))
+      {
         SetUefiImageMemoryAttributes (
           StackBase,
           EFI_PAGES_TO_SIZE (1),
-          EFI_MEMORY_RP | Attributes);
+          EFI_MEMORY_RP | Attributes
+          );
       }
-
     }
+
     MemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
   }
+
   FreePool (MemoryMap);
 
   //
@@ -905,40 +832,46 @@ InitializeDxeNxMemoryProtectionPolicy (
     DEBUG ((
       DEBUG_INFO,
       "%a: applying strict permissions to inactive memory regions\n",
-      __FUNCTION__
+      __func__
       ));
 
     CoreAcquireGcdMemoryLock ();
 
     Link = mGcdMemorySpaceMap.ForwardLink;
     while (Link != &mGcdMemorySpaceMap) {
-
       Entry = CR (Link, EFI_GCD_MAP_ENTRY, Link, EFI_GCD_MAP_SIGNATURE);
 
-      if (Entry->GcdMemoryType == EfiGcdMemoryTypeReserved &&
-          Entry->EndAddress < MAX_ADDRESS &&
-          (Entry->Capabilities & (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED)) ==
-            (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED)) {
-
+      if ((Entry->GcdMemoryType == EfiGcdMemoryTypeReserved) &&
+          (Entry->EndAddress < MAX_ADDRESS) &&
+          ((Entry->Capabilities & (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED)) ==
+           (EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED)))
+      {
         Attributes = GetPermissionAttributeForMemoryType (EfiConventionalMemory) |
                      (Entry->Attributes & EFI_CACHE_ATTRIBUTE_MASK);
 
-        DEBUG ((DEBUG_INFO,
+        DEBUG ((
+          DEBUG_INFO,
           "Untested GCD memory space region: - 0x%016lx - 0x%016lx (0x%016lx)\n",
-          Entry->BaseAddress, Entry->EndAddress - Entry->BaseAddress + 1,
-          Attributes));
+          Entry->BaseAddress,
+          Entry->EndAddress - Entry->BaseAddress + 1,
+          Attributes
+          ));
 
-        ASSERT(gCpu != NULL);
-        gCpu->SetMemoryAttributes (gCpu, Entry->BaseAddress,
-          Entry->EndAddress - Entry->BaseAddress + 1, Attributes);
+        ASSERT (gCpu != NULL);
+        gCpu->SetMemoryAttributes (
+                gCpu,
+                Entry->BaseAddress,
+                Entry->EndAddress - Entry->BaseAddress + 1,
+                Attributes
+                );
       }
 
       Link = Link->ForwardLink;
     }
+
     CoreReleaseGcdMemoryLock ();
   }
 }
-
 
 /**
   A notification for CPU_ARCH protocol.
@@ -951,16 +884,16 @@ InitializeDxeNxMemoryProtectionPolicy (
 VOID
 EFIAPI
 MemoryProtectionCpuArchProtocolNotify (
-  IN EFI_EVENT                Event,
-  IN VOID                     *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   )
 {
-  EFI_STATUS                  Status;
-  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
-  EFI_DEVICE_PATH_PROTOCOL    *LoadedImageDevicePath;
-  UINTN                       NoHandles;
-  EFI_HANDLE                  *HandleBuffer;
-  UINTN                       Index;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath;
+  UINTN                      NoHandles;
+  EFI_HANDLE                 *HandleBuffer;
+  UINTN                      Index;
 
   DEBUG ((DEBUG_INFO, "MemoryProtectionCpuArchProtocolNotify:\n"));
   Status = CoreLocateProtocol (&gEfiCpuArchProtocolGuid, NULL, (VOID **)&gCpu);
@@ -1001,20 +934,22 @@ MemoryProtectionCpuArchProtocolNotify (
                     &gEfiLoadedImageProtocolGuid,
                     (VOID **)&LoadedImage
                     );
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       continue;
     }
+
     Status = gBS->HandleProtocol (
                     HandleBuffer[Index],
                     &gEfiLoadedImageDevicePathProtocolGuid,
                     (VOID **)&LoadedImageDevicePath
                     );
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       LoadedImageDevicePath = NULL;
     }
 
     ProtectUefiImage (LoadedImage, LoadedImageDevicePath);
   }
+
   FreePool (HandleBuffer);
 
 Done:
@@ -1029,8 +964,8 @@ MemoryProtectionExitBootServicesCallback (
   VOID
   )
 {
-  EFI_RUNTIME_IMAGE_ENTRY       *RuntimeImage;
-  LIST_ENTRY                    *Link;
+  EFI_RUNTIME_IMAGE_ENTRY  *RuntimeImage;
+  LIST_ENTRY               *Link;
 
   //
   // We need remove the RT protection, because RT relocation need write code segment
@@ -1044,7 +979,7 @@ MemoryProtectionExitBootServicesCallback (
   if (mImageProtectionPolicy != 0) {
     for (Link = gRuntime->ImageHead.ForwardLink; Link != &gRuntime->ImageHead; Link = Link->ForwardLink) {
       RuntimeImage = BASE_CR (Link, EFI_RUNTIME_IMAGE_ENTRY, Link);
-      SetUefiImageMemoryAttributes ((UINT64)(UINTN)RuntimeImage->ImageBase, ALIGN_VALUE(RuntimeImage->ImageSize, EFI_PAGE_SIZE), 0);
+      SetUefiImageMemoryAttributes ((UINT64)(UINTN)RuntimeImage->ImageBase, ALIGN_VALUE (RuntimeImage->ImageSize, EFI_PAGE_SIZE), 0);
     }
   }
 }
@@ -1060,12 +995,12 @@ MemoryProtectionExitBootServicesCallback (
 VOID
 EFIAPI
 DisableNullDetectionAtTheEndOfDxe (
-  EFI_EVENT                               Event,
-  VOID                                    *Context
+  EFI_EVENT  Event,
+  VOID       *Context
   )
 {
-  EFI_STATUS                        Status;
-  EFI_GCD_MEMORY_SPACE_DESCRIPTOR   Desc;
+  EFI_STATUS                       Status;
+  EFI_GCD_MEMORY_SPACE_DESCRIPTOR  Desc;
 
   DEBUG ((DEBUG_INFO, "DisableNullDetectionAtTheEndOfDxe(): start\r\n"));
   //
@@ -1076,18 +1011,18 @@ DisableNullDetectionAtTheEndOfDxe (
 
   if ((Desc.Capabilities & EFI_MEMORY_RP) == 0) {
     Status = CoreSetMemorySpaceCapabilities (
-              0,
-              EFI_PAGE_SIZE,
-              Desc.Capabilities | EFI_MEMORY_RP
-              );
+               0,
+               EFI_PAGE_SIZE,
+               Desc.Capabilities | EFI_MEMORY_RP
+               );
     ASSERT_EFI_ERROR (Status);
   }
 
   Status = CoreSetMemorySpaceAttributes (
-            0,
-            EFI_PAGE_SIZE,
-            Desc.Attributes & ~EFI_MEMORY_RP
-            );
+             0,
+             EFI_PAGE_SIZE,
+             Desc.Attributes & ~EFI_MEMORY_RP
+             );
   ASSERT_EFI_ERROR (Status);
 
   //
@@ -1099,6 +1034,37 @@ DisableNullDetectionAtTheEndOfDxe (
   DEBUG ((DEBUG_INFO, "DisableNullDetectionAtTheEndOfDxe(): end\r\n"));
 
   return;
+}
+
+/**
+  A notification for the Memory Attribute Protocol Installation.
+
+  @param[in]  Event                 Event whose notification function is being invoked.
+  @param[in]  Context               Pointer to the notification function's context,
+                                    which is implementation-dependent.
+
+**/
+VOID
+EFIAPI
+MemoryAttributeProtocolNotify (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = gBS->LocateProtocol (&gEfiMemoryAttributeProtocolGuid, NULL, (VOID **)&gMemoryAttributeProtocol);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "%a - Unable to locate the memory attribute protocol! Status = %r\n",
+      __func__,
+      Status
+      ));
+  }
+
+  CoreCloseEvent (Event);
 }
 
 /**
@@ -1115,7 +1081,7 @@ CoreInitializeMemoryProtection (
   EFI_EVENT   EndOfDxeEvent;
   VOID        *Registration;
 
-  mImageProtectionPolicy = PcdGet32(PcdImageProtectionPolicy);
+  mImageProtectionPolicy = PcdGet32 (PcdImageProtectionPolicy);
 
   InitializeListHead (&mProtectedImageRecordList);
 
@@ -1128,8 +1094,10 @@ CoreInitializeMemoryProtection (
   ASSERT ((GetPermissionAttributeForMemoryType (EfiBootServicesCode) & EFI_MEMORY_XP) == 0);
   ASSERT ((GetPermissionAttributeForMemoryType (EfiRuntimeServicesCode) & EFI_MEMORY_XP) == 0);
   ASSERT ((GetPermissionAttributeForMemoryType (EfiLoaderCode) & EFI_MEMORY_XP) == 0);
-  ASSERT (GetPermissionAttributeForMemoryType (EfiBootServicesData) ==
-          GetPermissionAttributeForMemoryType (EfiConventionalMemory));
+  ASSERT (
+    GetPermissionAttributeForMemoryType (EfiBootServicesData) ==
+    GetPermissionAttributeForMemoryType (EfiConventionalMemory)
+    );
 
   Status = CoreCreateEvent (
              EVT_NOTIFY_SIGNAL,
@@ -1138,7 +1106,7 @@ CoreInitializeMemoryProtection (
              NULL,
              &Event
              );
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
   //
   // Register for protocol notifactions on this event
@@ -1148,25 +1116,55 @@ CoreInitializeMemoryProtection (
              Event,
              &Registration
              );
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
+
+  // Register an event to populate the memory attribute protocol
+  Status = CoreCreateEvent (
+             EVT_NOTIFY_SIGNAL,
+             TPL_CALLBACK,
+             MemoryAttributeProtocolNotify,
+             NULL,
+             &Event
+             );
+
+  // if we fail to create the event or the protocol notify, we should still continue, we won't be able to query the
+  // memory attributes on FreePages(), so we may encounter a driver or bootloader that has not set attributes back to
+  // RW, but this matches the state of the world before this protocol was introduced, so it is not a regression.
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a - Failed to create event for the Memory Attribute Protocol notification: %r\n", __func__, Status));
+    ASSERT_EFI_ERROR (Status);
+  }
+
+  // Register for protocol notification
+  Status = CoreRegisterProtocolNotify (
+             &gEfiMemoryAttributeProtocolGuid,
+             Event,
+             &Registration
+             );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a - Failed to register for the Memory Attribute Protocol notification: %r\n", __func__, Status));
+    ASSERT_EFI_ERROR (Status);
+  }
 
   //
   // Register a callback to disable NULL pointer detection at EndOfDxe
   //
   if ((PcdGet8 (PcdNullPointerDetectionPropertyMask) & (BIT0|BIT7))
-       == (BIT0|BIT7)) {
+      == (BIT0|BIT7))
+  {
     Status = CoreCreateEventEx (
-                    EVT_NOTIFY_SIGNAL,
-                    TPL_NOTIFY,
-                    DisableNullDetectionAtTheEndOfDxe,
-                    NULL,
-                    &gEfiEndOfDxeEventGroupGuid,
-                    &EndOfDxeEvent
-                    );
+               EVT_NOTIFY_SIGNAL,
+               TPL_NOTIFY,
+               DisableNullDetectionAtTheEndOfDxe,
+               NULL,
+               &gEfiEndOfDxeEventGroupGuid,
+               &EndOfDxeEvent
+               );
     ASSERT_EFI_ERROR (Status);
   }
 
-  return ;
+  return;
 }
 
 /**
@@ -1178,12 +1176,13 @@ IsInSmm (
   VOID
   )
 {
-  BOOLEAN     InSmm;
+  BOOLEAN  InSmm;
 
   InSmm = FALSE;
   if (gSmmBase2 != NULL) {
     gSmmBase2->InSmm (gSmmBase2, &InSmm);
   }
+
   return InSmm;
 }
 
@@ -1245,7 +1244,7 @@ ApplyMemoryProtectionPolicy (
   // if any.
   //
   if (IsHeapGuardEnabled (GUARD_HEAP_TYPE_PAGE|GUARD_HEAP_TYPE_POOL)) {
-    if (IsGuardPage (Memory))  {
+    if (IsGuardPage (Memory)) {
       Memory += EFI_PAGE_SIZE;
       Length -= EFI_PAGE_SIZE;
       if (Length == 0) {
@@ -1253,7 +1252,7 @@ ApplyMemoryProtectionPolicy (
       }
     }
 
-    if (IsGuardPage (Memory + Length - EFI_PAGE_SIZE))  {
+    if (IsGuardPage (Memory + Length - EFI_PAGE_SIZE)) {
       Length -= EFI_PAGE_SIZE;
       if (Length == 0) {
         return EFI_SUCCESS;

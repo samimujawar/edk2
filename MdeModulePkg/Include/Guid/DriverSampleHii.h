@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __DRIVER_SAMPLE_HII_GUID_H__
-#define __DRIVER_SAMPLE_HII_GUID_H__
+#pragma once
 
 #define DRIVER_SAMPLE_FORMSET_GUID \
   { \
@@ -24,8 +23,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
     0xF5E655D9, 0x02A6, 0x46f2, {0x9E, 0x76, 0xB8, 0xBE, 0x8E, 0x60, 0xAB, 0x22} \
   }
 
-extern EFI_GUID gDriverSampleFormSetGuid;
-extern EFI_GUID gDriverSampleInventoryGuid;
-extern EFI_GUID gEfiIfrRefreshIdOpGuid;
-
-#endif
+extern EFI_GUID  gDriverSampleFormSetGuid;
+extern EFI_GUID  gDriverSampleInventoryGuid;
+extern EFI_GUID  gEfiIfrRefreshIdOpGuid;

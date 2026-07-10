@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __SPI_SMM_HC_H__
-#define __SPI_SMM_HC_H__
+#pragma once
 
 #include <Protocol/SpiHc.h>
 
@@ -22,9 +21,7 @@
     { 0x8a, 0x54, 0x5c, 0x2c, 0xff, 0xe7, 0x3e, 0xcb }}
 
 typedef
-struct _EFI_SPI_HC_PROTOCOL
+  struct _EFI_SPI_HC_PROTOCOL
 EFI_SPI_SMM_HC_PROTOCOL;
 
-extern EFI_GUID gEfiSpiSmmHcProtocolGuid;
-
-#endif // __SPI_SMM_HC_H__
+extern EFI_GUID  gEfiSpiSmmHcProtocolGuid;

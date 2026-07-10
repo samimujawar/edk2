@@ -18,8 +18,7 @@ Abstract:
 
 **/
 
-#ifndef _EMU_BLOCK_IO_H_
-#define _EMU_BLOCK_IO_H_
+#pragma once
 
 #include <PiDxe.h>
 #include <Protocol/EmuIoThunk.h>
@@ -38,12 +37,11 @@ Abstract:
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-
 //
 // Language supported for driverconfiguration protocol
 //
 
-#define EMU_BLOCK_IO_PRIVATE_SIGNATURE SIGNATURE_32 ('E', 'M', 'b', 'k')
+#define EMU_BLOCK_IO_PRIVATE_SIGNATURE  SIGNATURE_32 ('E', 'M', 'b', 'k')
 typedef struct {
   UINTN                       Signature;
   EMU_IO_THUNK_PROTOCOL       *IoThunk;
@@ -55,7 +53,6 @@ typedef struct {
   EFI_BLOCK_IO_MEDIA          Media;
 
   EFI_UNICODE_STRING_TABLE    *ControllerNameTable;
-
 } EMU_BLOCK_IO_PRIVATE;
 
 #define EMU_BLOCK_IO_PRIVATE_DATA_FROM_THIS(a) \
@@ -63,7 +60,6 @@ typedef struct {
 
 #define EMU_BLOCK_IO2_PRIVATE_DATA_FROM_THIS(a) \
          CR(a, EMU_BLOCK_IO_PRIVATE, BlockIo2, EMU_BLOCK_IO_PRIVATE_SIGNATURE)
-
 
 //
 // Block I/O Global Variables
@@ -74,5 +70,3 @@ extern EFI_COMPONENT_NAME2_PROTOCOL       gEmuBlockIoComponentName2;
 extern EFI_DRIVER_CONFIGURATION_PROTOCOL  gEmuBlockIoDriverConfiguration;
 extern EFI_DRIVER_DIAGNOSTICS_PROTOCOL    gEmuBlockIoDriverDiagnostics;
 extern EFI_DRIVER_DIAGNOSTICS2_PROTOCOL   gEmuBlockIoDriverDiagnostics2;
-
-#endif

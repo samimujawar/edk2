@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __PC_ANSI_H__
-#define __PC_ANSI_H__
+#pragma once
 
 #define EFI_PC_ANSI_GUID \
   { \
@@ -42,11 +41,9 @@
     0xd487ddb4, 0x008b, 0x11d9, {0xaf, 0xdc, 0x00, 0x10, 0x83, 0xff, 0xca, 0x4d } \
   }
 
-extern EFI_GUID gEfiPcAnsiGuid;
-extern EFI_GUID gEfiVT100Guid;
-extern EFI_GUID gEfiVT100PlusGuid;
-extern EFI_GUID gEfiVTUTF8Guid;
-extern EFI_GUID gEfiUartDevicePathGuid;
-extern EFI_GUID gEfiSasDevicePathGuid;
-
-#endif
+extern EFI_GUID  gEfiPcAnsiGuid;
+extern EFI_GUID  gEfiVT100Guid;
+extern EFI_GUID  gEfiVT100PlusGuid;
+extern EFI_GUID  gEfiVTUTF8Guid;
+extern EFI_GUID  gEfiUartDevicePathGuid;
+extern EFI_GUID  gEfiSasDevicePathGuid;

@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __TIMER_LIB__
-#define __TIMER_LIB__
+#pragma once
 
 /**
   Stalls the CPU for at least the given number of microseconds.
@@ -22,7 +21,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 UINTN
 EFIAPI
 MicroSecondDelay (
-  IN      UINTN                     MicroSeconds
+  IN      UINTN  MicroSeconds
   );
 
 /**
@@ -38,7 +37,7 @@ MicroSecondDelay (
 UINTN
 EFIAPI
 NanoSecondDelay (
-  IN      UINTN                     NanoSeconds
+  IN      UINTN  NanoSeconds
   );
 
 /**
@@ -84,8 +83,8 @@ GetPerformanceCounter (
 UINT64
 EFIAPI
 GetPerformanceCounterProperties (
-  OUT      UINT64                    *StartValue,  OPTIONAL
-  OUT      UINT64                    *EndValue     OPTIONAL
+  OUT      UINT64  *StartValue   OPTIONAL,
+  OUT      UINT64  *EndValue     OPTIONAL
   );
 
 /**
@@ -102,7 +101,5 @@ GetPerformanceCounterProperties (
 UINT64
 EFIAPI
 GetTimeInNanoSecond (
-  IN      UINT64                     Ticks
+  IN      UINT64  Ticks
   );
-
-#endif

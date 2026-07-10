@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __FSP_WRAPPER_PLATFORM_LIB_H__
-#define __FSP_WRAPPER_PLATFORM_LIB_H__
+#pragma once
 
 /**
   This function overrides the default configurations in the FSP-M UPD data region.
@@ -18,7 +17,7 @@
 VOID
 EFIAPI
 UpdateFspmUpdData (
-  IN OUT VOID        *FspUpdRgnPtr
+  IN OUT VOID  *FspUpdRgnPtr
   );
 
 /**
@@ -30,7 +29,7 @@ UpdateFspmUpdData (
 VOID
 EFIAPI
 UpdateFspsUpdData (
-  IN OUT VOID        *FspUpdRgnPtr
+  IN OUT VOID  *FspUpdRgnPtr
   );
 
 /**
@@ -60,8 +59,8 @@ UpdateTempRamExitParam (
 EFI_STATUS
 EFIAPI
 GetS3MemoryInfo (
-  OUT UINT64               *S3PeiMemSize,
-  OUT EFI_PHYSICAL_ADDRESS *S3PeiMemBase
+  OUT UINT64                *S3PeiMemSize,
+  OUT EFI_PHYSICAL_ADDRESS  *S3PeiMemBase
   );
 
 /**
@@ -74,7 +73,17 @@ GetS3MemoryInfo (
 VOID
 EFIAPI
 CallFspWrapperResetSystem (
-  IN UINT32    FspStatusResetType
+  IN EFI_STATUS  FspStatusResetType
   );
 
-#endif
+/**
+  This function overrides the default configurations in the FSP-I UPD data region.
+
+  @param[in,out] FspUpdRgnPtr   A pointer to the UPD data region data structure.
+
+**/
+VOID
+EFIAPI
+UpdateFspiUpdData (
+  IN OUT VOID  *FspUpdRgnPtr
+  );

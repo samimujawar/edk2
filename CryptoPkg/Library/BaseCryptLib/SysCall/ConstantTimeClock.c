@@ -23,15 +23,51 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // -- Time Management Routines --
 //
 
-time_t time (time_t *timer)
+time_t
+time (
+  time_t  *timer
+  )
 {
   if (timer != NULL) {
     *timer = 0;
   }
+
   return 0;
 }
 
-struct tm * gmtime (const time_t *timer)
+struct tm *
+gmtime (
+  const time_t  *timer
+  )
 {
   return NULL;
 }
+
+time_t
+mktime (
+  struct tm  *t
+  )
+{
+  return 0;
+}
+
+unsigned int
+sleep (
+  unsigned int  seconds
+  )
+{
+  return 0;
+}
+
+int
+gettimeofday (
+  struct timeval   *tv,
+  struct timezone  *tz
+  )
+{
+  tv->tv_sec  = 0;
+  tv->tv_usec = 0;
+  return 0;
+}
+
+long  timezone;

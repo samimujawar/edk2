@@ -14,8 +14,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_CAPSULE_VENDOR_GUID_H__
-#define __EFI_CAPSULE_VENDOR_GUID_H__
+#pragma once
 
 ///
 /// This guid is used as a variable GUID for the capsule variable
@@ -30,7 +29,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// Name of capsule variable.
 ///
-#define EFI_CAPSULE_VARIABLE_NAME L"CapsuleUpdateData"
+#define EFI_CAPSULE_VARIABLE_NAME  L"CapsuleUpdateData"
 
 ///
 /// The data structure of the capsule guid hob entry.
@@ -38,22 +37,20 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///       UEFI_CAPSULE_HOB instead.
 ///
 typedef struct {
-  EFI_PHYSICAL_ADDRESS BaseAddress;  ///< Capsule data start address.
-  UINT32 Length;                     ///< Length of capsule data.
+  EFI_PHYSICAL_ADDRESS    BaseAddress; ///< Capsule data start address.
+  UINT32                  Length;      ///< Length of capsule data.
 } CAPSULE_HOB_INFO;
 
 //
 // The variable describes the long mode buffer used by IA32 Capsule PEIM
 // to call X64 CapsuleCoalesce code to handle >4GB capsule blocks.
 //
-#define EFI_CAPSULE_LONG_MODE_BUFFER_NAME L"CapsuleLongModeBuffer"
+#define EFI_CAPSULE_LONG_MODE_BUFFER_NAME  L"CapsuleLongModeBuffer"
 
 typedef struct {
-  EFI_PHYSICAL_ADDRESS   PageTableAddress;
-  EFI_PHYSICAL_ADDRESS   StackBaseAddress;
-  UINT64                 StackSize;
+  EFI_PHYSICAL_ADDRESS    PageTableAddress;
+  EFI_PHYSICAL_ADDRESS    StackBaseAddress;
+  UINT64                  StackSize;
 } EFI_CAPSULE_LONG_MODE_BUFFER;
 
-extern EFI_GUID gEfiCapsuleVendorGuid;
-
-#endif // #ifndef _EFI_CAPSULE_VENDOR_GUID_H_
+extern EFI_GUID  gEfiCapsuleVendorGuid;

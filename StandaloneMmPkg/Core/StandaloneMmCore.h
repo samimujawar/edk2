@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef _MM_CORE_H_
-#define _MM_CORE_H_
+#pragma once
 
 #include <PiMm.h>
 #include <StandaloneMm.h>
@@ -30,6 +29,8 @@
 #include <Guid/HobList.h>
 #include <Guid/MmFvDispatch.h>
 #include <Guid/MmramMemoryReserve.h>
+#include <Guid/MmCommBuffer.h>
+#include <Guid/PiSmmMemoryAttributesTable.h>
 
 #include <Library/StandaloneMmCoreEntryPoint.h>
 #include <Library/BaseLib.h>
@@ -40,11 +41,16 @@
 #include <Library/ReportStatusCodeLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
-
+#include <Library/HobPrintLib.h>
+#include <Library/ImagePropertiesRecordLib.h>
+#include <Library/PeCoffGetEntryPointLib.h>
 #include <Library/StandaloneMmMemLib.h>
 #include <Library/HobLib.h>
+#include <Library/PerformanceLib.h>
 
 #include "StandaloneMmCorePrivateData.h"
+
+extern EFI_MM_SYSTEM_TABLE  *mMemoryAllocationMmst;
 
 //
 // Used to build a table of MMI Handlers that the MM Core registers
@@ -59,64 +65,64 @@ typedef struct {
 //
 // Structure for recording the state of an MM Driver
 //
-#define EFI_MM_DRIVER_ENTRY_SIGNATURE SIGNATURE_32('s', 'd','r','v')
+#define EFI_MM_DRIVER_ENTRY_SIGNATURE  SIGNATURE_32('s', 'd','r','v')
 
 typedef struct {
-  UINTN                           Signature;
-  LIST_ENTRY                      Link;             // mDriverList
+  UINTN                         Signature;
+  LIST_ENTRY                    Link;               // mDriverList
 
-  LIST_ENTRY                      ScheduledLink;    // mScheduledQueue
+  LIST_ENTRY                    ScheduledLink;      // mScheduledQueue
 
-  EFI_FIRMWARE_VOLUME_HEADER      *FwVolHeader;
-  EFI_GUID                        FileName;
-  VOID                            *Pe32Data;
-  UINTN                           Pe32DataSize;
+  EFI_FIRMWARE_VOLUME_HEADER    *FwVolHeader;
+  EFI_GUID                      FileName;
+  VOID                          *Pe32Data;
+  UINTN                         Pe32DataSize;
 
-  VOID                            *Depex;
-  UINTN                           DepexSize;
+  VOID                          *Depex;
+  UINTN                         DepexSize;
 
-  BOOLEAN                         Before;
-  BOOLEAN                         After;
-  EFI_GUID                        BeforeAfterGuid;
+  BOOLEAN                       Before;
+  BOOLEAN                       After;
+  EFI_GUID                      BeforeAfterGuid;
 
-  BOOLEAN                         Dependent;
-  BOOLEAN                         Scheduled;
-  BOOLEAN                         Initialized;
-  BOOLEAN                         DepexProtocolError;
+  BOOLEAN                       Dependent;
+  BOOLEAN                       Scheduled;
+  BOOLEAN                       Initialized;
+  BOOLEAN                       DepexProtocolError;
 
-  EFI_HANDLE                      ImageHandle;
-  EFI_LOADED_IMAGE_PROTOCOL       *LoadedImage;
+  EFI_HANDLE                    ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL     LoadedImage;
   //
   // Image EntryPoint in MMRAM
   //
-  PHYSICAL_ADDRESS                ImageEntryPoint;
+  PHYSICAL_ADDRESS              ImageEntryPoint;
   //
   // Image Buffer in MMRAM
   //
-  PHYSICAL_ADDRESS                ImageBuffer;
+  PHYSICAL_ADDRESS              ImageBuffer;
   //
   // Image Page Number
   //
-  UINTN                           NumberOfPage;
+  UINTN                         NumberOfPage;
 } EFI_MM_DRIVER_ENTRY;
 
-#define EFI_HANDLE_SIGNATURE            SIGNATURE_32('h','n','d','l')
+#define EFI_HANDLE_SIGNATURE  SIGNATURE_32('h','n','d','l')
 
 ///
 /// IHANDLE - contains a list of protocol handles
 ///
 typedef struct {
-  UINTN               Signature;
+  UINTN         Signature;
   /// All handles list of IHANDLE
-  LIST_ENTRY          AllHandles;
+  LIST_ENTRY    AllHandles;
   /// List of PROTOCOL_INTERFACE's for this handle
-  LIST_ENTRY          Protocols;
-  UINTN               LocateRequest;
+  LIST_ENTRY    Protocols;
+  UINTN         LocateRequest;
 } IHANDLE;
 
 #define ASSERT_IS_HANDLE(a)  ASSERT((a)->Signature == EFI_HANDLE_SIGNATURE)
 
-#define PROTOCOL_ENTRY_SIGNATURE        SIGNATURE_32('p','r','t','e')
+#define PROTOCOL_ENTRY_SIGNATURE  SIGNATURE_32('p','r','t','e')
 
 ///
 /// PROTOCOL_ENTRY - each different protocol has 1 entry in the protocol
@@ -124,15 +130,15 @@ typedef struct {
 /// with a list of registered notifies.
 ///
 typedef struct {
-  UINTN               Signature;
+  UINTN         Signature;
   /// Link Entry inserted to mProtocolDatabase
-  LIST_ENTRY          AllEntries;
+  LIST_ENTRY    AllEntries;
   /// ID of the protocol
-  EFI_GUID            ProtocolID;
+  EFI_GUID      ProtocolID;
   /// All protocol interfaces
-  LIST_ENTRY          Protocols;
+  LIST_ENTRY    Protocols;
   /// Registered notification handlers
-  LIST_ENTRY          Notify;
+  LIST_ENTRY    Notify;
 } PROTOCOL_ENTRY;
 
 #define PROTOCOL_INTERFACE_SIGNATURE  SIGNATURE_32('p','i','f','c')
@@ -142,20 +148,20 @@ typedef struct {
 /// with a protocol interface structure
 ///
 typedef struct {
-  UINTN                       Signature;
+  UINTN             Signature;
   /// Link on IHANDLE.Protocols
-  LIST_ENTRY                  Link;
+  LIST_ENTRY        Link;
   /// Back pointer
-  IHANDLE                     *Handle;
+  IHANDLE           *Handle;
   /// Link on PROTOCOL_ENTRY.Protocols
-  LIST_ENTRY                  ByProtocol;
+  LIST_ENTRY        ByProtocol;
   /// The protocol ID
-  PROTOCOL_ENTRY              *Protocol;
+  PROTOCOL_ENTRY    *Protocol;
   /// The interface value
-  VOID                        *Interface;
+  VOID              *Interface;
 } PROTOCOL_INTERFACE;
 
-#define PROTOCOL_NOTIFY_SIGNATURE       SIGNATURE_32('p','r','t','n')
+#define PROTOCOL_NOTIFY_SIGNATURE  SIGNATURE_32('p','r','t','n')
 
 ///
 /// PROTOCOL_NOTIFY - used for each register notification for a protocol
@@ -166,7 +172,7 @@ typedef struct {
   /// All notifications for this protocol
   LIST_ENTRY          Link;
   /// Notification function
-  EFI_MM_NOTIFY_FN   Function;
+  EFI_MM_NOTIFY_FN    Function;
   /// Last position notified
   LIST_ENTRY          *Position;
 } PROTOCOL_NOTIFY;
@@ -174,10 +180,9 @@ typedef struct {
 //
 // MM Core Global Variables
 //
-extern MM_CORE_PRIVATE_DATA  *gMmCorePrivate;
-extern EFI_MM_SYSTEM_TABLE   gMmCoreMmst;
-extern LIST_ENTRY            gHandleList;
-extern EFI_PHYSICAL_ADDRESS  gLoadModuleAtFixAddressMmramBase;
+extern EFI_MM_SYSTEM_TABLE  gMmCoreMmst;
+extern LIST_ENTRY           gHandleList;
+extern BOOLEAN              mMmEntryPointRegistered;
 
 /**
   Called to initialize the memory service.
@@ -213,9 +218,9 @@ EFI_STATUS
 EFIAPI
 MmInstallConfigurationTable (
   IN  CONST EFI_MM_SYSTEM_TABLE  *SystemTable,
-  IN  CONST EFI_GUID              *Guid,
-  IN  VOID                        *Table,
-  IN  UINTN                       TableSize
+  IN  CONST EFI_GUID             *Guid,
+  IN  VOID                       *Table,
+  IN  UINTN                      TableSize
   );
 
 /**
@@ -235,10 +240,10 @@ MmInstallConfigurationTable (
 EFI_STATUS
 EFIAPI
 MmInstallProtocolInterface (
-  IN OUT EFI_HANDLE     *UserHandle,
-  IN EFI_GUID           *Protocol,
-  IN EFI_INTERFACE_TYPE InterfaceType,
-  IN VOID               *Interface
+  IN OUT EFI_HANDLE      *UserHandle,
+  IN EFI_GUID            *Protocol,
+  IN EFI_INTERFACE_TYPE  InterfaceType,
+  IN VOID                *Interface
   );
 
 /**
@@ -260,10 +265,10 @@ MmInstallProtocolInterface (
 EFI_STATUS
 EFIAPI
 MmAllocatePages (
-  IN      EFI_ALLOCATE_TYPE         Type,
-  IN      EFI_MEMORY_TYPE           MemoryType,
-  IN      UINTN                     NumberOfPages,
-  OUT     EFI_PHYSICAL_ADDRESS      *Memory
+  IN      EFI_ALLOCATE_TYPE     Type,
+  IN      EFI_MEMORY_TYPE       MemoryType,
+  IN      UINTN                 NumberOfPages,
+  OUT     EFI_PHYSICAL_ADDRESS  *Memory
   );
 
 /**
@@ -285,10 +290,10 @@ MmAllocatePages (
 EFI_STATUS
 EFIAPI
 MmInternalAllocatePages (
-  IN      EFI_ALLOCATE_TYPE         Type,
-  IN      EFI_MEMORY_TYPE           MemoryType,
-  IN      UINTN                     NumberOfPages,
-  OUT     EFI_PHYSICAL_ADDRESS      *Memory
+  IN      EFI_ALLOCATE_TYPE     Type,
+  IN      EFI_MEMORY_TYPE       MemoryType,
+  IN      UINTN                 NumberOfPages,
+  OUT     EFI_PHYSICAL_ADDRESS  *Memory
   );
 
 /**
@@ -305,8 +310,8 @@ MmInternalAllocatePages (
 EFI_STATUS
 EFIAPI
 MmFreePages (
-  IN      EFI_PHYSICAL_ADDRESS      Memory,
-  IN      UINTN                     NumberOfPages
+  IN      EFI_PHYSICAL_ADDRESS  Memory,
+  IN      UINTN                 NumberOfPages
   );
 
 /**
@@ -323,8 +328,8 @@ MmFreePages (
 EFI_STATUS
 EFIAPI
 MmInternalFreePages (
-  IN      EFI_PHYSICAL_ADDRESS      Memory,
-  IN      UINTN                     NumberOfPages
+  IN      EFI_PHYSICAL_ADDRESS  Memory,
+  IN      UINTN                 NumberOfPages
   );
 
 /**
@@ -343,9 +348,9 @@ MmInternalFreePages (
 EFI_STATUS
 EFIAPI
 MmAllocatePool (
-  IN      EFI_MEMORY_TYPE           PoolType,
-  IN      UINTN                     Size,
-  OUT     VOID                      **Buffer
+  IN      EFI_MEMORY_TYPE  PoolType,
+  IN      UINTN            Size,
+  OUT     VOID             **Buffer
   );
 
 /**
@@ -364,9 +369,9 @@ MmAllocatePool (
 EFI_STATUS
 EFIAPI
 MmInternalAllocatePool (
-  IN      EFI_MEMORY_TYPE           PoolType,
-  IN      UINTN                     Size,
-  OUT     VOID                      **Buffer
+  IN      EFI_MEMORY_TYPE  PoolType,
+  IN      UINTN            Size,
+  OUT     VOID             **Buffer
   );
 
 /**
@@ -381,7 +386,7 @@ MmInternalAllocatePool (
 EFI_STATUS
 EFIAPI
 MmFreePool (
-  IN      VOID                      *Buffer
+  IN      VOID  *Buffer
   );
 
 /**
@@ -396,7 +401,7 @@ MmFreePool (
 EFI_STATUS
 EFIAPI
 MmInternalFreePool (
-  IN      VOID                      *Buffer
+  IN      VOID  *Buffer
   );
 
 /**
@@ -418,11 +423,11 @@ MmInternalFreePool (
 **/
 EFI_STATUS
 MmInstallProtocolInterfaceNotify (
-  IN OUT EFI_HANDLE     *UserHandle,
-  IN EFI_GUID           *Protocol,
-  IN EFI_INTERFACE_TYPE InterfaceType,
-  IN VOID               *Interface,
-  IN BOOLEAN            Notify
+  IN OUT EFI_HANDLE      *UserHandle,
+  IN EFI_GUID            *Protocol,
+  IN EFI_INTERFACE_TYPE  InterfaceType,
+  IN VOID                *Interface,
+  IN BOOLEAN             Notify
   );
 
 /**
@@ -441,9 +446,9 @@ MmInstallProtocolInterfaceNotify (
 EFI_STATUS
 EFIAPI
 MmUninstallProtocolInterface (
-  IN EFI_HANDLE       UserHandle,
-  IN EFI_GUID         *Protocol,
-  IN VOID             *Interface
+  IN EFI_HANDLE  UserHandle,
+  IN EFI_GUID    *Protocol,
+  IN VOID        *Interface
   );
 
 /**
@@ -460,9 +465,9 @@ MmUninstallProtocolInterface (
 EFI_STATUS
 EFIAPI
 MmHandleProtocol (
-  IN EFI_HANDLE       UserHandle,
-  IN EFI_GUID         *Protocol,
-  OUT VOID            **Interface
+  IN EFI_HANDLE  UserHandle,
+  IN EFI_GUID    *Protocol,
+  OUT VOID       **Interface
   );
 
 /**
@@ -481,9 +486,9 @@ MmHandleProtocol (
 EFI_STATUS
 EFIAPI
 MmRegisterProtocolNotify (
-  IN  CONST EFI_GUID              *Protocol,
-  IN  EFI_MM_NOTIFY_FN           Function,
-  OUT VOID                        **Registration
+  IN  CONST EFI_GUID    *Protocol,
+  IN  EFI_MM_NOTIFY_FN  Function,
+  OUT VOID              **Registration
   );
 
 /**
@@ -507,11 +512,43 @@ MmRegisterProtocolNotify (
 EFI_STATUS
 EFIAPI
 MmLocateHandle (
-  IN EFI_LOCATE_SEARCH_TYPE   SearchType,
-  IN EFI_GUID                 *Protocol   OPTIONAL,
-  IN VOID                     *SearchKey  OPTIONAL,
-  IN OUT UINTN                *BufferSize,
-  OUT EFI_HANDLE              *Buffer
+  IN EFI_LOCATE_SEARCH_TYPE  SearchType,
+  IN EFI_GUID                *Protocol   OPTIONAL,
+  IN VOID                    *SearchKey  OPTIONAL,
+  IN OUT UINTN               *BufferSize,
+  OUT EFI_HANDLE             *Buffer
+  );
+
+/**
+  Function returns an array of handles that support the requested protocol
+  in a buffer allocated from pool. This is a version of MmLocateHandle()
+  that allocates a buffer for the caller.
+
+  @param  SearchType             Specifies which handle(s) are to be returned.
+  @param  Protocol               Provides the protocol to search by.    This
+                                 parameter is only valid for SearchType
+                                 ByProtocol.
+  @param  SearchKey              Supplies the search key depending on the
+                                 SearchType.
+  @param  NumberHandles          The number of handles returned in Buffer.
+  @param  Buffer                 A pointer to the buffer to return the requested
+                                 array of  handles that support Protocol.
+
+  @retval EFI_SUCCESS            The result array of handles was returned.
+  @retval EFI_NOT_FOUND          No handles match the search.
+  @retval EFI_OUT_OF_RESOURCES   There is not enough pool memory to store the
+                                 matching results.
+  @retval EFI_INVALID_PARAMETER  One or more parameters are not valid.
+
+**/
+EFI_STATUS
+EFIAPI
+MmLocateHandleBuffer (
+  IN     EFI_LOCATE_SEARCH_TYPE  SearchType,
+  IN     EFI_GUID                *Protocol OPTIONAL,
+  IN     VOID                    *SearchKey OPTIONAL,
+  IN OUT UINTN                   *NumberHandles,
+  OUT    EFI_HANDLE              **Buffer
   );
 
 /**
@@ -555,10 +592,10 @@ MmLocateProtocol (
 EFI_STATUS
 EFIAPI
 MmiManage (
-  IN     CONST EFI_GUID           *HandlerType,
-  IN     CONST VOID               *Context         OPTIONAL,
-  IN OUT VOID                     *CommBuffer      OPTIONAL,
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     CONST EFI_GUID  *HandlerType,
+  IN     CONST VOID      *Context         OPTIONAL,
+  IN OUT VOID            *CommBuffer      OPTIONAL,
+  IN OUT UINTN           *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -575,9 +612,9 @@ MmiManage (
 EFI_STATUS
 EFIAPI
 MmiHandlerRegister (
-  IN   EFI_MM_HANDLER_ENTRY_POINT     Handler,
-  IN   CONST EFI_GUID                 *HandlerType  OPTIONAL,
-  OUT  EFI_HANDLE                     *DispatchHandle
+  IN   EFI_MM_HANDLER_ENTRY_POINT  Handler,
+  IN   CONST EFI_GUID              *HandlerType  OPTIONAL,
+  OUT  EFI_HANDLE                  *DispatchHandle
   );
 
 /**
@@ -592,7 +629,7 @@ MmiHandlerRegister (
 EFI_STATUS
 EFIAPI
 MmiHandlerUnRegister (
-  IN  EFI_HANDLE                      DispatchHandle
+  IN  EFI_HANDLE  DispatchHandle
   );
 
 /**
@@ -611,10 +648,10 @@ MmiHandlerUnRegister (
 EFI_STATUS
 EFIAPI
 MmDriverDispatchHandler (
-  IN     EFI_HANDLE               DispatchHandle,
-  IN     CONST VOID               *Context,        OPTIONAL
-  IN OUT VOID                     *CommBuffer,     OPTIONAL
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -633,10 +670,10 @@ MmDriverDispatchHandler (
 EFI_STATUS
 EFIAPI
 MmExitBootServiceHandler (
-  IN     EFI_HANDLE               DispatchHandle,
-  IN     CONST VOID               *Context,        OPTIONAL
-  IN OUT VOID                     *CommBuffer,     OPTIONAL
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -655,10 +692,10 @@ MmExitBootServiceHandler (
 EFI_STATUS
 EFIAPI
 MmReadyToBootHandler (
-  IN     EFI_HANDLE               DispatchHandle,
-  IN     CONST VOID               *Context,        OPTIONAL
-  IN OUT VOID                     *CommBuffer,     OPTIONAL
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -677,10 +714,33 @@ MmReadyToBootHandler (
 EFI_STATUS
 EFIAPI
 MmReadyToLockHandler (
-  IN     EFI_HANDLE               DispatchHandle,
-  IN     CONST VOID               *Context,        OPTIONAL
-  IN OUT VOID                     *CommBuffer,     OPTIONAL
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
+  );
+
+/**
+  Software MMI handler that is called when the EndOfPei event is signaled.
+  This function installs the MM EndOfPei Protocol so MM Drivers are informed that
+  EndOfPei event is signaled.
+
+  @param  DispatchHandle  The unique handle assigned to this handler by MmiHandlerRegister().
+  @param  Context         Points to an optional handler context which was specified when the handler was registered.
+  @param  CommBuffer      A pointer to a collection of data in memory that will
+                          be conveyed from a non-MM environment into an MM environment.
+  @param  CommBufferSize  The size of the CommBuffer.
+
+  @return Status Code
+
+**/
+EFI_STATUS
+EFIAPI
+MmEndOfPeiHandler (
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -699,10 +759,10 @@ MmReadyToLockHandler (
 EFI_STATUS
 EFIAPI
 MmEndOfDxeHandler (
-  IN     EFI_HANDLE               DispatchHandle,
-  IN     CONST VOID               *Context,        OPTIONAL
-  IN OUT VOID                     *CommBuffer,     OPTIONAL
-  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  IN     EFI_HANDLE  DispatchHandle,
+  IN     CONST VOID  *Context         OPTIONAL,
+  IN OUT VOID        *CommBuffer      OPTIONAL,
+  IN OUT UINTN       *CommBufferSize  OPTIONAL
   );
 
 /**
@@ -720,15 +780,15 @@ MmEndOfDxeHandler (
 EFI_STATUS
 EFIAPI
 MmEfiNotAvailableYetArg5 (
-  UINTN Arg1,
-  UINTN Arg2,
-  UINTN Arg3,
-  UINTN Arg4,
-  UINTN Arg5
+  UINTN  Arg1,
+  UINTN  Arg2,
+  UINTN  Arg3,
+  UINTN  Arg4,
+  UINTN  Arg5
   );
 
 //
-//Functions used during debug builds
+// Functions used during debug builds
 //
 
 /**
@@ -752,10 +812,10 @@ MmDisplayDiscoveredNotDispatched (
 **/
 VOID
 MmAddMemoryRegion (
-  IN      EFI_PHYSICAL_ADDRESS      MemBase,
-  IN      UINT64                    MemLength,
-  IN      EFI_MEMORY_TYPE           Type,
-  IN      UINT64                    Attributes
+  IN      EFI_PHYSICAL_ADDRESS  MemBase,
+  IN      UINT64                MemLength,
+  IN      EFI_MEMORY_TYPE       Type,
+  IN      UINT64                Attributes
   );
 
 /**
@@ -769,8 +829,8 @@ MmAddMemoryRegion (
 **/
 PROTOCOL_ENTRY  *
 MmFindProtocolEntry (
-  IN EFI_GUID   *Protocol,
-  IN BOOLEAN    Create
+  IN EFI_GUID  *Protocol,
+  IN BOOLEAN   Create
   );
 
 /**
@@ -781,7 +841,7 @@ MmFindProtocolEntry (
 **/
 VOID
 MmNotifyProtocol (
-  IN PROTOCOL_INTERFACE   *Prot
+  IN PROTOCOL_INTERFACE  *Prot
   );
 
 /**
@@ -798,9 +858,9 @@ MmNotifyProtocol (
 **/
 PROTOCOL_INTERFACE *
 MmFindProtocolInterface (
-  IN IHANDLE        *Handle,
-  IN EFI_GUID       *Protocol,
-  IN VOID           *Interface
+  IN IHANDLE   *Handle,
+  IN EFI_GUID  *Protocol,
+  IN VOID      *Interface
   );
 
 /**
@@ -815,9 +875,9 @@ MmFindProtocolInterface (
 **/
 PROTOCOL_INTERFACE *
 MmRemoveInterfaceFromProtocol (
-  IN IHANDLE        *Handle,
-  IN EFI_GUID       *Protocol,
-  IN VOID           *Interface
+  IN IHANDLE   *Handle,
+  IN EFI_GUID  *Protocol,
+  IN VOID      *Interface
   );
 
 /**
@@ -834,7 +894,7 @@ MmRemoveInterfaceFromProtocol (
 **/
 BOOLEAN
 MmIsSchedulable (
-  IN  EFI_MM_DRIVER_ENTRY   *DriverEntry
+  IN  EFI_MM_DRIVER_ENTRY  *DriverEntry
   );
 
 /**
@@ -846,8 +906,121 @@ DumpMmramInfo (
   VOID
   );
 
-extern UINTN                    mMmramRangeCount;
-extern EFI_MMRAM_DESCRIPTOR     *mMmramRanges;
-extern EFI_SYSTEM_TABLE         *mEfiSystemTable;
+/**
+  Given the pointer to the Firmware Volume Header find the
+  MM driver and return its PE32 image.
 
-#endif
+  @param [in] FwVolHeader   Pointer to memory mapped FV
+  @param [in] Depth         Nesting depth of encapsulation sections. Callers
+                            different from MmCoreFfsFindMmDriver() are
+                            responsible for passing in a zero Depth.
+
+  @retval  EFI_SUCCESS            Success.
+  @retval  EFI_INVALID_PARAMETER  Invalid parameter.
+  @retval  EFI_NOT_FOUND          Could not find section data.
+  @retval  EFI_OUT_OF_RESOURCES   Out of resources.
+  @retval  EFI_VOLUME_CORRUPTED   Firmware volume is corrupted.
+  @retval  EFI_UNSUPPORTED        Operation not supported.
+  @retval  EFI_ABORTED            Recursion aborted because Depth has been
+                                  greater than or equal to
+                                  PcdFwVolMmMaxEncapsulationDepth.
+
+**/
+EFI_STATUS
+MmCoreFfsFindMmDriver (
+  IN  EFI_FIRMWARE_VOLUME_HEADER  *FwVolHeader,
+  IN  UINT32                      Depth
+  );
+
+#define NEXT_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
+  ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) + (Size)))
+
+/**
+  Initialize MemoryAttributesTable support.
+**/
+VOID
+EFIAPI
+MmCoreInitializeMemoryAttributesTable (
+  VOID
+  );
+
+/**
+  This function returns a copy of the current memory map. The map is an array of
+  memory descriptors, each of which describes a contiguous block of memory.
+
+  @param[in, out]  MemoryMapSize          A pointer to the size, in bytes, of the
+                                          MemoryMap buffer. On input, this is the size of
+                                          the buffer allocated by the caller.  On output,
+                                          it is the size of the buffer returned by the
+                                          firmware  if the buffer was large enough, or the
+                                          size of the buffer needed  to contain the map if
+                                          the buffer was too small.
+  @param[in, out]  MemoryMap              A pointer to the buffer in which firmware places
+                                          the current memory map.
+  @param[out]      MapKey                 A pointer to the location in which firmware
+                                          returns the key for the current memory map.
+  @param[out]      DescriptorSize         A pointer to the location in which firmware
+                                          returns the size, in bytes, of an individual
+                                          EFI_MEMORY_DESCRIPTOR.
+  @param[out]      DescriptorVersion      A pointer to the location in which firmware
+                                          returns the version number associated with the
+                                          EFI_MEMORY_DESCRIPTOR.
+
+  @retval EFI_SUCCESS            The memory map was returned in the MemoryMap
+                                 buffer.
+  @retval EFI_BUFFER_TOO_SMALL   The MemoryMap buffer was too small. The current
+                                 buffer size needed to hold the memory map is
+                                 returned in MemoryMapSize.
+  @retval EFI_INVALID_PARAMETER  One of the parameters has an invalid value.
+
+**/
+EFI_STATUS
+EFIAPI
+MmCoreGetMemoryMap (
+  IN OUT UINTN                  *MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  OUT UINTN                     *MapKey,
+  OUT UINTN                     *DescriptorSize,
+  OUT UINT32                    *DescriptorVersion
+  );
+
+/**
+  This is the main Dispatcher for MM and it exits when there are no more
+  drivers to run. Drain the mScheduledQueue and load and start a PE
+  image for each driver. Search the mDiscoveredList to see if any driver can
+  be placed on the mScheduledQueue. If no drivers are placed on the
+  mScheduledQueue exit the function.
+
+  @retval EFI_SUCCESS           All of the MM Drivers that could be dispatched
+                                have been run and the MM Entry Point has been
+                                registered.
+  @retval EFI_NOT_READY         The MM Driver that registered the MM Entry Point
+                                was just dispatched.
+  @retval EFI_NOT_FOUND         There are no MM Drivers available to be dispatched.
+  @retval EFI_ALREADY_STARTED   The MM Dispatcher is already running
+
+**/
+EFI_STATUS
+MmDispatcher (
+  VOID
+  );
+
+/**
+  Dispatch Standalone MM FVs.
+  The FVs will be shadowed into MMRAM, caller is responsible for calling
+  MmFreeShadowedFvs() to free the shadowed MM FVs.
+
+**/
+VOID
+MmDispatchFvs (
+  VOID
+  );
+
+/**
+  Free the shadowed MM FVs.
+
+**/
+VOID
+MmFreeShadowedFvs (
+  VOID
+  );

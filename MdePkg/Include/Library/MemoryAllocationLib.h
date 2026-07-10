@@ -11,8 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __MEMORY_ALLOCATION_LIB_H__
-#define __MEMORY_ALLOCATION_LIB_H__
+#pragma once
 
 /**
   Allocates one or more 4KB pages of type EfiBootServicesData.
@@ -481,7 +480,5 @@ ReallocateReservedPool (
 VOID
 EFIAPI
 FreePool (
-  IN VOID   *Buffer
+  IN VOID  *Buffer
   );
-
-#endif

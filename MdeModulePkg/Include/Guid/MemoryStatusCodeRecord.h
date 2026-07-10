@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __MEMORY_STATUS_CODE_RECORD_H__
-#define __MEMORY_STATUS_CODE_RECORD_H__
+#pragma once
 
 ///
 /// Global ID used to identify GUIDed HOBs that start with a structure of type
@@ -39,15 +38,15 @@ typedef struct {
   ///
   /// Index of the packet.
   ///
-  UINT16  PacketIndex;
+  UINT16    PacketIndex;
   ///
   /// The number of active records in the packet.
   ///
-  UINT16  RecordIndex;
+  UINT16    RecordIndex;
   ///
   /// The maximum number of records that the packet can store.
   ///
-  UINT32  MaxRecordsNumber;
+  UINT32    MaxRecordsNumber;
 } MEMORY_STATUSCODE_PACKET_HEADER;
 
 ///
@@ -58,15 +57,15 @@ typedef struct {
   ///
   /// The index pointing to the last recored being stored.
   ///
-  UINT32   RecordIndex;
+  UINT32    RecordIndex;
   ///
   /// The number of records being stored.
   ///
-  UINT32   NumberOfRecords;
+  UINT32    NumberOfRecords;
   ///
   /// The maximum number of records that can be stored.
   ///
-  UINT32   MaxRecordsNumber;
+  UINT32    MaxRecordsNumber;
 } RUNTIME_MEMORY_STATUSCODE_HEADER;
 
 ///
@@ -77,21 +76,19 @@ typedef struct {
   ///
   /// Status Code type to be reported.
   ///
-  EFI_STATUS_CODE_TYPE   CodeType;
+  EFI_STATUS_CODE_TYPE     CodeType;
 
   ///
   /// An operation, plus value information about the class and subclass, used to
   /// classify the hardware and software entity.
   ///
-  EFI_STATUS_CODE_VALUE  Value;
+  EFI_STATUS_CODE_VALUE    Value;
 
   ///
   /// The enumeration of a hardware or software entity within
   /// the system. Valid instance numbers start with the number 1.
   ///
-  UINT32                 Instance;
+  UINT32                   Instance;
 } MEMORY_STATUSCODE_RECORD;
 
-extern EFI_GUID gMemoryStatusCodeRecordGuid;
-
-#endif
+extern EFI_GUID  gMemoryStatusCodeRecordGuid;

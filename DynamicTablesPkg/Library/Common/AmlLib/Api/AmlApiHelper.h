@@ -6,8 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef AML_HELPER_H_
-#define AML_HELPER_H_
+#pragma once
 
 #include <AmlNodeDefines.h>
 #include <ResourceData/AmlResourceData.h>
@@ -19,7 +18,7 @@
   of NameSegs that have less that 4 chars, like "DEV". "DEV" will be expanded
   as "DEV_".
 
-  An AML NameString is not NULL terminated and is is only composed of
+  An AML NameString is not NULL terminated and is only composed of
   4 chars long NameSegs.
 
   @param  [in] NameOpNode   NameOp object node defining a variable.
@@ -36,8 +35,8 @@
 BOOLEAN
 EFIAPI
 AmlNameOpCompareName (
-  IN  AML_OBJECT_NODE_HANDLE    NameOpNode,
-  IN  CHAR8                   * AslName
+  IN  AML_OBJECT_NODE_HANDLE  NameOpNode,
+  IN  CHAR8                   *AslName
   );
 
 /** Check whether ObjectNode has the input OpCode/SubOpcode couple.
@@ -53,9 +52,9 @@ AmlNameOpCompareName (
 BOOLEAN
 EFIAPI
 AmlNodeHasOpCode (
-  IN  AML_OBJECT_NODE_HANDLE    ObjectNode,
-  IN  UINT8                     OpCode,
-  IN  UINT8                     SubOpCode
+  IN  AML_OBJECT_NODE_HANDLE  ObjectNode,
+  IN  UINT8                   OpCode,
+  IN  UINT8                   SubOpCode
   );
 
 /** Check whether DataNode has the input DataType.
@@ -70,8 +69,8 @@ AmlNodeHasOpCode (
 BOOLEAN
 EFIAPI
 AmlNodeHasDataType (
-  IN  AML_DATA_NODE_HANDLE    DataNode,
-  IN  EAML_NODE_DATA_TYPE     DataType
+  IN  AML_DATA_NODE_HANDLE  DataNode,
+  IN  EAML_NODE_DATA_TYPE   DataType
   );
 
 /** Check whether RdNode has the input RdDataType.
@@ -86,8 +85,6 @@ AmlNodeHasDataType (
 BOOLEAN
 EFIAPI
 AmlNodeHasRdDataType (
-  IN  AML_DATA_NODE_HANDLE    RdNode,
-  IN  AML_RD_HEADER           RdDataType
+  IN  AML_DATA_NODE_HANDLE  RdNode,
+  IN  AML_RD_HEADER         RdDataType
   );
-
-#endif // AML_HELPER_H_

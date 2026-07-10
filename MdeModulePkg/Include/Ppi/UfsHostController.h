@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EDKII_PEI_UFS_HOST_CONTROLLER_PPI_H_
-#define _EDKII_PEI_UFS_HOST_CONTROLLER_PPI_H_
+#pragma once
 
 ///
 /// Global ID for the EDKII_UFS_HOST_CONTROLLER_PPI.
@@ -20,7 +19,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// Forward declaration for the UFS_HOST_CONTROLLER_PPI.
 ///
-typedef struct _EDKII_UFS_HOST_CONTROLLER_PPI  EDKII_UFS_HOST_CONTROLLER_PPI;
+typedef struct _EDKII_UFS_HOST_CONTROLLER_PPI EDKII_UFS_HOST_CONTROLLER_PPI;
 
 /**
   Get the MMIO base address of UFS host controller.
@@ -38,16 +37,14 @@ EFI_STATUS
 (EFIAPI *EDKII_UFS_HC_GET_MMIO_BAR)(
   IN     EDKII_UFS_HOST_CONTROLLER_PPI    *This,
   IN     UINT8                            ControllerId,
-     OUT UINTN                            *MmioBar
+  OUT UINTN                            *MmioBar
   );
 
 ///
 /// This PPI contains a set of services to interact with the UFS host controller.
 ///
 struct _EDKII_UFS_HOST_CONTROLLER_PPI {
-  EDKII_UFS_HC_GET_MMIO_BAR               GetUfsHcMmioBar;
+  EDKII_UFS_HC_GET_MMIO_BAR    GetUfsHcMmioBar;
 };
 
-extern EFI_GUID gEdkiiPeiUfsHostControllerPpiGuid;
-
-#endif
+extern EFI_GUID  gEdkiiPeiUfsHostControllerPpiGuid;

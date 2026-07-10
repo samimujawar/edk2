@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __FMP_DEVICE_LIB__
-#define __FMP_DEVICE_LIB__
+#pragma once
 
 #include <Protocol/FirmwareManagement.h>
 
@@ -206,8 +205,8 @@ FmpDeviceGetImageTypeIdGuidPtr (
 EFI_STATUS
 EFIAPI
 FmpDeviceGetAttributes (
-  OUT UINT64    *Supported,
-  OUT UINT64    *Setting
+  OUT UINT64  *Supported,
+  OUT UINT64  *Setting
   );
 
 /**
@@ -421,8 +420,7 @@ FmpDeviceCheckImage (
                                     IMAGE_UPDATABLE_VALID_WITH_VENDOR_CODE
   @param[out] LastAttemptStatus   A pointer to a UINT32 that holds the last attempt
                                   status to report back to the ESRT table in case
-                                  of error. This value will only be checked when this
-                                  function returns an error.
+                                  of error.
 
                                   The return status code must fall in the range of
                                   LAST_ATTEMPT_STATUS_DEVICE_LIBRARY_MIN_ERROR_CODE_VALUE to
@@ -504,8 +502,8 @@ EFIAPI
 FmpDeviceSetImage (
   IN  CONST VOID                                     *Image,
   IN  UINTN                                          ImageSize,
-  IN  CONST VOID                                     *VendorCode,       OPTIONAL
-  IN  EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS  Progress,          OPTIONAL
+  IN  CONST VOID                                     *VendorCode        OPTIONAL,
+  IN  EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS  Progress           OPTIONAL,
   IN  UINT32                                         CapsuleFwVersion,
   OUT CHAR16                                         **AbortReason
   );
@@ -578,8 +576,8 @@ EFIAPI
 FmpDeviceSetImageWithStatus (
   IN  CONST VOID                                     *Image,
   IN  UINTN                                          ImageSize,
-  IN  CONST VOID                                     *VendorCode,       OPTIONAL
-  IN  EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS  Progress,          OPTIONAL
+  IN  CONST VOID                                     *VendorCode        OPTIONAL,
+  IN  EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS  Progress           OPTIONAL,
   IN  UINT32                                         CapsuleFwVersion,
   OUT CHAR16                                         **AbortReason,
   OUT UINT32                                         *LastAttemptStatus
@@ -605,5 +603,3 @@ EFIAPI
 FmpDeviceLock (
   VOID
   );
-
-#endif

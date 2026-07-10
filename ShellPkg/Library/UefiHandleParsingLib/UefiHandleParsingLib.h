@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef _UEFI_HANDLE_PARSING_LIB_INTERNAL_H_
-#define _UEFI_HANDLE_PARSING_LIB_INTERNAL_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -58,12 +57,10 @@
 #include <Protocol/UnicodeCollation.h>
 #include <Protocol/PciRootBridgeIo.h>
 #include <Protocol/PciIo.h>
-#include <Protocol/ScsiPassThru.h>
 #include <Protocol/ScsiPassThruExt.h>
 #include <Protocol/ScsiIo.h>
 #include <Protocol/IScsiInitiatorName.h>
 #include <Protocol/UsbIo.h>
-#include <Protocol/UsbHostController.h>
 #include <Protocol/Usb2HostController.h>
 #include <Protocol/DebugSupport.h>
 #include <Protocol/DebugPort.h>
@@ -80,7 +77,6 @@
 #include <Protocol/Dhcp4.h>
 #include <Protocol/Tcp4.h>
 #include <Protocol/Ip4.h>
-#include <Protocol/Ip4Config.h>
 #include <Protocol/Ip4Config2.h>
 #include <Protocol/Udp4.h>
 #include <Protocol/Mtftp4.h>
@@ -93,14 +89,11 @@
 #include <Protocol/HiiConfigRouting.h>
 #include <Protocol/HiiConfigAccess.h>
 #include <Protocol/FormBrowser2.h>
-#include <Protocol/DeviceIo.h>
-#include <Protocol/UgaDraw.h>
-#include <Protocol/UgaIo.h>
 #include <Protocol/DriverConfiguration.h>
 #include <Protocol/DriverConfiguration2.h>
 #include <Protocol/DevicePathUtilities.h>
-//#include <Protocol/FirmwareVolume.h>
-//#include <Protocol/FirmwareVolume2.h>
+// #include <Protocol/FirmwareVolume.h>
+// #include <Protocol/FirmwareVolume2.h>
 #include <Protocol/DriverFamilyOverride.h>
 #include <Protocol/Pcd.h>
 #include <Protocol/TcgService.h>
@@ -150,8 +143,8 @@
 #include <Library/ShellCommandLib.h>
 #include <Library/PeCoffGetEntryPointLib.h>
 
-#define   EFI_FIRMWARE_IMAGE_DESCRIPTOR_VERSION_V1   1
-#define   EFI_FIRMWARE_IMAGE_DESCRIPTOR_VERSION_V2   2
+#define   EFI_FIRMWARE_IMAGE_DESCRIPTOR_VERSION_V1  1
+#define   EFI_FIRMWARE_IMAGE_DESCRIPTOR_VERSION_V2  2
 
 ///
 /// EFI_FIRMWARE_IMAGE_DESCRIPTOR in UEFI spec < 2.4a
@@ -161,32 +154,32 @@ typedef struct {
   /// A unique number identifying the firmware image within the device.  The number is
   /// between 1 and DescriptorCount.
   ///
-  UINT8                            ImageIndex;
+  UINT8       ImageIndex;
   ///
   /// A unique number identifying the firmware image type.
   ///
-  EFI_GUID                         ImageTypeId;
+  EFI_GUID    ImageTypeId;
   ///
   /// A unique number identifying the firmware image.
   ///
-  UINT64                           ImageId;
+  UINT64      ImageId;
   ///
   /// A pointer to a null-terminated string representing the firmware image name.
   ///
-  CHAR16                           *ImageIdName;
+  CHAR16      *ImageIdName;
   ///
   /// Identifies the version of the device firmware. The format is vendor specific and new
   /// version must have a greater value than an old version.
   ///
-  UINT32                           Version;
+  UINT32      Version;
   ///
   /// A pointer to a null-terminated string representing the firmware image version name.
   ///
-  CHAR16                           *VersionName;
+  CHAR16      *VersionName;
   ///
   /// Size of the image in bytes.  If size=0, then only ImageIndex and ImageTypeId are valid.
   ///
-  UINTN                            Size;
+  UINTN       Size;
   ///
   /// Image attributes that are supported by this device.  See 'Image Attribute Definitions'
   /// for possible returned values of this parameter.  A value of 1 indicates the attribute is
@@ -194,19 +187,18 @@ typedef struct {
   /// value of 0 indicates the attribute is not supported and the current setting value in
   /// AttributesSetting is meaningless.
   ///
-  UINT64                           AttributesSupported;
+  UINT64      AttributesSupported;
   ///
   /// Image attributes.  See 'Image Attribute Definitions' for possible returned values of
   /// this parameter.
   ///
-  UINT64                           AttributesSetting;
+  UINT64      AttributesSetting;
   ///
   /// Image compatibilities.  See 'Image Compatibility Definitions' for possible returned
   /// values of this parameter.
   ///
-  UINT64                           Compatibilities;
+  UINT64      Compatibilities;
 } EFI_FIRMWARE_IMAGE_DESCRIPTOR_V1;
-
 
 ///
 /// EFI_FIRMWARE_IMAGE_DESCRIPTOR in UEFI spec > 2.4a and < 2.5
@@ -216,32 +208,32 @@ typedef struct {
   /// A unique number identifying the firmware image within the device.  The number is
   /// between 1 and DescriptorCount.
   ///
-  UINT8                            ImageIndex;
+  UINT8       ImageIndex;
   ///
   /// A unique number identifying the firmware image type.
   ///
-  EFI_GUID                         ImageTypeId;
+  EFI_GUID    ImageTypeId;
   ///
   /// A unique number identifying the firmware image.
   ///
-  UINT64                           ImageId;
+  UINT64      ImageId;
   ///
   /// A pointer to a null-terminated string representing the firmware image name.
   ///
-  CHAR16                           *ImageIdName;
+  CHAR16      *ImageIdName;
   ///
   /// Identifies the version of the device firmware. The format is vendor specific and new
   /// version must have a greater value than an old version.
   ///
-  UINT32                           Version;
+  UINT32      Version;
   ///
   /// A pointer to a null-terminated string representing the firmware image version name.
   ///
-  CHAR16                           *VersionName;
+  CHAR16      *VersionName;
   ///
   /// Size of the image in bytes.  If size=0, then only ImageIndex and ImageTypeId are valid.
   ///
-  UINTN                            Size;
+  UINTN       Size;
   ///
   /// Image attributes that are supported by this device.  See 'Image Attribute Definitions'
   /// for possible returned values of this parameter.  A value of 1 indicates the attribute is
@@ -249,32 +241,32 @@ typedef struct {
   /// value of 0 indicates the attribute is not supported and the current setting value in
   /// AttributesSetting is meaningless.
   ///
-  UINT64                           AttributesSupported;
+  UINT64      AttributesSupported;
   ///
   /// Image attributes.  See 'Image Attribute Definitions' for possible returned values of
   /// this parameter.
   ///
-  UINT64                           AttributesSetting;
+  UINT64      AttributesSetting;
   ///
   /// Image compatibilities.  See 'Image Compatibility Definitions' for possible returned
   /// values of this parameter.
   ///
-  UINT64                           Compatibilities;
+  UINT64      Compatibilities;
   ///
   /// Describes the lowest ImageDescriptor version that the device will accept. Only
   /// present in version 2 or higher.
-  UINT32                           LowestSupportedImageVersion;
+  UINT32      LowestSupportedImageVersion;
 } EFI_FIRMWARE_IMAGE_DESCRIPTOR_V2;
 
 typedef struct {
-  LIST_ENTRY  Link;
-  EFI_HANDLE  TheHandle;
-  UINTN       TheIndex;
-}HANDLE_LIST;
+  LIST_ENTRY    Link;
+  EFI_HANDLE    TheHandle;
+  UINTN         TheIndex;
+} HANDLE_LIST;
 
 typedef struct {
-  HANDLE_LIST   List;
-  UINTN         NextIndex;
+  HANDLE_LIST    List;
+  UINTN          NextIndex;
 } HANDLE_INDEX_LIST;
 
 typedef
@@ -284,11 +276,8 @@ CHAR16 *
   IN CONST BOOLEAN    Verbose
   );
 
-typedef struct _GUID_INFO_BLOCK{
-  EFI_STRING_ID                 StringId;
-  EFI_GUID                      *GuidId;
-  DUMP_PROTOCOL_INFO            DumpInfo;
+typedef struct _GUID_INFO_BLOCK {
+  EFI_STRING_ID         StringId;
+  EFI_GUID              *GuidId;
+  DUMP_PROTOCOL_INFO    DumpInfo;
 } GUID_INFO_BLOCK;
-
-#endif
-

@@ -6,8 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef AML_PARSER_H_
-#define AML_PARSER_H_
+#pragma once
 
 #include <AmlNodeDefines.h>
 #include <Stream/AmlStream.h>
@@ -33,9 +32,9 @@
 EFI_STATUS
 EFIAPI
 AmlParseFixedArguments (
-  IN  AML_OBJECT_NODE   * ObjectNode,
-  IN  AML_STREAM        * FStream,
-  IN  LIST_ENTRY        * NameSpaceRefList
+  IN  AML_OBJECT_NODE  *ObjectNode,
+  IN  AML_STREAM       *FStream,
+  IN  LIST_ENTRY       *NameSpaceRefList
   );
 
 /** Parse the variable list of arguments of the input ObjectNode.
@@ -64,9 +63,7 @@ AmlParseFixedArguments (
 EFI_STATUS
 EFIAPI
 AmlParseVariableArguments (
-  IN  AML_NODE_HEADER   * Node,
-  IN  AML_STREAM        * FStream,
-  IN  LIST_ENTRY        * NameSpaceRefList
+  IN  AML_NODE_HEADER  *Node,
+  IN  AML_STREAM       *FStream,
+  IN  LIST_ENTRY       *NameSpaceRefList
   );
-
-#endif // AML_PARSER_H_

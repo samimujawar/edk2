@@ -1,6 +1,8 @@
 /** @file
 
-  Copyright (c) 2017 - 2020, Arm Limited. All rights reserved.<BR>
+  Copyright (c) 2017 - 2026, Arm Limited. All rights reserved.<BR>
+  Copyright (c) 2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.<BR>
+  Copyright (C) 2024 - 2025 Advanced Micro Devices, Inc. All rights reserved.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -10,8 +12,7 @@
     - Std or STD - Standard
 **/
 
-#ifndef ACPI_TABLE_GENERATOR_H_
-#define ACPI_TABLE_GENERATOR_H_
+#pragma once
 
 #include <IndustryStandard/Acpi.h>
 
@@ -63,6 +64,33 @@ The Dynamic Tables Framework implements the following ACPI table generators:
             The SSDT CMN-600 generator collates the CMN-600 information
             from the Configuration Manager and patches the SSDT CMN-600
             template to build the SSDT CMN-600 table.
+  - SSDT Cpu-Topology:
+            The SSDT Cpu-Topology generator collates the cpu and LPI
+            information from the Configuration Manager and generates a
+            SSDT table describing the CPU hierarchy.
+  - SSDT DMC-620 PMU:
+            The SSDT DMC620 PMU generator collates the PMU specific information
+            from the Configuration Manager and uses the Dynamic AML CodeGen
+            API's to build the SSDT DMC620 PMU table.
+  - SSDT Pci-Express:
+            The SSDT Pci Express generator collates the Pci Express
+            information from the Configuration Manager and generates a
+            SSDT table describing a Pci Express bus.
+  - WSMT  : The WSMT generator collates the WSMT protection flag information
+            from the Configuration Manager and builds the WSMT table.
+  - SPMI  : The SPMI generator collects the SPMI interface and
+            optionally SPMI interrupt and deviceid (or uid) information from the
+            Configuration Manager and builds the SPMI table.
+  - FACS  : The FACS generator collates the FACS information from the
+            Configuration Manager and builds the FACS table.
+  - CEDT  : The CEDT generator collates the CEDT information from the
+            Configuration Manager and builds the CEDT table.
+  - SLIT  : The SLIT generator collates the SLIT information from the
+            Configuration Manager and builds the SLIT table.
+  - HEST  : The HEST generator collates the HEST information from the
+            Configuration Manager and builds the HEST table.
+  - EINJ  : The EINJ generator collates the required platform information from
+            the Configuration Manager and builds the EINJ table.
 */
 
 /** The ACPI_TABLE_GENERATOR_ID type describes ACPI table generator ID.
@@ -88,6 +116,23 @@ typedef enum StdAcpiTableId {
   EStdAcpiTableIdSrat,                          ///< SRAT Generator
   EStdAcpiTableIdSsdtSerialPort,                ///< SSDT Serial-Port Generator
   EStdAcpiTableIdSsdtCmn600,                    ///< SSDT Cmn-600 Generator
+  EStdAcpiTableIdSsdtCpuTopology,               ///< SSDT Cpu Topology
+  EStdAcpiTableIdSsdtPciExpress,                ///< SSDT Pci Express Generator
+  EStdAcpiTableIdSsdtPlicAplic,                 ///< SSDT Plic/Aplic Generator
+  EStdAcpiTableIdPcct,                          ///< PCCT Generator
+  EStdAcpiTableIdTpm2,                          ///< TPM2 Generator
+  EStdAcpiTableIdWsmt,                          ///< WSMT Generator
+  EStdAcpiTableIdHpet,                          ///< HPET Generator
+  EStdAcpiTableIdSsdtHpet,                      ///< SSDT HPET Generator
+  EStdAcpiTableIdSpmi,                          ///< SPMI Generator
+  EStdAcpiTableIdFacs,                          ///< FACS Generator
+  EStdAcpiTableIdCedt,                          ///< CEDT Generator
+  EStdAcpiTableIdSlit,                          ///< SLIT Generator
+  EStdAcpiTableIdRhct,                          ///< RHCT Generator
+  EStdAcpiTableIdSsdtDmc620Pmu,                 ///< SSDT DMC620 PMU Generator
+  EStdAcpiTableIdHest,                          ///< Hest Generator
+  EStdAcpiTableIdEinj,                          ///< EINJ Generator
+  EStdAcpiTableIdHmat,                          ///< HMAT Generator
   EStdAcpiTableIdMax
 } ESTD_ACPI_TABLE_ID;
 
@@ -143,8 +188,13 @@ typedef enum StdAcpiTableId {
             TableId                           \
             )
 
-/** The Creator ID for the ACPI tables generated using
+/** The generic creator ID for the ACPI tables generated using
   the standard ACPI table generators.
+*/
+#define TABLE_GENERATOR_CREATOR_ID  SIGNATURE_32('D', 'Y', 'N', 'T')
+
+/** The Creator ID for the ACPI tables generated using
+  the standard ACPI table generators for ARM.
 */
 #define TABLE_GENERATOR_CREATOR_ID_ARM  SIGNATURE_32('A', 'R', 'M', 'H')
 
@@ -155,7 +205,7 @@ typedef enum StdAcpiTableId {
   @param [in] Type      The ACPI table structure.
   @param [in] Revision  The ACPI table revision.
 **/
-#define ACPI_HEADER(Signature, Type, Revision) {              \
+#define ACPI_HEADER(Signature, Type, Revision)  {             \
           Signature,             /* UINT32  Signature */      \
           sizeof (Type),         /* UINT32  Length */         \
           Revision,              /* UINT8   Revision */       \
@@ -164,7 +214,7 @@ typedef enum StdAcpiTableId {
           0,                     /* UINT64  OemTableId */     \
           0,                     /* UINT32  OemRevision */    \
           0,                     /* UINT32  CreatorId */      \
-          0                      /* UINT32  CreatorRevision */\
+          0                      /* UINT32  CreatorRevision */ \
           }
 
 /** A macro to dump the common header part of EFI ACPI tables as
@@ -203,11 +253,11 @@ typedef struct AcpiTableGenerator           ACPI_TABLE_GENERATOR;
   @return  EFI_SUCCESS If the table is generated successfully or other
                         failure codes as returned by the generator.
 **/
-typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_BUILD_TABLE) (
-  IN  CONST ACPI_TABLE_GENERATOR                   *       This,
-  IN  CONST CM_STD_OBJ_ACPI_TABLE_INFO             * CONST AcpiTableInfo,
-  IN  CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   * CONST CfgMgrProtocol,
-  OUT       EFI_ACPI_DESCRIPTION_HEADER           **       Table
+typedef EFI_STATUS (EFIAPI *ACPI_TABLE_GENERATOR_BUILD_TABLE)(
+  IN  CONST ACPI_TABLE_GENERATOR                           *This,
+  IN  CONST CM_STD_OBJ_ACPI_TABLE_INFO             *CONST  AcpiTableInfo,
+  IN  CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   *CONST  CfgMgrProtocol,
+  OUT       EFI_ACPI_DESCRIPTION_HEADER                    **Table
   );
 
 /** This function pointer describes the interface used by the
@@ -223,11 +273,11 @@ typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_BUILD_TABLE) (
   @return EFI_SUCCESS  If freed successfully or other failure codes
                         as returned by the generator.
 **/
-typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_FREE_TABLE) (
-  IN      CONST ACPI_TABLE_GENERATOR                   * CONST This,
-  IN      CONST CM_STD_OBJ_ACPI_TABLE_INFO             * CONST AcpiTableInfo,
-  IN      CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   * CONST CfgMgrProtocol,
-  IN OUT        EFI_ACPI_DESCRIPTION_HEADER           ** CONST Table
+typedef EFI_STATUS (EFIAPI *ACPI_TABLE_GENERATOR_FREE_TABLE)(
+  IN      CONST ACPI_TABLE_GENERATOR                   *CONST  This,
+  IN      CONST CM_STD_OBJ_ACPI_TABLE_INFO             *CONST  AcpiTableInfo,
+  IN      CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   *CONST  CfgMgrProtocol,
+  IN OUT        EFI_ACPI_DESCRIPTION_HEADER           **CONST  Table
   );
 
 /** This function pointer describes an extended interface to build
@@ -246,12 +296,12 @@ typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_FREE_TABLE) (
   @return  EFI_SUCCESS If the table is generated successfully or other
                         failure codes as returned by the generator.
 **/
-typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_BUILD_TABLEEX) (
-  IN  CONST ACPI_TABLE_GENERATOR                   *       This,
-  IN  CONST CM_STD_OBJ_ACPI_TABLE_INFO             * CONST AcpiTableInfo,
-  IN  CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   * CONST CfgMgrProtocol,
-  OUT       EFI_ACPI_DESCRIPTION_HEADER          ***       Table,
-  OUT       UINTN                                  * CONST TableCount
+typedef EFI_STATUS (EFIAPI *ACPI_TABLE_GENERATOR_BUILD_TABLEEX)(
+  IN  CONST ACPI_TABLE_GENERATOR                           *This,
+  IN  CONST CM_STD_OBJ_ACPI_TABLE_INFO             *CONST  AcpiTableInfo,
+  IN  CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   *CONST  CfgMgrProtocol,
+  OUT       EFI_ACPI_DESCRIPTION_HEADER                    ***Table,
+  OUT       UINTN                                  *CONST  TableCount
   );
 
 /** This function pointer describes an extended interface used by the
@@ -269,11 +319,11 @@ typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_BUILD_TABLEEX) (
   @return EFI_SUCCESS  If freed successfully or other failure codes
                         as returned by the generator.
 **/
-typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_FREE_TABLEEX) (
-  IN      CONST ACPI_TABLE_GENERATOR                   * CONST This,
-  IN      CONST CM_STD_OBJ_ACPI_TABLE_INFO             * CONST AcpiTableInfo,
-  IN      CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   * CONST CfgMgrProtocol,
-  IN OUT        EFI_ACPI_DESCRIPTION_HEADER          *** CONST Table,
+typedef EFI_STATUS (EFIAPI *ACPI_TABLE_GENERATOR_FREE_TABLEEX)(
+  IN      CONST ACPI_TABLE_GENERATOR                   *CONST  This,
+  IN      CONST CM_STD_OBJ_ACPI_TABLE_INFO             *CONST  AcpiTableInfo,
+  IN      CONST EDKII_CONFIGURATION_MANAGER_PROTOCOL   *CONST  CfgMgrProtocol,
+  IN OUT        EFI_ACPI_DESCRIPTION_HEADER          ***CONST  Table,
   IN      CONST UINTN                                          TableCount
   );
 
@@ -288,42 +338,42 @@ typedef EFI_STATUS (*ACPI_TABLE_GENERATOR_FREE_TABLEEX) (
 **/
 typedef struct AcpiTableGenerator {
   /// The ACPI table generator ID.
-  ACPI_TABLE_GENERATOR_ID                GeneratorID;
+  ACPI_TABLE_GENERATOR_ID               GeneratorID;
 
   /// String describing the ACPI table generator.
-  CONST CHAR16                         * Description;
+  CONST CHAR16                          *Description;
 
   /// The ACPI table signature.
-  UINT32                                 AcpiTableSignature;
+  UINT32                                AcpiTableSignature;
 
   /// The ACPI table revision.
-  UINT8                                  AcpiTableRevision;
+  UINT8                                 AcpiTableRevision;
 
   /// The minimum supported ACPI table revision.
-  UINT8                                  MinAcpiTableRevision;
+  UINT8                                 MinAcpiTableRevision;
 
   /// The ACPI table creator ID.
-  UINT32                                 CreatorId;
+  UINT32                                CreatorId;
 
   /// The ACPI table creator revision.
-  UINT32                                 CreatorRevision;
+  UINT32                                CreatorRevision;
 
   /// ACPI table build function pointer.
-  ACPI_TABLE_GENERATOR_BUILD_TABLE       BuildAcpiTable;
+  ACPI_TABLE_GENERATOR_BUILD_TABLE      BuildAcpiTable;
 
   /** The function to free any resources
       allocated for building the ACPI table.
   */
-  ACPI_TABLE_GENERATOR_FREE_TABLE        FreeTableResources;
+  ACPI_TABLE_GENERATOR_FREE_TABLE       FreeTableResources;
 
   /// ACPI table extended build function pointer.
-  ACPI_TABLE_GENERATOR_BUILD_TABLEEX     BuildAcpiTableEx;
+  ACPI_TABLE_GENERATOR_BUILD_TABLEEX    BuildAcpiTableEx;
 
   /** The function to free any resources
       allocated for building the ACPI table
       using the extended interface.
   */
-  ACPI_TABLE_GENERATOR_FREE_TABLEEX      FreeTableResourcesEx;
+  ACPI_TABLE_GENERATOR_FREE_TABLEEX     FreeTableResourcesEx;
 } ACPI_TABLE_GENERATOR;
 
 /** Register ACPI table factory generator.
@@ -343,7 +393,7 @@ typedef struct AcpiTableGenerator {
 EFI_STATUS
 EFIAPI
 RegisterAcpiTableGenerator (
-  IN CONST ACPI_TABLE_GENERATOR                 * CONST Generator
+  IN CONST ACPI_TABLE_GENERATOR                 *CONST  Generator
   );
 
 /** Deregister ACPI generator.
@@ -361,10 +411,7 @@ RegisterAcpiTableGenerator (
 EFI_STATUS
 EFIAPI
 DeregisterAcpiTableGenerator (
-  IN CONST ACPI_TABLE_GENERATOR                 * CONST Generator
+  IN CONST ACPI_TABLE_GENERATOR                 *CONST  Generator
   );
 
 #pragma pack()
-
-#endif // ACPI_TABLE_GENERATOR_H_
-

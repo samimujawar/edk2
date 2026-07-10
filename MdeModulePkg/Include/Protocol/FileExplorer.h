@@ -8,8 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __FILE_EXPLORER_H__
-#define __FILE_EXPLORER_H__
+#pragma once
 
 #define EFI_FILE_EXPLORER_PROTOCOL_GUID  \
   { 0x2C03C536, 0x4594, 0x4515, { 0x9E, 0x7A, 0xD3, 0xD2, 0x04, 0xFE, 0x13, 0x63 } }
@@ -17,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Forward reference for pure ANSI compatability
 //
-typedef struct _EFI_FILE_EXPLORER_PROTOCOL  EFI_FILE_EXPLORER_PROTOCOL;
+typedef struct _EFI_FILE_EXPLORER_PROTOCOL EFI_FILE_EXPLORER_PROTOCOL;
 
 /**
   Prototype for the next process after user chosed one file.
@@ -48,22 +47,20 @@ BOOLEAN
                            after choose one file.
   @param  File             Return the device path for the last time chosed file.
 
-  @retval EFI_SUCESS       Choose the file success.
+  @retval EFI_SUCCESS      Choose the file success.
   @retval Other errors     Choose the file failed.
 **/
 typedef
 EFI_STATUS
-(EFIAPI   *CHOOSE_FILE) (
+(EFIAPI   *CHOOSE_FILE)(
   IN  EFI_DEVICE_PATH_PROTOCOL  *RootDirectory,
-  IN  CHAR16                    *FileType,  OPTIONAL
-  IN  CHOOSE_HANDLER            ChooseHandler,  OPTIONAL
+  IN  CHAR16                    *FileType   OPTIONAL,
+  IN  CHOOSE_HANDLER            ChooseHandler   OPTIONAL,
   OUT EFI_DEVICE_PATH_PROTOCOL  **File  OPTIONAL
   );
 
 struct _EFI_FILE_EXPLORER_PROTOCOL {
-  CHOOSE_FILE                          ChooseFile;
+  CHOOSE_FILE    ChooseFile;
 };
 
-extern EFI_GUID gEfiFileExplorerProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiFileExplorerProtocolGuid;

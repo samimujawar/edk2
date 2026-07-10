@@ -2,7 +2,7 @@
 #  Provides interface to advanced shell functionality for parsing both handle and protocol database.
 #  Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved. <BR>
 #  (C) Copyright 2013-2015 Hewlett-Packard Development Company, L.P.<BR>
-#  (C) Copyright 2015 Hewlett Packard Enterprise Development LP<BR>
+#  (C) Copyright 2015-2021 Hewlett Packard Enterprise Development LP<BR>
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -82,15 +82,12 @@
   gEfiTapeIoProtocolGuid                                  ## UNDEFINED
   gEfiDiskIoProtocolGuid                                  ## UNDEFINED
   gEfiBlockIoProtocolGuid                                 ## UNDEFINED
-  gEfiUnicodeCollationProtocolGuid                        ## UNDEFINED
   gEfiPciRootBridgeIoProtocolGuid                         ## UNDEFINED
   gEfiPciIoProtocolGuid                                   ## UNDEFINED
-  gEfiScsiPassThruProtocolGuid                            ## UNDEFINED
   gEfiScsiIoProtocolGuid                                  ## UNDEFINED
   gEfiExtScsiPassThruProtocolGuid                         ## UNDEFINED
   gEfiIScsiInitiatorNameProtocolGuid                      ## UNDEFINED
   gEfiUsbIoProtocolGuid                                   ## UNDEFINED
-  gEfiUsbHcProtocolGuid                                   ## UNDEFINED
   gEfiUsb2HcProtocolGuid                                  ## UNDEFINED
   gEfiDebugSupportProtocolGuid                            ## UNDEFINED
   gEfiDebugPortProtocolGuid                               ## UNDEFINED
@@ -113,7 +110,6 @@
   gEfiTcp4ProtocolGuid                                    ## UNDEFINED
   gEfiIp4ServiceBindingProtocolGuid                       ## UNDEFINED
   gEfiIp4ProtocolGuid                                     ## UNDEFINED
-  gEfiIp4ConfigProtocolGuid                               ## UNDEFINED
   gEfiIp4Config2ProtocolGuid                              ## UNDEFINED
   gEfiUdp4ServiceBindingProtocolGuid                      ## UNDEFINED
   gEfiUdp4ProtocolGuid                                    ## UNDEFINED
@@ -128,9 +124,6 @@
   gEfiHiiConfigRoutingProtocolGuid                        ## UNDEFINED
   gEfiHiiConfigAccessProtocolGuid                         ## UNDEFINED
   gEfiFormBrowser2ProtocolGuid                            ## UNDEFINED
-  gEfiDeviceIoProtocolGuid                                ## UNDEFINED
-  gEfiUgaDrawProtocolGuid                                 ## UNDEFINED
-  gEfiUgaIoProtocolGuid                                   ## UNDEFINED
   gEfiDriverConfigurationProtocolGuid                     ## UNDEFINED
   gEfiDriverConfiguration2ProtocolGuid                    ## UNDEFINED
   gEfiSimpleTextInputExProtocolGuid                       ## UNDEFINED
@@ -269,6 +262,8 @@
   gEfiHttpProtocolGuid                                    ## UNDEFINED
   gEfiHttpUtilitiesProtocolGuid                           ## UNDEFINED
   gEfiRestProtocolGuid                                    ## UNDEFINED
+  gEfiRestExProtocolGuid                                  ## UNDEFINED
+  gEfiRedfishDiscoverProtocolGuid                         ## UNDEFINED
   gEfiMmEndOfDxeProtocolGuid                              ## UNDEFINED
   gEfiMmIoTrapDispatchProtocolGuid                        ## UNDEFINED
   gEfiMmPowerButtonDispatchProtocolGuid                   ## UNDEFINED

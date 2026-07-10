@@ -7,12 +7,10 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef __QEMU_BOOT_ORDER_LIB_H__
-#define __QEMU_BOOT_ORDER_LIB_H__
+#pragma once
 
 #include <Uefi/UefiBaseType.h>
 #include <Base.h>
-
 
 /**
   Connect devices based on the boot order retrieved from QEMU.
@@ -48,6 +46,19 @@ ConnectDevicesFromQemu (
   VOID
   );
 
+/**
+  Write qemu boot order to uefi variables.
+
+  Attempt to retrieve the "bootorder" fw_cfg file from QEMU. Translate
+  the OpenFirmware device paths therein to UEFI device path fragments.
+
+  On Success store the device path in QemuBootOrderNNNN variables.
+**/
+VOID
+EFIAPI
+StoreQemuBootOrder (
+  VOID
+  );
 
 /**
 
@@ -83,7 +94,6 @@ SetBootOrderFromQemu (
   VOID
   );
 
-
 /**
   Calculate the number of seconds we should be showing the FrontPage progress
   bar for.
@@ -95,5 +105,3 @@ EFIAPI
 GetFrontPageTimeoutFromQemu (
   VOID
   );
-
-#endif

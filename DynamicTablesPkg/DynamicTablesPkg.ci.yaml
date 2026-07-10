@@ -2,9 +2,35 @@
 # CI configuration for DynamicTablesPkg
 #
 # Copyright (c) 2020, Arm Limited. All rights reserved.<BR>
+# Copyright (C) 2024 - 2025 Advanced Micro Devices, Inc. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 {
+    "PrEval": {
+        "DscPath": "DynamicTablesPkg.dsc",
+    },
+    "EccCheck": {
+        ## Exception sample looks like below:
+        ## "ExceptionList": [
+        ##     "<ErrorID>", "<KeyWord>"
+        ## ]
+        "ExceptionList": [
+        # "The #ifndef at the start of an include file should use
+        # both prefix and postfix underscore characters, '_'"
+        # This error is not triggered for the latest BaseTools code.
+        # @TODO The error should be re-enabled when the python packages
+        # containing the BaseTools are updated to the latest version.
+        "8003", "DISABLE_NEW_DEPRECATED_INTERFACES",
+        "9005", "@defgroup",      # Use extra Doxygen commands
+        "9005", "@ingroup",       # Use extra Doxygen commands
+        "9005", "@mainpage",      # Use extra Doxygen commands
+        "9005", "@ref",           # Use extra Doxygen commands
+        ],
+        ## Both file path and directory path are accepted.
+        "IgnoreFiles": [
+        ]
+    },
+
     ## options defined .pytool/Plugin/CompilerPlugin
     "CompilerPlugin": {
         "DscPath": "DynamicTablesPkg.dsc"
@@ -12,7 +38,7 @@
 
     ## options defined .pytool/Plugin/HostUnitTestCompilerPlugin
     "HostUnitTestCompilerPlugin": {
-        "DscPath": "" # Don't support this test
+        "DscPath": "Test/DynamicTablesPkgHostTest.dsc"
     },
 
     ## options defined .pytool/Plugin/CharEncodingCheck
@@ -23,11 +49,13 @@
     ## options defined .pytool/Plugin/DependencyCheck
     "DependencyCheck": {
         "AcceptableDependencies": [
+            "ArmPkg/ArmPkg.dec",
             "ArmPlatformPkg/ArmPlatformPkg.dec",
             "EmbeddedPkg/EmbeddedPkg.dec",
             "DynamicTablesPkg/DynamicTablesPkg.dec",
             "MdeModulePkg/MdeModulePkg.dec",
-            "MdePkg/MdePkg.dec"
+            "MdePkg/MdePkg.dec",
+            "SecurityPkg/SecurityPkg.dec"
         ],
         # For host based unit tests
         "AcceptableDependencies-HOST_APPLICATION":[
@@ -71,34 +99,75 @@
         "ExtendWords": [
            "ARMHB",                  # ARMHB000
            "ARMHC",                  # ARMHC600
+           "ARMHD",                  # ARMHD620
            "ARMLTD",
            "AMLDBG",
            "EISAID",
+           "cacheablity",
+           "cavium",
            "CCIDX",
            "CCSIDR",
+           "cfmws",
            "countof",
+           "deviceid",
+           "EArch",
+           "edynamic",
+           "eventq",
            "EOBJECT",
+           "gerror",
            "invoc",
+           "ITARGETSR",
            "GTBLOCK",
            "lgreater",
            "lless",
            "MPIDR",
+           "NAMESPACEID",
+           "NUVIA",
+           "PASID",
            "PERIPHBASE",
+           "phandle",
            "pytool",
+           "Rdword",
            "Roadmap",
            "ROOTNODEBASE",
+           "sapic",
            "ssdtcmn",
+           "ssdtdmc",
            "ssdtserialporttemplate",
+           "SMCCC",
            "SMMUV",
+           "ssdtpcieosctemplate",
+           "SSDTPC",
            "standardised",
            "TABLEEX",
            "TNSID",
            "Vatos",
-           "WBINVD"
+           "WBINVD",
+           "xapic",
+           "aplic",
+           "aplics",
+           "eriscv",
+           "gmode",
+           "imsic",
+           "imsics",
+           "plics",
+           "rintc",
+           "smcbios",
+           "jedec",
+           "jep",
+           "sslbi"
            ],           # words to extend to the dictionary for this package
         "IgnoreStandardPaths": [],   # Standard Plugin defined paths that
                                      # should be ignore
         "AdditionalIncludePaths": [] # Additional paths to spell check
                                      # (wildcards supported)
+    },
+
+    "DebugMacroCheck": {
+      "StringSubstitutions": {
+          # DynamicTablesPkg/Library/Common/TableHelperLib/ConfigurationManagerObjectParser.c
+          # Reason: Debug format strings are dynamically set.
+          "Parser[Index].Format": "%d"
+      }
     }
 }

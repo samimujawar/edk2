@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __EFI_DEBUG_AGENT_GUID_H__
-#define __EFI_DEBUG_AGENT_GUID_H__
+#pragma once
 
 ///
 /// This guid is used as a variable GUID for the capsule variable
@@ -21,6 +20,4 @@
     0x865a5a9b, 0xb85d, 0x474c, { 0x84, 0x55, 0x65, 0xd1, 0xbe, 0x84, 0x4b, 0xe2 } \
   }
 
-extern EFI_GUID gEfiDebugAgentGuid;
-
-#endif
+extern EFI_GUID  gEfiDebugAgentGuid;

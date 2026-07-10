@@ -11,8 +11,7 @@
 
 **/
 
-#ifndef __MPS_GUID_H__
-#define __MPS_GUID_H__
+#pragma once
 
 #define EFI_MPS_TABLE_GUID \
   { \
@@ -22,8 +21,6 @@
 //
 // GUID name defined in spec.
 //
-#define MPS_TABLE_GUID EFI_MPS_TABLE_GUID
+#define MPS_TABLE_GUID  EFI_MPS_TABLE_GUID
 
-extern EFI_GUID gEfiMpsTableGuid;
-
-#endif
+extern EFI_GUID  gEfiMpsTableGuid;

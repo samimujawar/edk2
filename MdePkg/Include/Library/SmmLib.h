@@ -8,9 +8,7 @@
 
 **/
 
-#ifndef __SMM_LIB_H__
-#define __SMM_LIB_H__
-
+#pragma once
 
 /**
   Triggers an SMI at boot time.
@@ -24,7 +22,6 @@ TriggerBootServiceSoftwareSmi (
   VOID
   );
 
-
 /**
   Triggers an SMI at run time.
 
@@ -36,7 +33,6 @@ EFIAPI
 TriggerRuntimeSoftwareSmi (
   VOID
   );
-
 
 /**
   Test if a boot time software SMI happened.
@@ -53,7 +49,6 @@ EFIAPI
 IsBootServiceSoftwareSmi (
   VOID
   );
-
 
 /**
   Test if a run time software SMI happened.
@@ -80,4 +75,3 @@ EFIAPI
 ClearSmi (
   VOID
   );
-#endif

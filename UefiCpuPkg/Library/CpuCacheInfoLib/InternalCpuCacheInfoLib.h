@@ -1,13 +1,12 @@
 /** @file
   Internal header file for CPU Cache info Library.
 
-  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2020 - 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _INTERNAL_CPU_CACHE_INFO_LIB_H_
-#define _INTERNAL_CPU_CACHE_INFO_LIB_H_
+#pragma once
 
 #include <PiPei.h>
 #include <Register/Cpuid.h>
@@ -19,22 +18,48 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/CpuCacheInfoLib.h>
 
+typedef union {
+  struct {
+    //
+    // Type of the cache that this package's this type of logical processor corresponds to.
+    // Value = CPUID.04h:EAX[04:00]
+    //
+    UINT32    CacheType  : 5;
+    //
+    // Level of the cache that this package's this type of logical processor corresponds to.
+    // Value = CPUID.04h:EAX[07:05]
+    //
+    UINT32    CacheLevel : 3;
+    //
+    // Core type of logical processor.
+    // Value = CPUID.1Ah:EAX[31:24]
+    //
+    UINT32    CoreType   : 8;
+    UINT32    Reserved   : 16;
+    //
+    // Package number.
+    //
+    UINT32    Package;
+  } Bits;
+  UINT64    Uint64;
+} CPU_CACHE_INFO_COMPARATOR;
+
 typedef struct {
   //
   // Package ID, the information comes from
   // EFI_CPU_PHYSICAL_LOCATION.Package
   //
-  UINT32                    Package;
+  UINT32    Package;
   //
   // APIC ID, the information comes from
   // EFI_PROCESSOR_INFORMATION.ProcessorId
   //
-  UINT32                    ApicId;
+  UINT32    ApicId;
   //
   // Core type of logical processor.
   // Value = CPUID.1Ah:EAX[31:24]
   //
-  UINT8                     CoreType;
+  UINT8     CoreType;
 } CPUID_PROCESSOR_INFO;
 
 typedef struct {
@@ -42,41 +67,51 @@ typedef struct {
   // Level of the cache.
   // Value = CPUID.04h:EAX[07:05]
   //
-  UINT8                     CacheLevel : 3;
+  UINT8     CacheLevel            : 3;
   //
   // Type of the cache.
   // Value = CPUID.04h:EAX[04:00]
   //
-  UINT8                     CacheType : 5;
+  UINT8     CacheType             : 5;
   //
   // Ways of associativity.
   // Value = CPUID.04h:EBX[31:22]
   //
-  UINT16                    CacheWays;
+  UINT16    CacheWays             : 10;
+  //
+  // Fully associative cache.
+  // Value = CPUID.04h:EAX[09]
+  //
+  UINT16    FullyAssociativeCache : 1;
+  //
+  // Direct mapped cache.
+  // Value = CPUID.04h:EDX[02]
+  //
+  UINT16    DirectMappedCache     : 1;
+  UINT16    Reserved              : 4;
   //
   // Cache share bits.
   // Value = CPUID.04h:EAX[25:14]
   //
-  UINT16                    CacheShareBits;
+  UINT16    CacheShareBits;
   //
   // Size of single cache.
   // Value = (CPUID.04h:EBX[31:22] + 1) * (CPUID.04h:EBX[21:12] + 1) *
   //         (CPUID.04h:EBX[11:00] + 1) * (CPUID.04h:ECX[31:00] + 1)
   //
-  UINT32                    CacheSizeinKB;
+  UINT32    CacheSizeinKB;
 } CPUID_CACHE_DATA;
 
 typedef union {
-  EDKII_PEI_MP_SERVICES2_PPI    *Ppi;
-  EFI_MP_SERVICES_PROTOCOL      *Protocol;
+  EFI_PEI_MP_SERVICES2_PPI    *Ppi;
+  EFI_MP_SERVICES_PROTOCOL    *Protocol;
 } MP_SERVICES;
 
 typedef struct {
-  MP_SERVICES               MpServices;
-  CPUID_PROCESSOR_INFO      *ProcessorInfo;
-  CPUID_CACHE_DATA          *CacheData;
+  MP_SERVICES             MpServices;
+  CPUID_PROCESSOR_INFO    *ProcessorInfo;
+  CPUID_CACHE_DATA        *CacheData;
 } COLLECT_CPUID_CACHE_DATA_CONTEXT;
-
 
 /*
   Defines the maximum count of Deterministic Cache Parameters Leaf of all APs and BSP.
@@ -84,25 +119,25 @@ typedef struct {
   Cache Parameters Leaf, so use a definition instead.
   Anyway, definition value will be checked in CpuCacheInfoCollectCoreAndCacheData function.
 */
-#define MAX_NUM_OF_CACHE_PARAMS_LEAF    6
+#define MAX_NUM_OF_CACHE_PARAMS_LEAF  6
 
 /*
   Defines the maximum count of packages.
 */
-#define MAX_NUM_OF_PACKAGE              100
+#define MAX_NUM_OF_PACKAGE  100
 
 /**
-  Get EDKII_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL pointer.
+  Get EFI_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL pointer.
 
-  @param[out] MpServices    A pointer to the buffer where EDKII_PEI_MP_SERVICES2_PPI or
+  @param[out] MpServices    A pointer to the buffer where EFI_PEI_MP_SERVICES2_PPI or
                             EFI_MP_SERVICES_PROTOCOL is stored
 
-  @retval EFI_SUCCESS       EDKII_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL interface is returned
-  @retval EFI_NOT_FOUND     EDKII_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL interface is not found
+  @retval EFI_SUCCESS       EFI_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL interface is returned
+  @retval EFI_NOT_FOUND     EFI_PEI_MP_SERVICES2_PPI or EFI_MP_SERVICES_PROTOCOL interface is not found
 **/
 EFI_STATUS
 CpuCacheInfoGetMpServices (
-  OUT MP_SERVICES           *MpServices
+  OUT MP_SERVICES  *MpServices
   );
 
 /**
@@ -114,9 +149,9 @@ CpuCacheInfoGetMpServices (
 **/
 VOID
 CpuCacheInfoStartupAllCPUs (
-  IN MP_SERVICES            MpServices,
-  IN EFI_AP_PROCEDURE       Procedure,
-  IN VOID                   *ProcedureArgument
+  IN MP_SERVICES       MpServices,
+  IN EFI_AP_PROCEDURE  Procedure,
+  IN VOID              *ProcedureArgument
   );
 
 /**
@@ -128,9 +163,9 @@ CpuCacheInfoStartupAllCPUs (
 **/
 VOID
 CpuCacheInfoGetProcessorInfo (
-  IN MP_SERVICES                MpServices,
-  IN UINTN                      ProcessorNum,
-  OUT EFI_PROCESSOR_INFORMATION *ProcessorInfo
+  IN MP_SERVICES                 MpServices,
+  IN UINTN                       ProcessorNum,
+  OUT EFI_PROCESSOR_INFORMATION  *ProcessorInfo
   );
 
 /**
@@ -142,7 +177,7 @@ CpuCacheInfoGetProcessorInfo (
 **/
 UINT32
 CpuCacheInfoWhoAmI (
-  IN MP_SERVICES            MpServices
+  IN MP_SERVICES  MpServices
   );
 
 /**
@@ -154,6 +189,5 @@ CpuCacheInfoWhoAmI (
 **/
 UINT32
 CpuCacheInfoGetNumberOfProcessors (
-  IN MP_SERVICES            MpServices
+  IN MP_SERVICES  MpServices
   );
-#endif

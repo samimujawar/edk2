@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef _GRAPHICS_INFO_HOB_GUID_H_
-#define _GRAPHICS_INFO_HOB_GUID_H_
+#pragma once
 
 #include <Protocol/GraphicsOutput.h>
 
@@ -25,21 +24,19 @@
   }
 
 typedef struct {
-  EFI_PHYSICAL_ADDRESS                  FrameBufferBase;
-  UINT32                                FrameBufferSize;
-  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  GraphicsMode;
+  EFI_PHYSICAL_ADDRESS                    FrameBufferBase;
+  UINT32                                  FrameBufferSize;
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    GraphicsMode;
 } EFI_PEI_GRAPHICS_INFO_HOB;
 
 typedef struct {
-  UINT16                                VendorId;           ///< Ignore if the value is 0xFFFF.
-  UINT16                                DeviceId;           ///< Ignore if the value is 0xFFFF.
-  UINT16                                SubsystemVendorId;  ///< Ignore if the value is 0xFFFF.
-  UINT16                                SubsystemId;        ///< Ignore if the value is 0xFFFF.
-  UINT8                                 RevisionId;         ///< Ignore if the value is 0xFF.
-  UINT8                                 BarIndex;           ///< Ignore if the value is 0xFF.
+  UINT16    VendorId;                                       ///< Ignore if the value is 0xFFFF.
+  UINT16    DeviceId;                                       ///< Ignore if the value is 0xFFFF.
+  UINT16    SubsystemVendorId;                              ///< Ignore if the value is 0xFFFF.
+  UINT16    SubsystemId;                                    ///< Ignore if the value is 0xFFFF.
+  UINT8     RevisionId;                                     ///< Ignore if the value is 0xFF.
+  UINT8     BarIndex;                                       ///< Ignore if the value is 0xFF.
 } EFI_PEI_GRAPHICS_DEVICE_INFO_HOB;
 
-extern EFI_GUID gEfiGraphicsInfoHobGuid;
-extern EFI_GUID gEfiGraphicsDeviceInfoHobGuid;
-
-#endif
+extern EFI_GUID  gEfiGraphicsInfoHobGuid;
+extern EFI_GUID  gEfiGraphicsDeviceInfoHobGuid;

@@ -11,11 +11,80 @@
 
 #include <Library/ShellLib.h>
 
-STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
-  {L"-on", TypeFlag},
-  {L"-off", TypeFlag},
-  {NULL, TypeMax}
-  };
+STATIC CONST SHELL_PARAM_ITEM  ParamList[] = {
+  { L"-on",  TypeFlag },
+  { L"-off", TypeFlag },
+  { NULL,    TypeMax  }
+};
+
+/** Main function of the 'REcho' command.
+
+  @param[in] Package    List of input parameter for the command.
+**/
+STATIC
+SHELL_STATUS
+MainCmdREcho (
+  LIST_ENTRY  *Package
+  )
+{
+  UINTN   ParamCount;
+  UINTN   Size;
+  CHAR16  *PrintString;
+
+  //
+  // check for "-?"
+  //
+  if (ShellCommandLineGetFlag (Package, L"-?")) {
+    ASSERT (FALSE);
+  }
+
+  if (ShellCommandLineGetFlag (Package, L"-on")) {
+    //
+    // Turn it on
+    //
+    ShellCommandSetEchoState (TRUE);
+    return SHELL_SUCCESS;
+  } else if (ShellCommandLineGetFlag (Package, L"-off")) {
+    //
+    // turn it off
+    //
+    ShellCommandSetEchoState (FALSE);
+    return SHELL_SUCCESS;
+  } else if (ShellCommandLineGetRawValue (Package, 1) == NULL) {
+    //
+    // output its current state
+    //
+    if (ShellCommandGetEchoState ()) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_ECHO_ON), gShellLevel3HiiHandle);
+    } else {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_ECHO_OFF), gShellLevel3HiiHandle);
+    }
+
+    return SHELL_SUCCESS;
+  }
+
+  Size        = 0;
+  PrintString = NULL;
+
+  //
+  // print the line
+  //
+  for ( ParamCount = 1
+        ; ShellCommandLineGetRawValue (Package, ParamCount) != NULL
+        ; ParamCount++
+        )
+  {
+    StrnCatGrow (&PrintString, &Size, ShellCommandLineGetRawValue (Package, ParamCount), 0);
+    if (ShellCommandLineGetRawValue (Package, ParamCount+1) != NULL) {
+      StrnCatGrow (&PrintString, &Size, L" ", 0);
+    }
+  }
+
+  ShellPrintDefaultEx (L"%s\r\n", PrintString);
+  SHELL_FREE_NON_NULL (PrintString);
+
+  return SHELL_SUCCESS;
+}
 
 /**
   Function for 'echo' command.
@@ -30,86 +99,42 @@ ShellCommandRunEcho (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS          Status;
-  LIST_ENTRY          *Package;
-  SHELL_STATUS        ShellStatus;
-  UINTN               ParamCount;
-  CHAR16              *ProblemParam;
-  UINTN               Size;
-  CHAR16              *PrintString;
+  EFI_STATUS    Status;
+  LIST_ENTRY    *Package;
+  SHELL_STATUS  ShellStatus;
+  CHAR16        *ProblemParam;
 
-  Size                = 0;
-  ProblemParam        = NULL;
-  PrintString         = NULL;
-  ShellStatus         = SHELL_SUCCESS;
+  ProblemParam = NULL;
+  ShellStatus  = SHELL_SUCCESS;
 
   //
   // initialize the shell lib (we must be in non-auto-init...)
   //
-  Status = ShellInitialize();
-  ASSERT_EFI_ERROR(Status);
+  Status = ShellInitialize ();
+  ASSERT_EFI_ERROR (Status);
 
   //
   // parse the command line
   //
   Status = ShellCommandLineParseEx (ParamList, &Package, &ProblemParam, TRUE, TRUE);
-  if (EFI_ERROR(Status)) {
-    if (Status == EFI_VOLUME_CORRUPTED && ProblemParam != NULL) {
-      ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_GEN_PROBLEM), gShellLevel3HiiHandle, L"echo", ProblemParam);
-      FreePool(ProblemParam);
+  if (EFI_ERROR (Status)) {
+    if ((Status == EFI_VOLUME_CORRUPTED) && (ProblemParam != NULL)) {
+      ShellPrintHiiDefaultEx (STRING_TOKEN (STR_GEN_PROBLEM), gShellLevel3HiiHandle, L"echo", ProblemParam);
+      FreePool (ProblemParam);
       ShellStatus = SHELL_INVALID_PARAMETER;
     } else {
-      ASSERT(FALSE);
-    }
-  } else {
-    //
-    // check for "-?"
-    //
-    if (ShellCommandLineGetFlag(Package, L"-?")) {
-      ASSERT(FALSE);
-    }
-    if (ShellCommandLineGetFlag(Package, L"-on")) {
-      //
-      // Turn it on
-      //
-      ShellCommandSetEchoState(TRUE);
-    } else if (ShellCommandLineGetFlag(Package, L"-off")) {
-      //
-      // turn it off
-      //
-      ShellCommandSetEchoState(FALSE);
-    } else if (ShellCommandLineGetRawValue(Package, 1) == NULL) {
-      //
-      // output its current state
-      //
-      if (ShellCommandGetEchoState()) {
-        ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_ECHO_ON), gShellLevel3HiiHandle);
-      } else {
-        ShellPrintHiiEx(-1, -1, NULL, STRING_TOKEN (STR_ECHO_OFF), gShellLevel3HiiHandle);
-      }
-    } else {
-      //
-      // print the line
-      //
-      for ( ParamCount = 1
-          ; ShellCommandLineGetRawValue(Package, ParamCount) != NULL
-          ; ParamCount++
-         ) {
-        StrnCatGrow(&PrintString, &Size, ShellCommandLineGetRawValue(Package, ParamCount), 0);
-        if (ShellCommandLineGetRawValue(Package, ParamCount+1) != NULL) {
-          StrnCatGrow(&PrintString, &Size, L" ", 0);
-        }
-      }
-      ShellPrintEx(-1, -1, L"%s\r\n", PrintString);
-      SHELL_FREE_NON_NULL(PrintString);
+      ASSERT (FALSE);
     }
 
-    //
-    // free the command line package
-    //
-    ShellCommandLineFreeVarList (Package);
+    return ShellStatus;
   }
+
+  ShellStatus = MainCmdREcho (Package);
+
+  //
+  // free the command line package
+  //
+  ShellCommandLineFreeVarList (Package);
 
   return (ShellStatus);
 }
-

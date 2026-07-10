@@ -6,13 +6,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _GRAPHICS_CONSOLE_H_
-#define _GRAPHICS_CONSOLE_H_
+#pragma once
 
 #include <Uefi.h>
 #include <Protocol/SimpleTextOut.h>
 #include <Protocol/GraphicsOutput.h>
-#include <Protocol/UgaDraw.h>
 #include <Protocol/DevicePath.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiDriverEntryPoint.h>
@@ -29,17 +27,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/HiiFont.h>
 #include <Protocol/HiiDatabase.h>
 
-
 extern EFI_COMPONENT_NAME_PROTOCOL   gGraphicsConsoleComponentName;
 extern EFI_COMPONENT_NAME2_PROTOCOL  gGraphicsConsoleComponentName2;
 extern EFI_DRIVER_BINDING_PROTOCOL   gGraphicsConsoleDriverBinding;
 extern EFI_NARROW_GLYPH              gUsStdNarrowGlyphData[];
 
-extern UINT32 mNarrowFontSize;
+extern UINT32  mNarrowFontSize;
 
 typedef union {
-  EFI_NARROW_GLYPH  NarrowGlyph;
-  EFI_WIDE_GLYPH    WideGlyph;
+  EFI_NARROW_GLYPH    NarrowGlyph;
+  EFI_WIDE_GLYPH      WideGlyph;
 } GLYPH_UNION;
 
 //
@@ -48,32 +45,31 @@ typedef union {
 #define GRAPHICS_CONSOLE_DEV_SIGNATURE  SIGNATURE_32 ('g', 's', 't', 'o')
 
 typedef struct {
-  UINTN   Columns;
-  UINTN   Rows;
-  INTN    DeltaX;
-  INTN    DeltaY;
-  UINT32  GopWidth;
-  UINT32  GopHeight;
-  UINT32  GopModeNumber;
+  UINTN     Columns;
+  UINTN     Rows;
+  INTN      DeltaX;
+  INTN      DeltaY;
+  UINT32    GopWidth;
+  UINT32    GopHeight;
+  UINT32    GopModeNumber;
 } GRAPHICS_CONSOLE_MODE_DATA;
 
 typedef struct {
-  UINTN                            Signature;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL     *GraphicsOutput;
-  EFI_UGA_DRAW_PROTOCOL            *UgaDraw;
-  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  SimpleTextOutput;
-  EFI_SIMPLE_TEXT_OUTPUT_MODE      SimpleTextOutputMode;
-  GRAPHICS_CONSOLE_MODE_DATA       *ModeData;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL    *LineBuffer;
+  UINTN                              Signature;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
+  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL    SimpleTextOutput;
+  EFI_SIMPLE_TEXT_OUTPUT_MODE        SimpleTextOutputMode;
+  GRAPHICS_CONSOLE_MODE_DATA         *ModeData;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *LineBuffer;
 } GRAPHICS_CONSOLE_DEV;
 
 #define GRAPHICS_CONSOLE_CON_OUT_DEV_FROM_THIS(a) \
   CR (a, GRAPHICS_CONSOLE_DEV, SimpleTextOutput, GRAPHICS_CONSOLE_DEV_SIGNATURE)
 
-
 //
 // EFI Component Name Functions
 //
+
 /**
   Retrieves a Unicode string that is the user readable name of the driver.
 
@@ -120,7 +116,6 @@ GraphicsConsoleComponentNameGetDriverName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **DriverName
   );
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the controller
@@ -193,13 +188,12 @@ GraphicsConsoleComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 GraphicsConsoleComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   );
-
 
 /**
   Reset the text output device hardware and optionally run diagnostics.
@@ -222,8 +216,8 @@ GraphicsConsoleComponentNameGetControllerName (
 EFI_STATUS
 EFIAPI
 GraphicsConsoleConOutReset (
-  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL    *This,
-  IN  BOOLEAN                            ExtendedVerification
+  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN  BOOLEAN                          ExtendedVerification
   );
 
 /**
@@ -306,7 +300,6 @@ GraphicsConsoleConOutQueryMode (
   OUT UINTN                            *Columns,
   OUT UINTN                            *Rows
   );
-
 
 /**
   Sets the output device(s) to a specified mode.
@@ -399,7 +392,6 @@ GraphicsConsoleConOutSetCursorPosition (
   IN  UINTN                            Row
   );
 
-
 /**
   Makes the cursor visible or invisible.
 
@@ -422,9 +414,8 @@ GraphicsConsoleConOutEnableCursor (
 /**
   Test to see if Graphics Console could be supported on the Controller.
 
-  Graphics Console could be supported if Graphics Output Protocol or UGADraw
-  Protocol exists on the Controller. (UGA Draw Protocol could be skipped
-  if PcdUgaConsumeSupport is set to FALSE.)
+  Graphics Console could be supported if Graphics Output Protocol
+  exists on the Controller.
 
   @param  This                Protocol instance pointer.
   @param  Controller          Handle of device to test.
@@ -438,16 +429,14 @@ GraphicsConsoleConOutEnableCursor (
 EFI_STATUS
 EFIAPI
 GraphicsConsoleControllerDriverSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   );
 
-
 /**
-  Start this driver on Controller by opening Graphics Output protocol or
-  UGA Draw protocol, and installing Simple Text Out protocol on Controller.
-  (UGA Draw protocol could be skipped if PcdUgaConsumeSupport is set to FALSE.)
+  Start this driver on Controller by opening Graphics Output protocol
+  and installing Simple Text Out protocol on Controller.
 
   @param  This                 Protocol instance pointer.
   @param  Controller           Handle of device to bind driver to
@@ -461,16 +450,14 @@ GraphicsConsoleControllerDriverSupported (
 EFI_STATUS
 EFIAPI
 GraphicsConsoleControllerDriverStart (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   );
 
 /**
   Stop this driver on Controller by removing Simple Text Out protocol
-  and closing the Graphics Output Protocol or UGA Draw protocol on Controller.
-  (UGA Draw protocol could be skipped if PcdUgaConsumeSupport is set to FALSE.)
-
+  and closing the Graphics Output Protocol on Controller.
 
   @param  This              Protocol instance pointer.
   @param  Controller        Handle of device to stop driver on
@@ -487,12 +474,11 @@ GraphicsConsoleControllerDriverStart (
 EFI_STATUS
 EFIAPI
 GraphicsConsoleControllerDriverStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN  EFI_HANDLE                     Controller,
-  IN  UINTN                          NumberOfChildren,
-  IN  EFI_HANDLE                     *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   Controller,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   );
-
 
 /**
   Locate HII Database protocol and HII Font protocol.
@@ -507,7 +493,6 @@ EFI_STATUS
 EfiLocateHiiProtocol (
   VOID
   );
-
 
 /**
   Gets Graphics Console device's foreground color and background color.
@@ -534,8 +519,7 @@ GetTextColors (
   @param  Count                 The count of Unicode string.
 
   @retval EFI_OUT_OF_RESOURCES  If no memory resource to use.
-  @retval EFI_UNSUPPORTED       If no Graphics Output protocol and UGA Draw
-                                protocol exist.
+  @retval EFI_UNSUPPORTED       If no Graphics Output protocol exist.
   @retval EFI_SUCCESS           Drawing Unicode string implemented successfully.
 
 **/
@@ -586,9 +570,7 @@ FlushCursor (
 EFI_STATUS
 CheckModeSupported (
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
-  IN  UINT32  HorizontalResolution,
-  IN  UINT32  VerticalResolution,
-  OUT UINT32  *CurrentModeNumber
+  IN  UINT32                    HorizontalResolution,
+  IN  UINT32                    VerticalResolution,
+  OUT UINT32                    *CurrentModeNumber
   );
-
-#endif

@@ -8,14 +8,13 @@
 
 **/
 
-#ifndef __SIO_SERVICE_H__
-#define __SIO_SERVICE_H__
+#pragma once
 
 #pragma pack(1)
 
 typedef struct {
-  EFI_ACPI_FIXED_LOCATION_IO_PORT_DESCRIPTOR  Io;
-  EFI_ACPI_END_TAG_DESCRIPTOR                 End;
+  EFI_ACPI_FIXED_LOCATION_IO_PORT_DESCRIPTOR    Io;
+  EFI_ACPI_END_TAG_DESCRIPTOR                   End;
 } SIO_RESOURCES_IO;
 
 #pragma pack()
@@ -38,9 +37,8 @@ typedef struct {
   EFI_SIO_PROTOCOL            Sio;
   UINT32                      DeviceIndex;
 } SIO_DEV;
-#define SIO_DEV_SIGNATURE      SIGNATURE_32 ('S', 'I', 'O', 'D')
-#define SIO_DEV_FROM_SIO(a)    CR (a, SIO_DEV, Sio, SIO_DEV_SIGNATURE)
-
+#define SIO_DEV_SIGNATURE  SIGNATURE_32 ('S', 'I', 'O', 'D')
+#define SIO_DEV_FROM_SIO(a)  CR (a, SIO_DEV, Sio, SIO_DEV_SIGNATURE)
 
 //
 // Super I/O Protocol interfaces
@@ -82,11 +80,11 @@ typedef struct {
 EFI_STATUS
 EFIAPI
 SioRegisterAccess (
-  IN CONST EFI_SIO_PROTOCOL    *This,
-  IN       BOOLEAN             Write,
-  IN       BOOLEAN             ExitCfgMode,
-  IN       UINT8               Register,
-  IN OUT   UINT8               *Value
+  IN CONST EFI_SIO_PROTOCOL  *This,
+  IN       BOOLEAN           Write,
+  IN       BOOLEAN           ExitCfgMode,
+  IN       UINT8             Register,
+  IN OUT   UINT8             *Value
   );
 
 /**
@@ -111,8 +109,8 @@ SioRegisterAccess (
 EFI_STATUS
 EFIAPI
 SioGetResources (
-  IN CONST EFI_SIO_PROTOCOL            *This,
-  OUT      ACPI_RESOURCE_HEADER_PTR    *ResourceList
+  IN CONST EFI_SIO_PROTOCOL          *This,
+  OUT      ACPI_RESOURCE_HEADER_PTR  *ResourceList
   );
 
 /**
@@ -130,8 +128,8 @@ SioGetResources (
 EFI_STATUS
 EFIAPI
 SioSetResources (
-  IN CONST EFI_SIO_PROTOCOL            *This,
-  IN       ACPI_RESOURCE_HEADER_PTR    ResourceList
+  IN CONST EFI_SIO_PROTOCOL          *This,
+  IN       ACPI_RESOURCE_HEADER_PTR  ResourceList
   );
 
 /**
@@ -150,8 +148,8 @@ SioSetResources (
 EFI_STATUS
 EFIAPI
 SioPossibleResources (
-  IN CONST EFI_SIO_PROTOCOL            *This,
-  OUT      ACPI_RESOURCE_HEADER_PTR    *ResourceCollection
+  IN CONST EFI_SIO_PROTOCOL          *This,
+  OUT      ACPI_RESOURCE_HEADER_PTR  *ResourceCollection
   );
 
 /**
@@ -182,9 +180,9 @@ SioPossibleResources (
 EFI_STATUS
 EFIAPI
 SioModify (
-  IN CONST EFI_SIO_PROTOCOL           *This,
-  IN CONST EFI_SIO_REGISTER_MODIFY    *Command,
-  IN       UINTN                      NumberOfCommands
+  IN CONST EFI_SIO_PROTOCOL         *This,
+  IN CONST EFI_SIO_REGISTER_MODIFY  *Command,
+  IN       UINTN                    NumberOfCommands
   );
 
 //
@@ -210,5 +208,3 @@ SioCreateAllChildDevices (
   IN EFI_PCI_IO_PROTOCOL          *PciIo,
   IN EFI_DEVICE_PATH_PROTOCOL     *ParentDevicePath
   );
-
-#endif  // __SIO_SERVICE_H__

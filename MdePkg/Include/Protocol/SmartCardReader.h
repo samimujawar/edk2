@@ -9,48 +9,47 @@
 
 **/
 
-#ifndef __SMART_CARD_READER_H__
-#define __SMART_CARD_READER_H__
+#pragma once
 
 #define EFI_SMART_CARD_READER_PROTOCOL_GUID \
     { \
       0x2a4d1adf, 0x21dc, 0x4b81, {0xa4, 0x2f, 0x8b, 0x8e, 0xe2, 0x38, 0x00, 0x60} \
     }
 
-typedef struct _EFI_SMART_CARD_READER_PROTOCOL  EFI_SMART_CARD_READER_PROTOCOL;
+typedef struct _EFI_SMART_CARD_READER_PROTOCOL EFI_SMART_CARD_READER_PROTOCOL;
 
 //
 // Codes for access mode
 //
-#define SCARD_AM_READER              0x0001 // Exclusive access to reader
-#define SCARD_AM_CARD                0x0002 // Exclusive access to card
+#define SCARD_AM_READER  0x0001             // Exclusive access to reader
+#define SCARD_AM_CARD    0x0002             // Exclusive access to card
 //
 // Codes for card action
 //
-#define SCARD_CA_NORESET             0x0000 // Don't reset card
-#define SCARD_CA_COLDRESET           0x0001 // Perform a cold reset
-#define SCARD_CA_WARMRESET           0x0002 // Perform a warm reset
-#define SCARD_CA_UNPOWER             0x0003 // Power off the card
-#define SCARD_CA_EJECT               0x0004 // Eject the card
+#define SCARD_CA_NORESET    0x0000          // Don't reset card
+#define SCARD_CA_COLDRESET  0x0001          // Perform a cold reset
+#define SCARD_CA_WARMRESET  0x0002          // Perform a warm reset
+#define SCARD_CA_UNPOWER    0x0003          // Power off the card
+#define SCARD_CA_EJECT      0x0004          // Eject the card
 //
 // Protocol types
 //
-#define SCARD_PROTOCOL_UNDEFINED     0x0000
-#define SCARD_PROTOCOL_T0            0x0001
-#define SCARD_PROTOCOL_T1            0x0002
-#define SCARD_PROTOCOL_RAW           0x0004
+#define SCARD_PROTOCOL_UNDEFINED  0x0000
+#define SCARD_PROTOCOL_T0         0x0001
+#define SCARD_PROTOCOL_T1         0x0002
+#define SCARD_PROTOCOL_RAW        0x0004
 //
 // Codes for state type
 //
-#define SCARD_UNKNOWN                0x0000 /* state is unknown */
-#define SCARD_ABSENT                 0x0001 /* Card is absent */
-#define SCARD_INACTIVE               0x0002 /* Card is present and not powered*/
-#define SCARD_ACTIVE                 0x0003 /* Card is present and powered */
+#define SCARD_UNKNOWN   0x0000              /* state is unknown */
+#define SCARD_ABSENT    0x0001              /* Card is absent */
+#define SCARD_INACTIVE  0x0002              /* Card is present and not powered*/
+#define SCARD_ACTIVE    0x0003              /* Card is present and powered */
 //
 // Macro to generate a ControlCode & PC/SC part 10 control code
 //
-#define SCARD_CTL_CODE(code)         (0x42000000 + (code))
-#define CM_IOCTL_GET_FEATURE_REQUEST SCARD_CTL_CODE(3400)
+#define SCARD_CTL_CODE(code)  (0x42000000 + (code))
+#define CM_IOCTL_GET_FEATURE_REQUEST  SCARD_CTL_CODE(3400)
 
 /**
   This function requests connection to the smart card or the reader, using the
@@ -87,12 +86,12 @@ typedef struct _EFI_SMART_CARD_READER_PROTOCOL  EFI_SMART_CARD_READER_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_CONNECT) (
+(EFIAPI *EFI_SMART_CARD_READER_CONNECT)(
   IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
   IN     UINT32                            AccessMode,
   IN     UINT32                            CardAction,
   IN     UINT32                            PreferredProtocols,
-     OUT UINT32                            *ActiveProtocol
+  OUT UINT32                            *ActiveProtocol
   );
 
 /**
@@ -116,7 +115,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_DISCONNECT) (
+(EFIAPI *EFI_SMART_CARD_READER_DISCONNECT)(
   IN  EFI_SMART_CARD_READER_PROTOCOL    *This,
   IN  UINT32                            CardAction
   );
@@ -159,13 +158,13 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_STATUS) (
+(EFIAPI *EFI_SMART_CARD_READER_STATUS)(
   IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
-     OUT CHAR16                            *ReaderName OPTIONAL,
+  OUT CHAR16                            *ReaderName OPTIONAL,
   IN OUT UINTN                             *ReaderNameLength OPTIONAL,
-     OUT UINT32                            *State OPTIONAL,
-     OUT UINT32                            *CardProtocol OPTIONAL,
-     OUT UINT8                             *Atr OPTIONAL,
+  OUT UINT32                            *State OPTIONAL,
+  OUT UINT32                            *CardProtocol OPTIONAL,
+  OUT UINT8                             *Atr OPTIONAL,
   IN OUT UINTN                             *AtrLength OPTIONAL
   );
 
@@ -203,11 +202,11 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_TRANSMIT) (
+(EFIAPI *EFI_SMART_CARD_READER_TRANSMIT)(
   IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
   IN     UINT8                             *CAPDU,
   IN     UINTN                             CAPDULength,
-     OUT UINT8                             *RAPDU,
+  OUT UINT8                             *RAPDU,
   IN OUT UINTN                             *RAPDULength
   );
 
@@ -233,8 +232,8 @@ EFI_STATUS
   @retval EFI_SUCCESS           The requested command completed successfully.
   @retval EFI_INVALID_PARAMETER This is NULL.
   @retval EFI_INVALID_PARAMETER ControlCode requires input parameters but:
-                                  InBuffer is NULL or InBufferLenth is NULL or
-                                  InBuffer is not NULL but InBufferLenth is less than
+                                  InBuffer is NULL or InBufferlength is NULL or
+                                  InBuffer is not NULL but InBufferlength is less than
                                   expected.
   @retval EFI_INVALID_PARAMETER OutBuffer is not NULL but OutBufferLength is NULL.
   @retval EFI_UNSUPPORTED       ControlCode is not supported.
@@ -252,12 +251,12 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_CONTROL) (
+(EFIAPI *EFI_SMART_CARD_READER_CONTROL)(
   IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
   IN     UINT32                            ControlCode,
   IN     UINT8                             *InBuffer OPTIONAL,
   IN     UINTN                             InBufferLength OPTIONAL,
-     OUT UINT8                             *OutBuffer OPTIONAL,
+  OUT UINT8                             *OutBuffer OPTIONAL,
   IN OUT UINTN                             *OutBufferLength OPTIONAL
   );
 
@@ -282,7 +281,7 @@ EFI_STATUS
   @retval EFI_BUFFER_TOO_SMALL  OutBufferLength is not big enough to hold the output
                                 parameters.
                                 OutBufferLength has been updated to the required value.
-  @retval EFI_UNSUPPORTED       Attribis not supported
+  @retval EFI_UNSUPPORTED       Attributes not supported
   @retval EFI_NO_MEDIA          There is no card in the reader and Attrib value
                                 requires one.
   @retval EFI_NOT_READY         Attrib requires a powered card to operate.
@@ -293,10 +292,10 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_SMART_CARD_READER_GET_ATTRIB) (
+(EFIAPI *EFI_SMART_CARD_READER_GET_ATTRIB)(
   IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
   IN     UINT32                            Attrib,
-     OUT UINT8                             *OutBuffer,
+  OUT UINT8                             *OutBuffer,
   IN OUT UINTN                             *OutBufferLength
   );
 
@@ -305,15 +304,12 @@ EFI_STATUS
 /// smart card in the reader or to the reader itself.
 ///
 struct _EFI_SMART_CARD_READER_PROTOCOL {
-  EFI_SMART_CARD_READER_CONNECT        SCardConnect;
-  EFI_SMART_CARD_READER_DISCONNECT     SCardDisconnect;
-  EFI_SMART_CARD_READER_STATUS         SCardStatus;
-  EFI_SMART_CARD_READER_TRANSMIT       SCardTransmit;
-  EFI_SMART_CARD_READER_CONTROL        SCardControl;
-  EFI_SMART_CARD_READER_GET_ATTRIB     SCardGetAttrib;
+  EFI_SMART_CARD_READER_CONNECT       SCardConnect;
+  EFI_SMART_CARD_READER_DISCONNECT    SCardDisconnect;
+  EFI_SMART_CARD_READER_STATUS        SCardStatus;
+  EFI_SMART_CARD_READER_TRANSMIT      SCardTransmit;
+  EFI_SMART_CARD_READER_CONTROL       SCardControl;
+  EFI_SMART_CARD_READER_GET_ATTRIB    SCardGetAttrib;
 };
 
-extern EFI_GUID gEfiSmartCardReaderProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmartCardReaderProtocolGuid;

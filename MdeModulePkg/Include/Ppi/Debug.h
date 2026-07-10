@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __EDKII_DEBUG_PPI_H__
-#define __EDKII_DEBUG_PPI_H__
+#pragma once
 
 #include <Pi/PiPeiCis.h>
 
@@ -65,11 +64,8 @@ VOID
 /// This PPI contains a set of services to print message to debug output device
 ///
 struct _EDKII_DEBUG_PPI {
-  EDKII_DEBUG_BPRINT                DebugBPrint;
-  EDKII_DEBUG_ASSERT                DebugAssert;
+  EDKII_DEBUG_BPRINT    DebugBPrint;
+  EDKII_DEBUG_ASSERT    DebugAssert;
 };
 
-extern EFI_GUID gEdkiiDebugPpiGuid;
-
-#endif
-
+extern EFI_GUID  gEdkiiDebugPpiGuid;

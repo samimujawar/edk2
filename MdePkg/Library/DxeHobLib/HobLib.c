@@ -48,6 +48,7 @@ GetHobList (
     ASSERT_EFI_ERROR (Status);
     ASSERT (mHobList != NULL);
   }
+
   return mHobList;
 }
 
@@ -93,15 +94,15 @@ HobLibConstructor (
 VOID *
 EFIAPI
 GetNextHob (
-  IN UINT16                 Type,
-  IN CONST VOID             *HobStart
+  IN UINT16      Type,
+  IN CONST VOID  *HobStart
   )
 {
   EFI_PEI_HOB_POINTERS  Hob;
 
   ASSERT (HobStart != NULL);
 
-  Hob.Raw = (UINT8 *) HobStart;
+  Hob.Raw = (UINT8 *)HobStart;
   //
   // Parse the HOB list until end of list or matching type is found.
   //
@@ -109,8 +110,10 @@ GetNextHob (
     if (Hob.Header->HobType == Type) {
       return Hob.Raw;
     }
+
     Hob.Raw = GET_NEXT_HOB (Hob);
   }
+
   return NULL;
 }
 
@@ -130,10 +133,10 @@ GetNextHob (
 VOID *
 EFIAPI
 GetFirstHob (
-  IN UINT16                 Type
+  IN UINT16  Type
   )
 {
-  VOID      *HobList;
+  VOID  *HobList;
 
   HobList = GetHobList ();
   return GetNextHob (Type, HobList);
@@ -164,19 +167,21 @@ GetFirstHob (
 VOID *
 EFIAPI
 GetNextGuidHob (
-  IN CONST EFI_GUID         *Guid,
-  IN CONST VOID             *HobStart
+  IN CONST EFI_GUID  *Guid,
+  IN CONST VOID      *HobStart
   )
 {
   EFI_PEI_HOB_POINTERS  GuidHob;
 
-  GuidHob.Raw = (UINT8 *) HobStart;
+  GuidHob.Raw = (UINT8 *)HobStart;
   while ((GuidHob.Raw = GetNextHob (EFI_HOB_TYPE_GUID_EXTENSION, GuidHob.Raw)) != NULL) {
     if (CompareGuid (Guid, &GuidHob.Guid->Name)) {
       break;
     }
+
     GuidHob.Raw = GET_NEXT_HOB (GuidHob);
   }
+
   return GuidHob.Raw;
 }
 
@@ -201,10 +206,10 @@ GetNextGuidHob (
 VOID *
 EFIAPI
 GetFirstGuidHob (
-  IN CONST EFI_GUID         *Guid
+  IN CONST EFI_GUID  *Guid
   )
 {
-  VOID      *HobList;
+  VOID  *HobList;
 
   HobList = GetHobList ();
   return GetNextGuidHob (Guid, HobList);
@@ -229,11 +234,11 @@ GetBootModeHob (
   VOID
   )
 {
-  EFI_HOB_HANDOFF_INFO_TABLE    *HandOffHob;
+  EFI_HOB_HANDOFF_INFO_TABLE  *HandOffHob;
 
-  HandOffHob = (EFI_HOB_HANDOFF_INFO_TABLE *) GetHobList ();
+  HandOffHob = (EFI_HOB_HANDOFF_INFO_TABLE *)GetHobList ();
 
-  return  HandOffHob->BootMode;
+  return HandOffHob->BootMode;
 }
 
 /**
@@ -255,10 +260,10 @@ GetBootModeHob (
 VOID
 EFIAPI
 BuildModuleHob (
-  IN CONST EFI_GUID         *ModuleName,
-  IN EFI_PHYSICAL_ADDRESS   MemoryAllocationModule,
-  IN UINT64                 ModuleLength,
-  IN EFI_PHYSICAL_ADDRESS   EntryPoint
+  IN CONST EFI_GUID        *ModuleName,
+  IN EFI_PHYSICAL_ADDRESS  MemoryAllocationModule,
+  IN UINT64                ModuleLength,
+  IN EFI_PHYSICAL_ADDRESS  EntryPoint
   )
 {
   //
@@ -354,8 +359,8 @@ BuildResourceDescriptorHob (
 VOID *
 EFIAPI
 BuildGuidHob (
-  IN CONST EFI_GUID              *Guid,
-  IN UINTN                       DataLength
+  IN CONST EFI_GUID  *Guid,
+  IN UINTN           DataLength
   )
 {
   //
@@ -393,9 +398,9 @@ BuildGuidHob (
 VOID *
 EFIAPI
 BuildGuidDataHob (
-  IN CONST EFI_GUID              *Guid,
-  IN VOID                        *Data,
-  IN UINTN                       DataLength
+  IN CONST EFI_GUID  *Guid,
+  IN VOID            *Data,
+  IN UINTN           DataLength
   )
 {
   //
@@ -422,8 +427,8 @@ BuildGuidDataHob (
 VOID
 EFIAPI
 BuildFvHob (
-  IN EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN UINT64                      Length
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length
   )
 {
   //
@@ -451,10 +456,10 @@ BuildFvHob (
 VOID
 EFIAPI
 BuildFv2Hob (
-  IN          EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN          UINT64                      Length,
-  IN CONST    EFI_GUID                    *FvName,
-  IN CONST    EFI_GUID                    *FileName
+  IN          EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN          UINT64                Length,
+  IN CONST    EFI_GUID              *FvName,
+  IN CONST    EFI_GUID              *FileName
   )
 {
   ASSERT (FALSE);
@@ -484,12 +489,12 @@ BuildFv2Hob (
 VOID
 EFIAPI
 BuildFv3Hob (
-  IN          EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN          UINT64                      Length,
-  IN          UINT32                      AuthenticationStatus,
-  IN          BOOLEAN                     ExtractedFv,
-  IN CONST    EFI_GUID                    *FvName, OPTIONAL
-  IN CONST    EFI_GUID                    *FileName OPTIONAL
+  IN          EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN          UINT64                Length,
+  IN          UINT32                AuthenticationStatus,
+  IN          BOOLEAN               ExtractedFv,
+  IN CONST    EFI_GUID              *FvName  OPTIONAL,
+  IN CONST    EFI_GUID              *FileName OPTIONAL
   )
 {
   ASSERT (FALSE);
@@ -512,8 +517,8 @@ BuildFv3Hob (
 VOID
 EFIAPI
 BuildCvHob (
-  IN EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN UINT64                      Length
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length
   )
 {
   //
@@ -538,8 +543,8 @@ BuildCvHob (
 VOID
 EFIAPI
 BuildCpuHob (
-  IN UINT8                       SizeOfMemorySpace,
-  IN UINT8                       SizeOfIoSpace
+  IN UINT8  SizeOfMemorySpace,
+  IN UINT8  SizeOfIoSpace
   )
 {
   //
@@ -564,8 +569,8 @@ BuildCpuHob (
 VOID
 EFIAPI
 BuildStackHob (
-  IN EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN UINT64                      Length
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length
   )
 {
   //
@@ -591,9 +596,9 @@ BuildStackHob (
 VOID
 EFIAPI
 BuildBspStoreHob (
-  IN EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN UINT64                      Length,
-  IN EFI_MEMORY_TYPE             MemoryType
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length,
+  IN EFI_MEMORY_TYPE       MemoryType
   )
 {
   //
@@ -619,13 +624,83 @@ BuildBspStoreHob (
 VOID
 EFIAPI
 BuildMemoryAllocationHob (
-  IN EFI_PHYSICAL_ADDRESS        BaseAddress,
-  IN UINT64                      Length,
-  IN EFI_MEMORY_TYPE             MemoryType
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINT64                Length,
+  IN EFI_MEMORY_TYPE       MemoryType
   )
 {
   //
   // PEI HOB is read only for DXE phase
   //
   ASSERT (FALSE);
+}
+
+/**
+  Returns the next instance of the memory allocation HOB with the matched GUID from
+  the starting HOB.
+
+  This function searches the first instance of a HOB from the starting HOB pointer.
+  Such HOB should satisfy two conditions:
+  Its HOB type is EFI_HOB_TYPE_MEMORY_ALLOCATION and its GUID Name equals to input Guid.
+  If there does not exist such HOB from the starting HOB pointer, it will return NULL.
+
+  If Guid is NULL, then ASSERT().
+  If HobStart is NULL, then ASSERT().
+
+  @param  Guid          The GUID to match with in the HOB list.
+  @param  HobStart      The starting HOB pointer to search from.
+
+  @retval !NULL  The next instance of the Memory Allocation HOB with matched GUID from the starting HOB.
+  @retval NULL   NULL is returned if the matching Memory Allocation HOB is not found.
+
+**/
+VOID *
+EFIAPI
+GetNextMemoryAllocationGuidHob (
+  IN CONST EFI_GUID  *Guid,
+  IN CONST VOID      *HobStart
+  )
+{
+  EFI_PEI_HOB_POINTERS  Hob;
+
+  ASSERT (Guid != NULL);
+  ASSERT (HobStart != NULL);
+
+  for (Hob.Raw = (UINT8 *)HobStart; (Hob.Raw = GetNextHob (EFI_HOB_TYPE_MEMORY_ALLOCATION, Hob.Raw)) != NULL;
+       Hob.Raw = GET_NEXT_HOB (Hob))
+  {
+    if (CompareGuid (&Hob.MemoryAllocation->AllocDescriptor.Name, Guid)) {
+      return Hob.Raw;
+    }
+  }
+
+  return NULL;
+}
+
+/**
+  Search the HOB list for the Memory Allocation HOB with a matching base address
+  and set the Name GUID. If there does not exist such Memory Allocation HOB in the
+  HOB list, it will return NULL.
+
+  If Guid is NULL, then ASSERT().
+
+  @param BaseAddress  BaseAddress of Memory Allocation HOB to set Name to Guid.
+  @param Guid         Pointer to the GUID to set in the matching Memory Allocation GUID.
+
+  @retval !NULL  The instance of the tagged Memory Allocation HOB with matched base address.
+  @retval NULL   NULL is returned if the matching Memory Allocation HOB is not found.
+
+**/
+VOID *
+EFIAPI
+TagMemoryAllocationHobWithGuid (
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN CONST EFI_GUID        *Guid
+  )
+{
+  //
+  // PEI HOB is read only for DXE phase
+  //
+  ASSERT (FALSE);
+  return NULL;
 }

@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __SEMIHOSTING_H__
-#define __SEMIHOSTING_H__
+#pragma once
 
 /*
  *
@@ -17,12 +16,12 @@
  *
  */
 
-#define SEMIHOST_FILE_MODE_READ     (0 << 2)
-#define SEMIHOST_FILE_MODE_WRITE    (1 << 2)
-#define SEMIHOST_FILE_MODE_APPEND   (2 << 2)
-#define SEMIHOST_FILE_MODE_UPDATE   (1 << 1)
-#define SEMIHOST_FILE_MODE_BINARY   (1 << 0)
-#define SEMIHOST_FILE_MODE_ASCII    (0 << 0)
+#define SEMIHOST_FILE_MODE_READ    (0 << 2)
+#define SEMIHOST_FILE_MODE_WRITE   (1 << 2)
+#define SEMIHOST_FILE_MODE_APPEND  (2 << 2)
+#define SEMIHOST_FILE_MODE_UPDATE  (1 << 1)
+#define SEMIHOST_FILE_MODE_BINARY  (1 << 0)
+#define SEMIHOST_FILE_MODE_ASCII   (0 << 0)
 
 BOOLEAN
 SemihostConnectionSupported (
@@ -31,9 +30,9 @@ SemihostConnectionSupported (
 
 RETURN_STATUS
 SemihostFileOpen (
-  IN  CHAR8  *FileName,
-  IN  UINT32 Mode,
-  OUT UINTN  *FileHandle
+  IN  CHAR8   *FileName,
+  IN  UINT32  Mode,
+  OUT UINTN   *FileHandle
   );
 
 RETURN_STATUS
@@ -81,7 +80,7 @@ SemihostFileLength (
 
 **/
 RETURN_STATUS
-SemihostFileTmpName(
+SemihostFileTmpName (
   OUT  VOID   *Buffer,
   IN   UINT8  Identifier,
   IN   UINTN  Length
@@ -89,7 +88,7 @@ SemihostFileTmpName(
 
 RETURN_STATUS
 SemihostFileRemove (
-  IN CHAR8 *FileName
+  IN CHAR8  *FileName
   );
 
 /**
@@ -104,7 +103,7 @@ SemihostFileRemove (
 
 **/
 RETURN_STATUS
-SemihostFileRename(
+SemihostFileRename (
   IN  CHAR8  *FileName,
   IN  CHAR8  *NewFileName
   );
@@ -116,17 +115,15 @@ SemihostReadCharacter (
 
 VOID
 SemihostWriteCharacter (
-  IN CHAR8 Character
+  IN CHAR8  Character
   );
 
 VOID
 SemihostWriteString (
-  IN CHAR8 *String
+  IN CHAR8  *String
   );
 
 UINT32
 SemihostSystem (
-  IN CHAR8 *CommandLine
+  IN CHAR8  *CommandLine
   );
-
-#endif // __SEMIHOSTING_H__

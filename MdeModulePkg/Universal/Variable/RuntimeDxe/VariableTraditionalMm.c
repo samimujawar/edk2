@@ -2,7 +2,7 @@
 
   Parts of the SMM/MM implementation that are specific to traditional MM
 
-Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved. <BR>
+Copyright (c) 2011 - 2024, Intel Corporation. All rights reserved. <BR>
 Copyright (c) 2018, Linaro, Ltd. All rights reserved. <BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -11,6 +11,24 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/SmmMemLib.h>
 #include "Variable.h"
+
+/**
+  This function checks if the Primary Buffer (CommBuffer) is valid.
+
+  @param Buffer The buffer start address to be checked.
+  @param Length The buffer length to be checked.
+
+  @retval TRUE  This buffer is valid.
+  @retval FALSE This buffer is not valid.
+**/
+BOOLEAN
+VariableSmmIsPrimaryBufferValid (
+  IN EFI_PHYSICAL_ADDRESS  Buffer,
+  IN UINT64                Length
+  )
+{
+  return SmmIsBufferOutsideSmmValid (Buffer, Length);
+}
 
 /**
   This function checks if the buffer is valid per processor architecture and
@@ -25,7 +43,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
                 with SMRAM.
 **/
 BOOLEAN
-VariableSmmIsBufferOutsideSmmValid (
+VariableSmmIsNonPrimaryBufferValid (
   IN EFI_PHYSICAL_ADDRESS  Buffer,
   IN UINT64                Length
   )
@@ -41,8 +59,8 @@ VariableNotifySmmReady (
   VOID
   )
 {
-  EFI_STATUS            Status;
-  EFI_HANDLE            Handle;
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
 
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (
@@ -62,8 +80,8 @@ VariableNotifySmmWriteReady (
   VOID
   )
 {
-  EFI_STATUS            Status;
-  EFI_HANDLE            Handle;
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
 
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (
@@ -87,8 +105,8 @@ VariableNotifySmmWriteReady (
 EFI_STATUS
 EFIAPI
 VariableServiceInitialize (
-  IN EFI_HANDLE                           ImageHandle,
-  IN EFI_SYSTEM_TABLE                     *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   return MmVariableServiceInitialize ();
@@ -100,17 +118,17 @@ VariableServiceInitialize (
   MOR variable is legitimate or not.
 
   @retval TRUE  Either the TCG or TCG2 protocol is installed in the UEFI
-                protocol database
+                protocol database. MOR variable is legitimate.
   @retval FALSE Neither the TCG nor the TCG2 protocol is installed in the UEFI
-                protocol database
+                protocol database. MOR variable is not legitimate.
 **/
 BOOLEAN
-VariableHaveTcgProtocols (
+VariableIsMorVariableLegitimate (
   VOID
   )
 {
-  EFI_STATUS            Status;
-  VOID                  *Interface;
+  EFI_STATUS  Status;
+  VOID        *Interface;
 
   Status = gBS->LocateProtocol (
                   &gEfiTcg2ProtocolGuid,

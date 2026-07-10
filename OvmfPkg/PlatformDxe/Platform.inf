@@ -36,6 +36,7 @@
   DebugLib
   DevicePathLib
   HiiLib
+  HobLib
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
@@ -47,6 +48,9 @@
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution
+  gUefiOvmfPkgTokenSpaceGuid.PcdVideoResolutionSource
 
 [Protocols]
   gEfiDevicePathProtocolGuid      ## PRODUCES
@@ -56,6 +60,7 @@
 [Guids]
   gEfiIfrTianoGuid
   gOvmfPlatformConfigGuid
+  gMemDebugLogHobGuid
 
 [Depex]
   gEfiHiiConfigRoutingProtocolGuid  AND

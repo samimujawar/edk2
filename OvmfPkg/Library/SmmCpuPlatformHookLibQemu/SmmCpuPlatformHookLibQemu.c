@@ -2,7 +2,7 @@
 SMM CPU Platform Hook library instance for QEMU.
 
 Copyright (c) 2020, Red Hat, Inc.
-Copyright (c) 2006 - 2015, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2006 - 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -75,13 +75,13 @@ ClearTopLevelSmiStatus (
 EFI_STATUS
 EFIAPI
 PlatformSmmBspElection (
-  OUT BOOLEAN     *IsBsp
+  OUT BOOLEAN  *IsBsp
   )
 {
-  MSR_IA32_APIC_BASE_REGISTER ApicBaseMsr;
+  MSR_IA32_APIC_BASE_REGISTER  ApicBaseMsr;
 
   ApicBaseMsr.Uint64 = AsmReadMsr64 (MSR_IA32_APIC_BASE);
-  *IsBsp = (BOOLEAN)(ApicBaseMsr.Bits.BSP == 1);
+  *IsBsp             = (BOOLEAN)(ApicBaseMsr.Bits.BSP == 1);
   return EFI_SUCCESS;
 }
 
@@ -105,11 +105,52 @@ PlatformSmmBspElection (
 EFI_STATUS
 EFIAPI
 GetPlatformPageTableAttribute (
-  IN  UINT64                Address,
-  IN OUT SMM_PAGE_SIZE_TYPE *PageSize,
-  IN OUT UINTN              *NumOfPages,
-  IN OUT UINTN              *PageAttribute
+  IN  UINT64                 Address,
+  IN OUT SMM_PAGE_SIZE_TYPE  *PageSize,
+  IN OUT UINTN               *NumOfPages,
+  IN OUT UINTN               *PageAttribute
   )
 {
   return EFI_UNSUPPORTED;
+}
+
+/**
+  SMM CPU Platform Hook before executing MMI Handler.
+
+  This function can be used to perform the platform specific items before executing MMI Handler.
+
+  @retval EFI_SUCCESS      The smm cpu platform hook before executing MMI Handler is executed successfully.
+  @retval EFI_UNSUPPORTED  The smm cpu platform hook before executing MMI Handler is unsupported.
+
+**/
+EFI_STATUS
+EFIAPI
+SmmCpuPlatformHookBeforeMmiHandler (
+  VOID
+  )
+{
+  return EFI_UNSUPPORTED;
+}
+
+/**
+  This function determines whether the first CPU Synchronization should be executed unconditionally
+  when a SMI occurs.
+
+  If the function returns true, it indicates that there is no need to check the system configuration
+  and status, and the first CPU Synchronization should be executed unconditionally.
+
+  If the function returns false, it indicates that the first CPU Synchronization is not executed
+  unconditionally, and the decision to synchronize should be based on the system configuration and status.
+
+  @retval TRUE   The first CPU Synchronization is executed unconditionally.
+  @retval FALSE  The first CPU Synchronization is not executed unconditionally.
+
+**/
+BOOLEAN
+EFIAPI
+IsCpuSyncAlwaysNeeded (
+  VOID
+  )
+{
+  return FALSE;
 }

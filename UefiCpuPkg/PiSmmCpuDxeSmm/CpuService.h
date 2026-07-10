@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _CPU_SERVICE_H_
-#define _CPU_SERVICE_H_
+#pragma once
 
 typedef enum {
   SmmCpuNone,
@@ -38,9 +37,9 @@ typedef enum {
 EFI_STATUS
 EFIAPI
 SmmGetProcessorInfo (
-  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL *This,
-  IN       UINTN                        ProcessorNumber,
-  OUT      EFI_PROCESSOR_INFORMATION    *ProcessorInfoBuffer
+  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL  *This,
+  IN       UINTN                         ProcessorNumber,
+  OUT      EFI_PROCESSOR_INFORMATION     *ProcessorInfoBuffer
   );
 
 /**
@@ -57,8 +56,8 @@ SmmGetProcessorInfo (
 EFI_STATUS
 EFIAPI
 SmmSwitchBsp (
-  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL *This,
-  IN       UINTN                        ProcessorNumber
+  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL  *This,
+  IN       UINTN                         ProcessorNumber
   );
 
 /**
@@ -115,8 +114,8 @@ SmmRemoveProcessor (
 EFI_STATUS
 EFIAPI
 SmmWhoAmI (
-  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL *This,
-  OUT      UINTN                        *ProcessorNumber
+  IN CONST EFI_SMM_CPU_SERVICE_PROTOCOL  *This,
+  OUT      UINTN                         *ProcessorNumber
   );
 
 /**
@@ -171,5 +170,3 @@ EFI_STATUS
 InitializeSmmCpuServices (
   IN EFI_HANDLE  Handle
   );
-
-#endif

@@ -8,8 +8,8 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-#ifndef __INT_SAFE_LIB_H__
-#define __INT_SAFE_LIB_H__
+
+#pragma once
 
 //
 // It is common for -1 to be used as an error value
@@ -40,14 +40,14 @@
 #define SafeIntnToChar16    SafeIntnToUint16
 #define SafeUintnToChar16   SafeUintnToUint16
 
-#define SafeChar16ToInt8    SafeUint16ToInt8
-#define SafeChar16ToUint8   SafeUint16ToUint8
-#define SafeChar16ToChar8   SafeUint16ToChar8
-#define SafeChar16ToInt16   SafeUint16ToInt16
+#define SafeChar16ToInt8   SafeUint16ToInt8
+#define SafeChar16ToUint8  SafeUint16ToUint8
+#define SafeChar16ToChar8  SafeUint16ToChar8
+#define SafeChar16ToInt16  SafeUint16ToInt16
 
-#define SafeChar16Mult      SafeUint16Mult
-#define SafeChar16Sub       SafeUint16Sub
-#define SafeChar16Add       SafeUint16Add
+#define SafeChar16Mult  SafeUint16Mult
+#define SafeChar16Sub   SafeUint16Sub
+#define SafeChar16Add   SafeUint16Add
 
 //
 // Conversion functions
@@ -357,8 +357,8 @@ SafeInt16ToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeInt16ToUint8 (
-  IN INT16 Operand,
-  OUT UINT8 *Result
+  IN INT16   Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -546,8 +546,8 @@ SafeUint16ToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeUint16ToUint8 (
-  IN UINT16 Operand,
-  OUT UINT8 *Result
+  IN UINT16  Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -654,8 +654,8 @@ SafeInt32ToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeInt32ToUint8 (
-  IN INT32 Operand,
-  OUT UINT8 *Result
+  IN INT32   Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -711,7 +711,6 @@ SafeInt32ToUint16 (
   IN  INT32   Operand,
   OUT UINT16  *Result
   );
-
 
 /**
   INT32 -> UINT32 conversion
@@ -871,8 +870,8 @@ SafeUint32ToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeUint32ToUint8 (
-  IN UINT32 Operand,
-  OUT UINT8 *Result
+  IN UINT32  Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -1060,8 +1059,8 @@ SafeIntnToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeIntnToUint8 (
-  IN INTN Operand,
-  OUT UINT8 *Result
+  IN INTN    Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -1303,8 +1302,8 @@ SafeUintnToChar8 (
 RETURN_STATUS
 EFIAPI
 SafeUintnToUint8 (
-  IN UINTN Operand,
-  OUT UINT8 *Result
+  IN UINTN   Operand,
+  OUT UINT8  *Result
   );
 
 /**
@@ -3009,5 +3008,3 @@ SafeInt64Mult (
   IN  INT64  Multiplier,
   OUT INT64  *Result
   );
-
-#endif // __INT_SAFE_LIB_H__

@@ -14,7 +14,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Guid/AcpiBoardInfoGuid.h>
 
-ACPI_BOARD_INFO    mAcpiBoardInfo;
+ACPI_BOARD_INFO  mAcpiBoardInfo;
 
 /**
   The constructor function to initialize mAcpiBoardInfo.
@@ -40,23 +40,13 @@ ResetSystemLibConstructor (
   AcpiBoardInfoPtr = (ACPI_BOARD_INFO *)GET_GUID_HOB_DATA (GuidHob);
   CopyMem (&mAcpiBoardInfo, AcpiBoardInfoPtr, sizeof (ACPI_BOARD_INFO));
 
+  ASSERT (mAcpiBoardInfo.ResetRegAddress != 0);
+  ASSERT (mAcpiBoardInfo.ResetValue != 0);
+  ASSERT (mAcpiBoardInfo.PmGpeEnBase != 0);
+  ASSERT (mAcpiBoardInfo.PmEvtBase != 0);
+  ASSERT (mAcpiBoardInfo.PmCtrlRegBase != 0);
+
   return EFI_SUCCESS;
-}
-
-
-VOID
-AcpiPmControl (
-  UINTN   SuspendType
-  )
-{
-  UINTN              PmCtrlReg;
-
-  ASSERT (SuspendType <= 7);
-
-  PmCtrlReg = (UINTN)mAcpiBoardInfo.PmCtrlRegBase;
-  IoAndThenOr16 (PmCtrlReg, (UINT16) ~0x3c00, (UINT16) (SuspendType << 10));
-  IoOr16 (PmCtrlReg, BIT13);
-  CpuDeadLoop ();
 }
 
 /**
@@ -108,23 +98,23 @@ ResetShutdown (
   VOID
   )
 {
-  UINTN              PmCtrlReg;
+  UINTN  PmCtrlReg;
 
   //
   // GPE0_EN should be disabled to avoid any GPI waking up the system from S5
   //
-  IoWrite16 ((UINTN)mAcpiBoardInfo.PmGpeEnBase,  0);
+  IoWrite16 ((UINTN)mAcpiBoardInfo.PmGpeEnBase, 0);
 
   //
   // Clear Power Button Status
   //
-  IoWrite16((UINTN) mAcpiBoardInfo.PmEvtBase, BIT8);
+  IoWrite16 ((UINTN)mAcpiBoardInfo.PmEvtBase, BIT8);
 
   //
   // Transform system into S5 sleep state
   //
   PmCtrlReg = (UINTN)mAcpiBoardInfo.PmCtrlRegBase;
-  IoAndThenOr16 (PmCtrlReg, (UINT16) ~0x3c00, (UINT16) (7 << 10));
+  IoAndThenOr16 (PmCtrlReg, (UINT16) ~0x3c00, (UINT16)(7 << 10));
   IoOr16 (PmCtrlReg, BIT13);
   CpuDeadLoop ();
 
@@ -145,8 +135,8 @@ ResetShutdown (
 VOID
 EFIAPI
 ResetPlatformSpecific (
-  IN UINTN   DataSize,
-  IN VOID    *ResetData
+  IN UINTN  DataSize,
+  IN VOID   *ResetData
   )
 {
   ResetCold ();

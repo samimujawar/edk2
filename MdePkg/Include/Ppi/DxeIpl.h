@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef __DXE_IPL_H__
-#define __DXE_IPL_H__
+#pragma once
 
 #define EFI_DXE_IPL_PPI_GUID \
   { \
@@ -58,9 +57,7 @@ EFI_STATUS
 /// The DXE IPL PPI may use PEI services to locate and load the DXE Foundation.
 ///
 struct _EFI_DXE_IPL_PPI {
-  EFI_DXE_IPL_ENTRY Entry;
+  EFI_DXE_IPL_ENTRY    Entry;
 };
 
-extern EFI_GUID gEfiDxeIplPpiGuid;
-
-#endif
+extern EFI_GUID  gEfiDxeIplPpiGuid;

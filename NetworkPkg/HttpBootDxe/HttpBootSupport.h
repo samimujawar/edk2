@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_HTTP_BOOT_SUPPORT_H__
-#define __EFI_HTTP_BOOT_SUPPORT_H__
+#pragma once
 
 /**
   Get the Nic handle using any child handle in the IPv4 stack.
@@ -21,7 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_HANDLE
 HttpBootGetNicByIp4Children (
-  IN EFI_HANDLE                 ControllerHandle
+  IN EFI_HANDLE  ControllerHandle
   );
 
 /**
@@ -35,7 +34,7 @@ HttpBootGetNicByIp4Children (
 **/
 EFI_HANDLE
 HttpBootGetNicByIp6Children (
-  IN EFI_HANDLE                 ControllerHandle
+  IN EFI_HANDLE  ControllerHandle
   );
 
 /**
@@ -48,11 +47,10 @@ HttpBootGetNicByIp6Children (
 **/
 VOID
 HttpBootUintnToAscDecWithFormat (
-  IN UINTN                       Number,
-  IN UINT8                       *Buffer,
-  IN INTN                        Length
+  IN UINTN  Number,
+  IN UINT8  *Buffer,
+  IN INTN   Length
   );
-
 
 /**
   This function is to display the IPv4 address.
@@ -62,7 +60,7 @@ HttpBootUintnToAscDecWithFormat (
 **/
 VOID
 HttpBootShowIp4Addr (
-  IN EFI_IPv4_ADDRESS   *Ip
+  IN EFI_IPv4_ADDRESS  *Ip
   );
 
 /**
@@ -73,7 +71,7 @@ HttpBootShowIp4Addr (
 **/
 VOID
 HttpBootShowIp6Addr (
-  IN EFI_IPv6_ADDRESS   *Ip
+  IN EFI_IPv6_ADDRESS  *Ip
   );
 
 /**
@@ -84,7 +82,7 @@ HttpBootShowIp6Addr (
 **/
 VOID
 HttpBootPrintErrorMessage (
-  EFI_HTTP_STATUS_CODE            StatusCode
+  EFI_HTTP_STATUS_CODE  StatusCode
   );
 
 /**
@@ -100,9 +98,9 @@ HttpBootPrintErrorMessage (
 **/
 EFI_STATUS
 HttpBootDns (
-  IN     HTTP_BOOT_PRIVATE_DATA   *Private,
-  IN     CHAR16                   *HostName,
-     OUT EFI_IPv6_ADDRESS         *IpAddress
+  IN     HTTP_BOOT_PRIVATE_DATA  *Private,
+  IN     CHAR16                  *HostName,
+  OUT EFI_IPv6_ADDRESS           *IpAddress
   );
 
 /**
@@ -115,8 +113,8 @@ HttpBootDns (
 VOID
 EFIAPI
 HttpBootCommonNotify (
-  IN EFI_EVENT           Event,
-  IN VOID                *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
 
 /**
@@ -131,25 +129,28 @@ HttpBootCommonNotify (
 **/
 EFI_STATUS
 HttpBootCheckUriScheme (
-  IN      CHAR8                  *Uri
+  IN      CHAR8  *Uri
   );
 
 /**
   Get the URI address string from the input device path.
 
-  Caller need to free the buffer in the UriAddress pointer.
+  Caller needs to free the buffers returned by this function.
 
-  @param[in]   FilePath         Pointer to the device path which contains a URI device path node.
-  @param[out]  UriAddress       The URI address string extract from the device path.
+  @param[in]   FilePath           Pointer to the device path which contains a URI device path node.
+  @param[out]  ProxyUriAddress    The proxy URI address string extract from the device path (if it exists)
+  @param[out]  EndPointUriAddress The endpoint URI address string for the endpoint host.
 
   @retval EFI_SUCCESS            The URI string is returned.
+  @retval EFI_INVALID_PARAMETER  Parameters are NULL or device path is invalid.
   @retval EFI_OUT_OF_RESOURCES   Failed to allocate memory.
 
 **/
 EFI_STATUS
 HttpBootParseFilePath (
-  IN     EFI_DEVICE_PATH_PROTOCOL     *FilePath,
-     OUT CHAR8                        **UriAddress
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  OUT CHAR8                     **ProxyUriAddress,
+  OUT CHAR8                     **EndPointUriAddress
   );
 
 /**
@@ -171,11 +172,11 @@ HttpBootParseFilePath (
 **/
 EFI_STATUS
 HttpBootCheckImageType (
-  IN      CHAR8                  *Uri,
-  IN      VOID                   *UriParser,
-  IN      UINTN                  HeaderCount,
-  IN      EFI_HTTP_HEADER        *Headers,
-     OUT  HTTP_BOOT_IMAGE_TYPE   *ImageType
+  IN      CHAR8              *Uri,
+  IN      VOID               *UriParser,
+  IN      UINTN              HeaderCount,
+  IN      EFI_HTTP_HEADER    *Headers,
+  OUT  HTTP_BOOT_IMAGE_TYPE  *ImageType
   );
 
 /**
@@ -194,10 +195,10 @@ HttpBootCheckImageType (
 **/
 EFI_STATUS
 HttpBootRegisterRamDisk (
-  IN  HTTP_BOOT_PRIVATE_DATA       *Private,
-  IN  UINTN                        BufferSize,
-  IN  VOID                         *Buffer,
-  IN  HTTP_BOOT_IMAGE_TYPE         ImageType
+  IN  HTTP_BOOT_PRIVATE_DATA  *Private,
+  IN  UINTN                   BufferSize,
+  IN  VOID                    *Buffer,
+  IN  HTTP_BOOT_IMAGE_TYPE    ImageType
   );
 
 /**
@@ -210,6 +211,5 @@ HttpBootRegisterRamDisk (
 **/
 BOOLEAN
 HttpBootIsHttpRedirectStatusCode (
-  IN   EFI_HTTP_STATUS_CODE        StatusCode
+  IN   EFI_HTTP_STATUS_CODE  StatusCode
   );
-#endif

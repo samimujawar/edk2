@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _LIB_FILE_IMAGE_H_
-#define _LIB_FILE_IMAGE_H_
+#pragma once
 
 #include "HexEditor.h"
 
@@ -57,7 +56,7 @@ HFileImageBackup (
 EFI_STATUS
 HFileImageRead (
   IN CONST CHAR16  *FileName,
-  IN BOOLEAN Recover
+  IN BOOLEAN       Recover
   );
 
 /**
@@ -71,7 +70,5 @@ HFileImageRead (
 **/
 EFI_STATUS
 HFileImageSave (
-  IN CHAR16 *FileName
+  IN CHAR16  *FileName
   );
-
-#endif

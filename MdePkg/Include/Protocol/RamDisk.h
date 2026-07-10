@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __RAM_DISK_PROTOCOL_H__
-#define __RAM_DISK_PROTOCOL_H__
+#pragma once
 
 //
 // EFI RAM Disk Protocol GUID value
@@ -21,7 +20,7 @@
 //
 // Forward reference for pure ANSI compatability
 //
-typedef struct _EFI_RAM_DISK_PROTOCOL  EFI_RAM_DISK_PROTOCOL;
+typedef struct _EFI_RAM_DISK_PROTOCOL EFI_RAM_DISK_PROTOCOL;
 
 /**
   Register a RAM disk with specified address, size and type.
@@ -55,7 +54,7 @@ typedef struct _EFI_RAM_DISK_PROTOCOL  EFI_RAM_DISK_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_RAM_DISK_REGISTER_RAMDISK) (
+(EFIAPI *EFI_RAM_DISK_REGISTER_RAMDISK)(
   IN UINT64                       RamDiskBase,
   IN UINT64                       RamDiskSize,
   IN EFI_GUID                     *RamDiskType,
@@ -80,7 +79,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_RAM_DISK_UNREGISTER_RAMDISK) (
+(EFIAPI *EFI_RAM_DISK_UNREGISTER_RAMDISK)(
   IN  EFI_DEVICE_PATH_PROTOCOL    *DevicePath
   );
 
@@ -88,13 +87,11 @@ EFI_STATUS
 /// RAM Disk Protocol structure.
 ///
 struct _EFI_RAM_DISK_PROTOCOL {
-  EFI_RAM_DISK_REGISTER_RAMDISK        Register;
-  EFI_RAM_DISK_UNREGISTER_RAMDISK      Unregister;
+  EFI_RAM_DISK_REGISTER_RAMDISK      Register;
+  EFI_RAM_DISK_UNREGISTER_RAMDISK    Unregister;
 };
 
 ///
 /// RAM Disk Protocol GUID variable.
 ///
-extern EFI_GUID gEfiRamDiskProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiRamDiskProtocolGuid;

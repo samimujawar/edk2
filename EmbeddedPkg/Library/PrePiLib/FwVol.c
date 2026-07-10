@@ -10,12 +10,11 @@
 **/
 
 #include <PrePi.h>
+#include <Pi/PiFirmwareFile.h>
 #include <Library/ExtractGuidedSectionLib.h>
-
 
 #define GET_OCCUPIED_SIZE(ActualSize, Alignment) \
   (ActualSize) + (((Alignment) - ((ActualSize) & ((Alignment) - 1))) & ((Alignment) - 1))
-
 
 /**
   Returns the highest bit set of the State field
@@ -30,7 +29,7 @@
 **/
 STATIC
 EFI_FFS_FILE_STATE
-GetFileState(
+GetFileState (
   IN UINT8                ErasePolarity,
   IN EFI_FFS_FILE_HEADER  *FfsHeader
   )
@@ -41,7 +40,7 @@ GetFileState(
   FileState = FfsHeader->State;
 
   if (ErasePolarity != 0) {
-    FileState = (EFI_FFS_FILE_STATE)~FileState;
+    FileState = (EFI_FFS_FILE_STATE) ~FileState;
   }
 
   HighestBit = 0x80;
@@ -51,7 +50,6 @@ GetFileState(
 
   return HighestBit;
 }
-
 
 /**
   Calculates the checksum of the header of a file.
@@ -68,21 +66,21 @@ CalculateHeaderChecksum (
   IN EFI_FFS_FILE_HEADER  *FileHeader
   )
 {
-  UINT8   *Ptr;
-  UINTN   Index;
-  UINT8   Sum;
+  UINT8  *Ptr;
+  UINTN  Index;
+  UINT8  Sum;
 
   Sum = 0;
   Ptr = (UINT8 *)FileHeader;
 
-  for (Index = 0; Index < sizeof(EFI_FFS_FILE_HEADER) - 3; Index += 4) {
+  for (Index = 0; Index < sizeof (EFI_FFS_FILE_HEADER) - 3; Index += 4) {
     Sum = (UINT8)(Sum + Ptr[Index]);
     Sum = (UINT8)(Sum + Ptr[Index+1]);
     Sum = (UINT8)(Sum + Ptr[Index+2]);
     Sum = (UINT8)(Sum + Ptr[Index+3]);
   }
 
-  for (; Index < sizeof(EFI_FFS_FILE_HEADER); Index++) {
+  for ( ; Index < sizeof (EFI_FFS_FILE_HEADER); Index++) {
     Sum = (UINT8)(Sum + Ptr[Index]);
   }
 
@@ -98,7 +96,6 @@ CalculateHeaderChecksum (
   return Sum;
 }
 
-
 /**
   Given a FileHandle return the VolumeHandle
 
@@ -112,8 +109,8 @@ STATIC
 BOOLEAN
 EFIAPI
 FileHandleToVolume (
-  IN   EFI_PEI_FILE_HANDLE     FileHandle,
-  OUT  EFI_PEI_FV_HANDLE       *VolumeHandle
+  IN   EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT  EFI_PEI_FV_HANDLE    *VolumeHandle
   )
 {
   EFI_FIRMWARE_VOLUME_HEADER  *FwVolHeader;
@@ -128,8 +125,9 @@ FileHandleToVolume (
     Hob.Raw = GetNextHob (EFI_HOB_TYPE_FV, Hob.Raw);
     if (Hob.Raw != NULL) {
       FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)(UINTN)(Hob.FirmwareVolume->BaseAddress);
-      if (((UINT64) (UINTN) FileHandle > (UINT64) (UINTN) FwVolHeader ) &&   \
-          ((UINT64) (UINTN) FileHandle <= ((UINT64) (UINTN) FwVolHeader + FwVolHeader->FvLength - 1))) {
+      if (((UINT64)(UINTN)FileHandle > (UINT64)(UINTN)FwVolHeader) &&   \
+          ((UINT64)(UINTN)FileHandle <= ((UINT64)(UINTN)FwVolHeader + FwVolHeader->FvLength - 1)))
+      {
         *VolumeHandle = (EFI_PEI_FV_HANDLE)FwVolHeader;
         return TRUE;
       }
@@ -140,8 +138,6 @@ FileHandleToVolume (
 
   return FALSE;
 }
-
-
 
 /**
   Given the input file pointer, search for the next matching file in the
@@ -155,22 +151,22 @@ FileHandleToVolume (
 **/
 EFI_STATUS
 FindFileEx (
-  IN  CONST EFI_PEI_FV_HANDLE        FvHandle,
-  IN  CONST EFI_GUID                 *FileName,   OPTIONAL
-  IN        EFI_FV_FILETYPE          SearchType,
-  IN OUT    EFI_PEI_FILE_HANDLE      *FileHandle
+  IN  CONST EFI_PEI_FV_HANDLE    FvHandle,
+  IN  CONST EFI_GUID             *FileName    OPTIONAL,
+  IN        EFI_FV_FILETYPE      SearchType,
+  IN OUT    EFI_PEI_FILE_HANDLE  *FileHandle
   )
 {
-  EFI_FIRMWARE_VOLUME_HEADER           *FwVolHeader;
-  EFI_FFS_FILE_HEADER                   **FileHeader;
-  EFI_FFS_FILE_HEADER                   *FfsFileHeader;
-  EFI_FIRMWARE_VOLUME_EXT_HEADER        *FwVolExHeaderInfo;
-  UINT32                                FileLength;
-  UINT32                                FileOccupiedSize;
-  UINT32                                FileOffset;
-  UINT64                                FvLength;
-  UINT8                                 ErasePolarity;
-  UINT8                                 FileState;
+  EFI_FIRMWARE_VOLUME_HEADER      *FwVolHeader;
+  EFI_FFS_FILE_HEADER             **FileHeader;
+  EFI_FFS_FILE_HEADER             *FfsFileHeader;
+  EFI_FIRMWARE_VOLUME_EXT_HEADER  *FwVolExHeaderInfo;
+  UINT32                          FileLength;
+  UINT32                          FileOccupiedSize;
+  UINT32                          FileOffset;
+  UINT64                          FvLength;
+  UINT8                           ErasePolarity;
+  UINT8                           FileState;
 
   FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)FvHandle;
   FileHeader  = (EFI_FFS_FILE_HEADER **)FileHandle;
@@ -191,22 +187,21 @@ FindFileEx (
     FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FwVolHeader + FwVolHeader->HeaderLength);
     if (FwVolHeader->ExtHeaderOffset != 0) {
       FwVolExHeaderInfo = (EFI_FIRMWARE_VOLUME_EXT_HEADER *)(((UINT8 *)FwVolHeader) + FwVolHeader->ExtHeaderOffset);
-      FfsFileHeader = (EFI_FFS_FILE_HEADER *)(((UINT8 *)FwVolExHeaderInfo) + FwVolExHeaderInfo->ExtHeaderSize);
+      FfsFileHeader     = (EFI_FFS_FILE_HEADER *)(((UINT8 *)FwVolExHeaderInfo) + FwVolExHeaderInfo->ExtHeaderSize);
     }
   } else {
     //
-    // Length is 24 bits wide so mask upper 8 bits
     // FileLength is adjusted to FileOccupiedSize as it is 8 byte aligned.
     //
-    FileLength = *(UINT32 *)(*FileHeader)->Size & 0x00FFFFFF;
+    FileLength       = FFS_FILE_SIZE (*FileHeader);
     FileOccupiedSize = GET_OCCUPIED_SIZE (FileLength, 8);
-    FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)*FileHeader + FileOccupiedSize);
+    FfsFileHeader    = (EFI_FFS_FILE_HEADER *)((UINT8 *)*FileHeader + FileOccupiedSize);
   }
 
   // FFS files begin with a header that is aligned on an 8-byte boundary
   FfsFileHeader = ALIGN_POINTER (FfsFileHeader, 8);
 
-  FileOffset = (UINT32) ((UINT8 *)FfsFileHeader - (UINT8 *)FwVolHeader);
+  FileOffset = (UINT32)((UINT8 *)FfsFileHeader - (UINT8 *)FwVolHeader);
   ASSERT (FileOffset <= 0xFFFFFFFF);
 
   while (FileOffset < (FvLength - sizeof (EFI_FFS_FILE_HEADER))) {
@@ -216,130 +211,207 @@ FindFileEx (
     FileState = GetFileState (ErasePolarity, FfsFileHeader);
 
     switch (FileState) {
+      case EFI_FILE_HEADER_INVALID:
+        FileOffset   += sizeof (EFI_FFS_FILE_HEADER);
+        FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + sizeof (EFI_FFS_FILE_HEADER));
+        break;
 
-    case EFI_FILE_HEADER_INVALID:
-      FileOffset += sizeof(EFI_FFS_FILE_HEADER);
-      FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + sizeof(EFI_FFS_FILE_HEADER));
-      break;
+      case EFI_FILE_DATA_VALID:
+      case EFI_FILE_MARKED_FOR_UPDATE:
+        if (CalculateHeaderChecksum (FfsFileHeader) != 0) {
+          ASSERT (FALSE);
+          *FileHeader = NULL;
+          return EFI_NOT_FOUND;
+        }
 
-    case EFI_FILE_DATA_VALID:
-    case EFI_FILE_MARKED_FOR_UPDATE:
-      if (CalculateHeaderChecksum (FfsFileHeader) != 0) {
-        ASSERT (FALSE);
-        *FileHeader = NULL;
-        return EFI_NOT_FOUND;
-      }
+        FileLength       = FFS_FILE_SIZE (FfsFileHeader);
+        FileOccupiedSize = GET_OCCUPIED_SIZE (FileLength, 8);
 
-      FileLength = *(UINT32 *)(FfsFileHeader->Size) & 0x00FFFFFF;
-      FileOccupiedSize = GET_OCCUPIED_SIZE(FileLength, 8);
-
-      if (FileName != NULL) {
-        if (CompareGuid (&FfsFileHeader->Name, (EFI_GUID*)FileName)) {
+        if (FileName != NULL) {
+          if (CompareGuid (&FfsFileHeader->Name, (EFI_GUID *)FileName)) {
+            *FileHeader = FfsFileHeader;
+            return EFI_SUCCESS;
+          }
+        } else if (((SearchType == FfsFileHeader->Type) || (SearchType == EFI_FV_FILETYPE_ALL)) &&
+                   (FfsFileHeader->Type != EFI_FV_FILETYPE_FFS_PAD))
+        {
           *FileHeader = FfsFileHeader;
           return EFI_SUCCESS;
         }
-      } else if (((SearchType == FfsFileHeader->Type) || (SearchType == EFI_FV_FILETYPE_ALL)) &&
-                 (FfsFileHeader->Type != EFI_FV_FILETYPE_FFS_PAD)) {
-        *FileHeader = FfsFileHeader;
-        return EFI_SUCCESS;
-      }
 
-      FileOffset += FileOccupiedSize;
-      FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + FileOccupiedSize);
-      break;
+        FileOffset   += FileOccupiedSize;
+        FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + FileOccupiedSize);
+        break;
 
-    case EFI_FILE_DELETED:
-      FileLength = *(UINT32 *)(FfsFileHeader->Size) & 0x00FFFFFF;
-      FileOccupiedSize = GET_OCCUPIED_SIZE(FileLength, 8);
-      FileOffset += FileOccupiedSize;
-      FfsFileHeader = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + FileOccupiedSize);
-      break;
+      case EFI_FILE_DELETED:
+        FileLength       = FFS_FILE_SIZE (FfsFileHeader);
+        FileOccupiedSize = GET_OCCUPIED_SIZE (FileLength, 8);
+        FileOffset      += FileOccupiedSize;
+        FfsFileHeader    = (EFI_FFS_FILE_HEADER *)((UINT8 *)FfsFileHeader + FileOccupiedSize);
+        break;
 
-    default:
-      *FileHeader = NULL;
-      return EFI_NOT_FOUND;
+      default:
+        *FileHeader = NULL;
+        return EFI_NOT_FOUND;
     }
   }
-
 
   *FileHeader = NULL;
   return EFI_NOT_FOUND;
 }
 
+/**
+  Return the size of a section whether SECTION or SECTION2
+
+  @param  Section           - Pointer to start of section header
+
+  @retval Size in bytes.
+ **/
+STATIC
+UINT32
+GetSectionNSize (
+  IN EFI_COMMON_SECTION_HEADER  *Section
+  )
+{
+  UINT32  SectionSize;
+
+  if (IS_SECTION2 (Section)) {
+    ASSERT (SECTION2_SIZE (Section) > 0x00FFFFFF);
+    SectionSize = SECTION2_SIZE (Section);
+  } else {
+    SectionSize = SECTION_SIZE (Section);
+  }
+
+  return SectionSize;
+}
+
+/**
+  Return the size of a section header whether SECTION or SECTION2
+
+  @param  Section           - Pointer to start of section header
+
+  @retval Size in bytes.
+ **/
+STATIC
+UINT32
+GetCommonSectionNHeaderSize (
+  IN EFI_COMMON_SECTION_HEADER  *Section
+  )
+{
+  if (IS_SECTION2 (Section)) {
+    return sizeof (EFI_COMMON_SECTION_HEADER2);
+  } else {
+    return sizeof (EFI_COMMON_SECTION_HEADER);
+  }
+}
+
+/**
+  Return the size of a compression section header whether SECTION or SECTION2
+
+  @param  Section           - Pointer to start of section header
+
+  @retval Size in bytes.
+ **/
+STATIC
+UINT32
+GetCompressionSectionNHeaderSize (
+  IN EFI_COMMON_SECTION_HEADER  *Section
+  )
+{
+  ASSERT (Section->Type == EFI_SECTION_COMPRESSION);
+
+  if (IS_SECTION2 (Section)) {
+    return sizeof (EFI_COMPRESSION_SECTION2);
+  } else {
+    return sizeof (EFI_COMPRESSION_SECTION);
+  }
+}
+
+/**
+  Return the compression type of a section whether SECTION or SECTION2
+
+  @param  Section           - Pointer to start of section header
+
+  @retval EFI_SECTION_TYPE
+ **/
+STATIC
+EFI_SECTION_TYPE
+GetSectionNCompressionType (
+  IN EFI_COMMON_SECTION_HEADER  *Section
+  )
+{
+  ASSERT (Section->Type == EFI_SECTION_COMPRESSION);
+
+  if (IS_SECTION2 (Section)) {
+    return ((EFI_COMPRESSION_SECTION2 *)Section)->CompressionType;
+  } else {
+    return ((EFI_COMPRESSION_SECTION *)Section)->CompressionType;
+  }
+}
 
 /**
   Go through the file to search SectionType section,
   when meeting an encapsuled section.
 
-  @param  SectionType  - Filter to find only section of this type.
-  @param  Section      - From where to search.
-  @param  SectionSize  - The file size to search.
-  @param  OutputBuffer - Pointer to the section to search.
+  @param  SectionType           - Filter to find only section of this type.
+  @param  SectionCheckHook      - A hook which can check if the section is the target one.
+  @param  Section               - From where to search.
+  @param  SectionSize           - The file size to search.
+  @param  OutputBuffer          - Pointer to the section to search.
+  @param  AuthenticationStatus  - Pointer to the authentication status. This parameter is optional. If non-NULL and
+                                  GUIDed extraction occurs, the authentication status will be updated.
 
   @retval EFI_SUCCESS
 **/
 EFI_STATUS
 FfsProcessSection (
   IN EFI_SECTION_TYPE           SectionType,
+  IN FFS_CHECK_SECTION_HOOK     SectionCheckHook,
   IN EFI_COMMON_SECTION_HEADER  *Section,
   IN UINTN                      SectionSize,
-  OUT VOID                      **OutputBuffer
+  OUT VOID                      **OutputBuffer,
+  OUT UINT32                    *AuthenticationStatus OPTIONAL
   )
 {
-  EFI_STATUS                              Status;
-  UINT32                                  SectionLength;
-  UINT32                                  ParsedLength;
-  EFI_COMPRESSION_SECTION                 *CompressionSection;
-  EFI_COMPRESSION_SECTION2                *CompressionSection2;
-  UINT32                                  DstBufferSize;
-  VOID                                    *ScratchBuffer;
-  UINT32                                  ScratchBufferSize;
-  VOID                                    *DstBuffer;
-  UINT16                                  SectionAttribute;
-  UINT32                                  AuthenticationStatus;
-  CHAR8                                   *CompressedData;
-  UINTN                                   CompressedDataLength;
+  EFI_STATUS  Status;
+  UINT32      SectionLength;
+  UINTN       ParsedLength;
+  UINT32      DstBufferSize;
+  VOID        *DstBuffer;
+  UINT32      TempAuthStatus;
 
+  ParsedLength = 0;
 
-  *OutputBuffer = NULL;
-  ParsedLength  = 0;
-  Status        = EFI_NOT_FOUND;
   while (ParsedLength < SectionSize) {
-    if (IS_SECTION2 (Section)) {
-      ASSERT (SECTION2_SIZE (Section) > 0x00FFFFFF);
-    }
+    UINT32  SectionHeaderSize;
+
+    SectionHeaderSize = GetCommonSectionNHeaderSize (Section);
 
     if (Section->Type == SectionType) {
-      if (IS_SECTION2 (Section)) {
-        *OutputBuffer = (VOID *)((UINT8 *) Section + sizeof (EFI_COMMON_SECTION_HEADER2));
-      } else {
-        *OutputBuffer = (VOID *)((UINT8 *) Section + sizeof (EFI_COMMON_SECTION_HEADER));
+      if (SectionCheckHook != NULL) {
+        if (SectionCheckHook (Section) != EFI_SUCCESS) {
+          goto CheckNextSection;
+        }
       }
+
+      *OutputBuffer = (VOID *)((UINT8 *)Section + SectionHeaderSize);
 
       return EFI_SUCCESS;
     } else if ((Section->Type == EFI_SECTION_COMPRESSION) || (Section->Type == EFI_SECTION_GUID_DEFINED)) {
+      VOID    *ScratchBuffer;
+      UINT32  ScratchBufferSize;
 
       if (Section->Type == EFI_SECTION_COMPRESSION) {
-        if (IS_SECTION2 (Section)) {
-          CompressionSection2 = (EFI_COMPRESSION_SECTION2 *) Section;
-          SectionLength       = SECTION2_SIZE (Section);
+        CHAR8   *CompressedData;
+        UINT32  CompressedDataLength;
 
-          if (CompressionSection2->CompressionType != EFI_STANDARD_COMPRESSION) {
-            return EFI_UNSUPPORTED;
-          }
+        SectionLength = GetSectionNSize (Section);
 
-          CompressedData = (CHAR8 *) ((EFI_COMPRESSION_SECTION2 *) Section + 1);
-          CompressedDataLength = (UINT32) SectionLength - sizeof (EFI_COMPRESSION_SECTION2);
-        } else {
-          CompressionSection  = (EFI_COMPRESSION_SECTION *) Section;
-          SectionLength       = SECTION_SIZE (Section);
+        CompressedData       = (CHAR8 *)((UINTN)(Section) + GetCompressionSectionNHeaderSize (Section));
+        CompressedDataLength = SectionLength - GetCompressionSectionNHeaderSize (Section);
 
-          if (CompressionSection->CompressionType != EFI_STANDARD_COMPRESSION) {
-            return EFI_UNSUPPORTED;
-          }
-
-          CompressedData = (CHAR8 *) ((EFI_COMPRESSION_SECTION *) Section + 1);
-          CompressedDataLength = (UINT32) SectionLength - sizeof (EFI_COMPRESSION_SECTION);
+        if (GetSectionNCompressionType (Section) != EFI_STANDARD_COMPRESSION) {
+          return EFI_UNSUPPORTED;
         }
 
         Status = UefiDecompressGetInfo (
@@ -348,7 +420,10 @@ FfsProcessSection (
                    &DstBufferSize,
                    &ScratchBufferSize
                    );
-      } else if (Section->Type == EFI_SECTION_GUID_DEFINED) {
+      } else {
+        // Section->Type == EFI_SECTION_GUID_DEFINED)
+        UINT16  SectionAttribute;
+
         Status = ExtractGuidedSectionGetInfo (
                    Section,
                    &DstBufferSize,
@@ -361,9 +436,10 @@ FfsProcessSection (
         //
         // GetInfo failed
         //
-        DEBUG ((EFI_D_ERROR, "Decompress GetInfo Failed - %r\n", Status));
+        DEBUG ((DEBUG_ERROR, "Decompress GetInfo Failed - %r\n", Status));
         return EFI_NOT_FOUND;
       }
+
       //
       // Allocate scratch buffer
       //
@@ -371,6 +447,7 @@ FfsProcessSection (
       if (ScratchBuffer == NULL) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       //
       // Allocate destination buffer, extra one page for adjustment
       //
@@ -378,60 +455,60 @@ FfsProcessSection (
       if (DstBuffer == NULL) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       //
       // DstBuffer still is one section. Adjust DstBuffer offset, skip EFI section header
       // to make section data at page alignment.
       //
-      if (IS_SECTION2 (Section))
-        DstBuffer = (UINT8 *)DstBuffer + EFI_PAGE_SIZE - sizeof (EFI_COMMON_SECTION_HEADER2);
-      else
-        DstBuffer = (UINT8 *)DstBuffer + EFI_PAGE_SIZE - sizeof (EFI_COMMON_SECTION_HEADER);
+      DstBuffer = (UINT8 *)DstBuffer + EFI_PAGE_SIZE - SectionHeaderSize;
+
       //
       // Call decompress function
       //
       if (Section->Type == EFI_SECTION_COMPRESSION) {
-        if (IS_SECTION2 (Section)) {
-          CompressedData = (CHAR8 *) ((EFI_COMPRESSION_SECTION2 *) Section + 1);
-        }
-        else {
-          CompressedData = (CHAR8 *) ((EFI_COMPRESSION_SECTION *) Section + 1);
-        }
+        CHAR8  *CompressedData;
+
+        CompressedData = (CHAR8 *)((UINTN)(Section) + GetCompressionSectionNHeaderSize (Section));
 
         Status = UefiDecompress (
-                    CompressedData,
-                    DstBuffer,
-                    ScratchBuffer
-                    );
+                   CompressedData,
+                   DstBuffer,
+                   ScratchBuffer
+                   );
       } else if (Section->Type == EFI_SECTION_GUID_DEFINED) {
         Status = ExtractGuidedSectionDecode (
-                    Section,
-                    &DstBuffer,
-                    ScratchBuffer,
-                    &AuthenticationStatus
-                    );
+                   Section,
+                   &DstBuffer,
+                   ScratchBuffer,
+                   &TempAuthStatus
+                   );
+
+        if ((Status == EFI_SUCCESS) && (AuthenticationStatus != NULL)) {
+          *AuthenticationStatus = TempAuthStatus;
+        }
       }
 
       if (EFI_ERROR (Status)) {
         //
         // Decompress failed
         //
-        DEBUG ((EFI_D_ERROR, "Decompress Failed - %r\n", Status));
+        DEBUG ((DEBUG_ERROR, "Decompress Failed - %r\n", Status));
         return EFI_NOT_FOUND;
-      } else {
-        return FfsProcessSection (
-                SectionType,
-                DstBuffer,
-                DstBufferSize,
-                OutputBuffer
-                );
-       }
+      }
+
+      return FfsProcessSection (
+               SectionType,
+               SectionCheckHook,
+               DstBuffer,
+               DstBufferSize,
+               OutputBuffer,
+               AuthenticationStatus
+               );
     }
 
-    if (IS_SECTION2 (Section)) {
-      SectionLength = SECTION2_SIZE (Section);
-    } else {
-      SectionLength = SECTION_SIZE (Section);
-    }
+CheckNextSection:
+    SectionLength = GetSectionNSize (Section);
+
     //
     // SectionLength is adjusted it is 4 byte aligned.
     // Go to the next section
@@ -439,19 +516,66 @@ FfsProcessSection (
     SectionLength = GET_OCCUPIED_SIZE (SectionLength, 4);
     ASSERT (SectionLength != 0);
     ParsedLength += SectionLength;
-    Section = (EFI_COMMON_SECTION_HEADER *)((UINT8 *)Section + SectionLength);
+    Section       = (EFI_COMMON_SECTION_HEADER *)((UINT8 *)Section + SectionLength);
   }
 
   return EFI_NOT_FOUND;
 }
 
+/**
+  This service enables discovery sections of a given type within a valid FFS file.
+  Caller also can provide a SectionCheckHook to do additional checking.
 
+  @param  SectionType           The value of the section type to find.
+  @param  SectionCheckHook      A hook which can check if the section is the target one.
+  @param  FileHandle            A pointer to the file header that contains the set of sections to
+                                be searched.
+  @param  SectionData           A pointer to the discovered section, if successful.
+  @param  AuthenticationStatus  Pointer to the authentication status. This parameter is optional. If non-NULL and
+                                GUIDed extraction occurs, the authentication status will be updated.
+
+  @retval EFI_SUCCESS           The section was found.
+  @retval EFI_NOT_FOUND         The section was not found.
+
+**/
+EFI_STATUS
+EFIAPI
+FfsFindSectionDataWithHook (
+  IN EFI_SECTION_TYPE        SectionType,
+  IN FFS_CHECK_SECTION_HOOK  SectionCheckHook,
+  IN EFI_PEI_FILE_HANDLE     FileHandle,
+  OUT VOID                   **SectionData,
+  OUT UINT32                 *AuthenticationStatus OPTIONAL
+  )
+{
+  EFI_FFS_FILE_HEADER        *FfsFileHeader;
+  UINT32                     FileSize;
+  EFI_COMMON_SECTION_HEADER  *Section;
+
+  FfsFileHeader = (EFI_FFS_FILE_HEADER *)(FileHandle);
+
+  //
+  // FileSize is adjusted to FileOccupiedSize as it is 8 byte aligned.
+  //
+  Section   = (EFI_COMMON_SECTION_HEADER *)(FfsFileHeader + 1);
+  FileSize  = FFS_FILE_SIZE (FfsFileHeader);
+  FileSize -= sizeof (EFI_FFS_FILE_HEADER);
+
+  return FfsProcessSection (
+           SectionType,
+           SectionCheckHook,
+           Section,
+           FileSize,
+           SectionData,
+           AuthenticationStatus
+           );
+}
 
 /**
   This service enables discovery sections of a given type within a valid FFS file.
 
-  @param  SearchType            The value of the section type to find.
-  @param  FfsFileHeader         A pointer to the file header that contains the set of sections to
+  @param  SectionType           The value of the section type to find.
+  @param  FileHandle            A pointer to the file header that contains the set of sections to
                                 be searched.
   @param  SectionData           A pointer to the discovered section, if successful.
 
@@ -462,38 +586,13 @@ FfsProcessSection (
 EFI_STATUS
 EFIAPI
 FfsFindSectionData (
-  IN EFI_SECTION_TYPE           SectionType,
-  IN EFI_PEI_FILE_HANDLE        FileHandle,
-  OUT VOID                      **SectionData
+  IN EFI_SECTION_TYPE     SectionType,
+  IN EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT VOID                **SectionData
   )
 {
-  EFI_FFS_FILE_HEADER                     *FfsFileHeader;
-  UINT32                                  FileSize;
-  EFI_COMMON_SECTION_HEADER               *Section;
-
-  FfsFileHeader = (EFI_FFS_FILE_HEADER *)(FileHandle);
-
-  //
-  // Size is 24 bits wide so mask upper 8 bits.
-  // Does not include FfsFileHeader header size
-  // FileSize is adjusted to FileOccupiedSize as it is 8 byte aligned.
-  //
-  Section = (EFI_COMMON_SECTION_HEADER *)(FfsFileHeader + 1);
-  FileSize = *(UINT32 *)(FfsFileHeader->Size) & 0x00FFFFFF;
-  FileSize -= sizeof (EFI_FFS_FILE_HEADER);
-
-  return FfsProcessSection (
-          SectionType,
-          Section,
-          FileSize,
-          SectionData
-          );
+  return FfsFindSectionDataWithHook (SectionType, NULL, FileHandle, SectionData, NULL);
 }
-
-
-
-
-
 
 /**
   This service enables discovery of additional firmware files.
@@ -511,14 +610,13 @@ FfsFindSectionData (
 EFI_STATUS
 EFIAPI
 FfsFindNextFile (
-  IN UINT8                       SearchType,
-  IN EFI_PEI_FV_HANDLE           VolumeHandle,
-  IN OUT EFI_PEI_FILE_HANDLE     *FileHandle
+  IN UINT8                    SearchType,
+  IN EFI_PEI_FV_HANDLE        VolumeHandle,
+  IN OUT EFI_PEI_FILE_HANDLE  *FileHandle
   )
 {
   return FindFileEx (VolumeHandle, NULL, SearchType, FileHandle);
 }
-
 
 /**
   This service enables discovery of additional firmware volumes.
@@ -534,12 +632,11 @@ FfsFindNextFile (
 EFI_STATUS
 EFIAPI
 FfsFindNextVolume (
-  IN UINTN                          Instance,
-  IN OUT EFI_PEI_FV_HANDLE          *VolumeHandle
+  IN UINTN                  Instance,
+  IN OUT EFI_PEI_FV_HANDLE  *VolumeHandle
   )
 {
-  EFI_PEI_HOB_POINTERS        Hob;
-
+  EFI_PEI_HOB_POINTERS  Hob;
 
   Hob.Raw = GetHobList ();
   if (Hob.Raw == NULL) {
@@ -559,9 +656,7 @@ FfsFindNextVolume (
   } while (Hob.Raw != NULL);
 
   return EFI_NOT_FOUND;
-
 }
-
 
 /**
   Find a file in the volume by name
@@ -584,24 +679,24 @@ FfsFindNextVolume (
 EFI_STATUS
 EFIAPI
 FfsFindFileByName (
-  IN  CONST EFI_GUID        *FileName,
-  IN  EFI_PEI_FV_HANDLE     VolumeHandle,
-  OUT EFI_PEI_FILE_HANDLE   *FileHandle
+  IN  CONST EFI_GUID       *FileName,
+  IN  EFI_PEI_FV_HANDLE    VolumeHandle,
+  OUT EFI_PEI_FILE_HANDLE  *FileHandle
   )
 {
   EFI_STATUS  Status;
+
   if ((VolumeHandle == NULL) || (FileName == NULL) || (FileHandle == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
+
   Status = FindFileEx (VolumeHandle, FileName, 0, FileHandle);
   if (Status == EFI_NOT_FOUND) {
     *FileHandle = NULL;
   }
+
   return Status;
 }
-
-
-
 
 /**
   Get information about the file by name.
@@ -626,10 +721,10 @@ FfsGetFileInfo (
   OUT EFI_FV_FILE_INFO    *FileInfo
   )
 {
-  UINT8                       FileState;
-  UINT8                       ErasePolarity;
-  EFI_FFS_FILE_HEADER         *FileHeader;
-  EFI_PEI_FV_HANDLE           VolumeHandle;
+  UINT8                FileState;
+  UINT8                ErasePolarity;
+  EFI_FFS_FILE_HEADER  *FileHeader;
+  EFI_PEI_FV_HANDLE    VolumeHandle;
 
   if ((FileHandle == NULL) || (FileInfo == NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -639,11 +734,11 @@ FfsGetFileInfo (
   //
   // Retrieve the FirmwareVolume which the file resides in.
   //
-  if (!FileHandleToVolume(FileHandle, &VolumeHandle)) {
+  if (!FileHandleToVolume (FileHandle, &VolumeHandle)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (((EFI_FIRMWARE_VOLUME_HEADER*)VolumeHandle)->Attributes & EFI_FVB2_ERASE_POLARITY) {
+  if (((EFI_FIRMWARE_VOLUME_HEADER *)VolumeHandle)->Attributes & EFI_FVB2_ERASE_POLARITY) {
     ErasePolarity = 1;
   } else {
     ErasePolarity = 0;
@@ -652,7 +747,7 @@ FfsGetFileInfo (
   //
   // Get FileState which is the highest bit of the State
   //
-  FileState = GetFileState (ErasePolarity, (EFI_FFS_FILE_HEADER*)FileHandle);
+  FileState = GetFileState (ErasePolarity, (EFI_FFS_FILE_HEADER *)FileHandle);
 
   switch (FileState) {
     case EFI_FILE_DATA_VALID:
@@ -660,17 +755,16 @@ FfsGetFileInfo (
       break;
     default:
       return EFI_INVALID_PARAMETER;
-    }
+  }
 
   FileHeader = (EFI_FFS_FILE_HEADER *)FileHandle;
-  CopyMem (&FileInfo->FileName, &FileHeader->Name, sizeof(EFI_GUID));
-  FileInfo->FileType = FileHeader->Type;
+  CopyMem (&FileInfo->FileName, &FileHeader->Name, sizeof (EFI_GUID));
+  FileInfo->FileType       = FileHeader->Type;
   FileInfo->FileAttributes = FileHeader->Attributes;
-  FileInfo->BufferSize = ((*(UINT32 *)FileHeader->Size) & 0x00FFFFFF) -  sizeof (EFI_FFS_FILE_HEADER);
-  FileInfo->Buffer = (FileHeader + 1);
+  FileInfo->BufferSize     = (FFS_FILE_SIZE (FileHeader) -  sizeof (EFI_FFS_FILE_HEADER));
+  FileInfo->Buffer         = (FileHeader + 1);
   return EFI_SUCCESS;
 }
-
 
 /**
   Get Information about the volume by name
@@ -695,8 +789,8 @@ FfsGetVolumeInfo (
   OUT EFI_FV_INFO       *VolumeInfo
   )
 {
-  EFI_FIRMWARE_VOLUME_HEADER             FwVolHeader;
-  EFI_FIRMWARE_VOLUME_EXT_HEADER         *FwVolExHeaderInfo;
+  EFI_FIRMWARE_VOLUME_HEADER      FwVolHeader;
+  EFI_FIRMWARE_VOLUME_EXT_HEADER  *FwVolExHeaderInfo;
 
   if (VolumeInfo == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -714,19 +808,20 @@ FfsGetVolumeInfo (
   if (FwVolHeader.Signature != EFI_FVH_SIGNATURE) {
     return EFI_INVALID_PARAMETER;
   }
+
+  ZeroMem (VolumeInfo, sizeof (*VolumeInfo));
   VolumeInfo->FvAttributes = FwVolHeader.Attributes;
-  VolumeInfo->FvStart = (VOID *) VolumeHandle;
-  VolumeInfo->FvSize = FwVolHeader.FvLength;
-  CopyMem (&VolumeInfo->FvFormat, &FwVolHeader.FileSystemGuid, sizeof(EFI_GUID));
+  VolumeInfo->FvStart      = (VOID *)VolumeHandle;
+  VolumeInfo->FvSize       = FwVolHeader.FvLength;
+  CopyMem (&VolumeInfo->FvFormat, &FwVolHeader.FileSystemGuid, sizeof (EFI_GUID));
 
   if (FwVolHeader.ExtHeaderOffset != 0) {
-    FwVolExHeaderInfo = (EFI_FIRMWARE_VOLUME_EXT_HEADER*)(((UINT8 *)VolumeHandle) + FwVolHeader.ExtHeaderOffset);
-    CopyMem (&VolumeInfo->FvName, &FwVolExHeaderInfo->FvName, sizeof(EFI_GUID));
+    FwVolExHeaderInfo = (EFI_FIRMWARE_VOLUME_EXT_HEADER *)(((UINT8 *)VolumeHandle) + FwVolHeader.ExtHeaderOffset);
+    CopyMem (&VolumeInfo->FvName, &FwVolExHeaderInfo->FvName, sizeof (EFI_GUID));
   }
+
   return EFI_SUCCESS;
 }
-
-
 
 /**
   Search through every FV until you find a file of type FileType
@@ -742,13 +837,13 @@ FfsGetVolumeInfo (
 EFI_STATUS
 EFIAPI
 FfsAnyFvFindFirstFile (
-  IN  EFI_FV_FILETYPE       FileType,
-  OUT EFI_PEI_FV_HANDLE     *VolumeHandle,
-  OUT EFI_PEI_FILE_HANDLE   *FileHandle
+  IN  EFI_FV_FILETYPE      FileType,
+  OUT EFI_PEI_FV_HANDLE    *VolumeHandle,
+  OUT EFI_PEI_FILE_HANDLE  *FileHandle
   )
 {
-  EFI_STATUS        Status;
-  UINTN             Instance;
+  EFI_STATUS  Status;
+  UINTN       Instance;
 
   //
   // Search every FV for the DXE Core
@@ -756,17 +851,14 @@ FfsAnyFvFindFirstFile (
   Instance    = 0;
   *FileHandle = NULL;
 
-  while (1)
-  {
+  while (1) {
     Status = FfsFindNextVolume (Instance++, VolumeHandle);
-    if (EFI_ERROR (Status))
-    {
+    if (EFI_ERROR (Status)) {
       break;
     }
 
     Status = FfsFindNextFile (FileType, *VolumeHandle, FileHandle);
-    if (!EFI_ERROR (Status))
-    {
+    if (!EFI_ERROR (Status)) {
       break;
     }
   }
@@ -774,13 +866,11 @@ FfsAnyFvFindFirstFile (
   return Status;
 }
 
-
-
 /**
   Get Fv image from the FV type file, then add FV & FV2 Hob.
 
-  @param FileHandle  File handle of a Fv type file.
-
+  @param FvFileHandle        File handle of a Fv type file.
+  @param ParentVolumeHandle  Parent volume handle, for filling out FvName field in FV2 Hob
 
   @retval EFI_NOT_FOUND  FV image can't be found.
   @retval EFI_SUCCESS    Successfully to process it.
@@ -789,38 +879,48 @@ FfsAnyFvFindFirstFile (
 EFI_STATUS
 EFIAPI
 FfsProcessFvFile (
-  IN  EFI_PEI_FILE_HANDLE   FvFileHandle
+  IN  EFI_PEI_FILE_HANDLE  FvFileHandle,
+  IN EFI_PEI_FV_HANDLE     ParentVolumeHandle
   )
 {
   EFI_STATUS            Status;
   EFI_PEI_FV_HANDLE     FvImageHandle;
   EFI_FV_INFO           FvImageInfo;
+  EFI_FV_INFO           ParentVolumeInfo;
   UINT32                FvAlignment;
   VOID                  *FvBuffer;
-  EFI_PEI_HOB_POINTERS  HobFv2;
+  EFI_PEI_HOB_POINTERS  Hob;
+  UINT32                AuthenticationStatus;
 
   FvBuffer             = NULL;
-
+  AuthenticationStatus = 0;
 
   //
   // Check if this EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE file has already
   // been extracted.
   //
-  HobFv2.Raw = GetHobList ();
-  while ((HobFv2.Raw = GetNextHob (EFI_HOB_TYPE_FV2, HobFv2.Raw)) != NULL) {
-    if (CompareGuid (&(((EFI_FFS_FILE_HEADER *)FvFileHandle)->Name), &HobFv2.FirmwareVolume2->FileName)) {
-      //
-      // this FILE has been dispatched, it will not be dispatched again.
-      //
-      return EFI_SUCCESS;
+  for (Hob.Raw = GetHobList (); !END_OF_HOB_LIST (Hob); Hob.Raw = GET_NEXT_HOB (Hob)) {
+    if (GET_HOB_TYPE (Hob) == EFI_HOB_TYPE_FV2) {
+      if (CompareGuid (&(((EFI_FFS_FILE_HEADER *)FvFileHandle)->Name), &Hob.FirmwareVolume2->FileName)) {
+        //
+        // this FILE has been dispatched, it will not be dispatched again.
+        //
+        return EFI_SUCCESS;
+      }
+    } else if ((GET_HOB_TYPE (Hob) == EFI_HOB_TYPE_FV3) && Hob.FirmwareVolume3->ExtractedFv) {
+      if (CompareGuid (&(((EFI_FFS_FILE_HEADER *)FvFileHandle)->Name), &Hob.FirmwareVolume3->FileName)) {
+        //
+        // this FILE has been dispatched, it will not be dispatched again.
+        //
+        return EFI_SUCCESS;
+      }
     }
-    HobFv2.Raw = GET_NEXT_HOB (HobFv2);
   }
 
   //
   // Find FvImage in FvFile
   //
-  Status = FfsFindSectionData (EFI_SECTION_FIRMWARE_VOLUME_IMAGE, FvFileHandle, (VOID **)&FvImageHandle);
+  Status = FfsFindSectionDataWithHook (EFI_SECTION_FIRMWARE_VOLUME_IMAGE, NULL, FvFileHandle, (VOID **)&FvImageHandle, &AuthenticationStatus);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -828,7 +928,6 @@ FfsProcessFvFile (
   //
   // Collect FvImage Info.
   //
-  ZeroMem (&FvImageInfo, sizeof (FvImageInfo));
   Status = FfsGetVolumeInfo (FvImageHandle, &FvImageInfo);
   ASSERT_EFI_ERROR (Status);
 
@@ -843,36 +942,46 @@ FfsProcessFvFile (
   //
   // Check FvImage
   //
-  if ((UINTN) FvImageInfo.FvStart % FvAlignment != 0) {
-    FvBuffer = AllocateAlignedPages (EFI_SIZE_TO_PAGES ((UINT32) FvImageInfo.FvSize), FvAlignment);
+  if ((UINTN)FvImageInfo.FvStart % FvAlignment != 0) {
+    FvBuffer = AllocateAlignedPages (EFI_SIZE_TO_PAGES ((UINT32)FvImageInfo.FvSize), FvAlignment);
     if (FvBuffer == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
-    CopyMem (FvBuffer, FvImageInfo.FvStart, (UINTN) FvImageInfo.FvSize);
+
+    CopyMem (FvBuffer, FvImageInfo.FvStart, (UINTN)FvImageInfo.FvSize);
     //
     // Update FvImageInfo after reload FvImage to new aligned memory
     //
-    FfsGetVolumeInfo ((EFI_PEI_FV_HANDLE) FvBuffer, &FvImageInfo);
+    FfsGetVolumeInfo ((EFI_PEI_FV_HANDLE)FvBuffer, &FvImageInfo);
   }
-
 
   //
   // Inform HOB consumer phase, i.e. DXE core, the existence of this FV
   //
-  BuildFvHob ((EFI_PHYSICAL_ADDRESS) (UINTN) FvImageInfo.FvStart, FvImageInfo.FvSize);
+  BuildFvHob ((EFI_PHYSICAL_ADDRESS)(UINTN)FvImageInfo.FvStart, FvImageInfo.FvSize);
+
+  Status = FfsGetVolumeInfo (ParentVolumeHandle, &ParentVolumeInfo);
+  ASSERT_EFI_ERROR (Status);
 
   //
   // Makes the encapsulated volume show up in DXE phase to skip processing of
   // encapsulated file again.
   //
   BuildFv2Hob (
-    (EFI_PHYSICAL_ADDRESS) (UINTN) FvImageInfo.FvStart,
+    (EFI_PHYSICAL_ADDRESS)(UINTN)FvImageInfo.FvStart,
     FvImageInfo.FvSize,
-    &FvImageInfo.FvName,
+    &ParentVolumeInfo.FvName,
+    &(((EFI_FFS_FILE_HEADER *)FvFileHandle)->Name)
+    );
+
+  BuildFv3Hob (
+    (EFI_PHYSICAL_ADDRESS)(UINTN)FvImageInfo.FvStart,
+    FvImageInfo.FvSize,
+    AuthenticationStatus,
+    TRUE,
+    &ParentVolumeInfo.FvName,
     &(((EFI_FFS_FILE_HEADER *)FvFileHandle)->Name)
     );
 
   return EFI_SUCCESS;
 }
-
-

@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PE_COFF_GET_ENTRY_POINT_LIB_H__
-#define __PE_COFF_GET_ENTRY_POINT_LIB_H__
+#pragma once
 
 /**
   Retrieves and returns a pointer to the entry point to a PE/COFF image that has been loaded
@@ -76,7 +75,6 @@ PeCoffLoaderGetPdbPointer (
   IN VOID  *Pe32Data
   );
 
-
 /**
   Returns the size of the PE/COFF headers
 
@@ -92,7 +90,7 @@ PeCoffLoaderGetPdbPointer (
 UINT32
 EFIAPI
 PeCoffGetSizeOfHeaders (
-  IN VOID     *Pe32Data
+  IN VOID  *Pe32Data
   );
 
 /**
@@ -110,7 +108,5 @@ PeCoffGetSizeOfHeaders (
 UINTN
 EFIAPI
 PeCoffSearchImageBase (
-  IN UINTN    Address
+  IN UINTN  Address
   );
-
-#endif

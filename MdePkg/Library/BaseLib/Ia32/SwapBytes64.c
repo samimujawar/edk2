@@ -6,9 +6,6 @@
 
 **/
 
-
-
-
 /**
   Switches the endianess of a 64-bit integer.
 
@@ -18,13 +15,13 @@
 
   @param  Operand A 64-bit unsigned value.
 
-  @return The byte swaped Operand.
+  @return The byte swapped Operand.
 
 **/
 UINT64
 EFIAPI
 InternalMathSwapBytes64 (
-  IN      UINT64                    Operand
+  IN      UINT64  Operand
   )
 {
   _asm {
@@ -34,4 +31,3 @@ InternalMathSwapBytes64 (
     bswap   edx
   }
 }
-

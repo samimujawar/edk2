@@ -15,9 +15,7 @@
 
 **/
 
-
-#ifndef _EFI_PEI_CORE_FV_LOCATION_H_
-#define _EFI_PEI_CORE_FV_LOCATION_H_
+#pragma once
 
 ///
 /// Global ID for EFI_PEI_CORE_FV_LOCATION_PPI
@@ -37,6 +35,4 @@ typedef struct {
   VOID    *PeiCoreFvLocation;
 } EFI_PEI_CORE_FV_LOCATION_PPI;
 
-extern EFI_GUID gEfiPeiCoreFvLocationPpiGuid;
-
-#endif // _EFI_PEI_CORE_FV_LOCATION_H_
+extern EFI_GUID  gEfiPeiCoreFvLocationPpiGuid;

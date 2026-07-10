@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef __TEMPORARY_RAM_DONE_H__
-#define __TEMPORARY_RAM_DONE_H__
+#pragma once
 
 #define EFI_PEI_TEMPORARY_RAM_DONE_PPI_GUID \
   { 0xceab683c, 0xec56, 0x4a2d, { 0xa9, 0x6, 0x40, 0x53, 0xfa, 0x4e, 0x9c, 0x16 } }
@@ -26,7 +25,7 @@
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_PEI_TEMPORARY_RAM_DONE) (
+(EFIAPI *EFI_PEI_TEMPORARY_RAM_DONE)(
   VOID
   );
 
@@ -38,9 +37,7 @@ EFI_STATUS
 /// Permanent RAM to be enabled and accessed at the same time with no side effects.
 ///
 typedef struct _EFI_PEI_TEMPORARY_RAM_DONE_PPI {
-  EFI_PEI_TEMPORARY_RAM_DONE TemporaryRamDone;
+  EFI_PEI_TEMPORARY_RAM_DONE    TemporaryRamDone;
 } EFI_PEI_TEMPORARY_RAM_DONE_PPI;
 
-extern EFI_GUID gEfiTemporaryRamDonePpiGuid;
-
-#endif
+extern EFI_GUID  gEfiTemporaryRamDonePpiGuid;

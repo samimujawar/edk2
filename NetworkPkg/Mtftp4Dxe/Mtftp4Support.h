@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_MTFTP4_SUPPORT_H__
-#define __EFI_MTFTP4_SUPPORT_H__
+#pragma once
 
 //
 // The structure representing a range of block numbers, [Start, End].
@@ -15,13 +14,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // the holes are filled in, then the download or upload has completed.
 //
 typedef struct {
-  LIST_ENTRY                Link;
-  INTN                      Start;
-  INTN                      End;
-  INTN                      Round;
-  INTN                      Bound;
+  LIST_ENTRY    Link;
+  INTN          Start;
+  INTN          End;
+  INTN          Round;
+  INTN          Bound;
 } MTFTP4_BLOCK_RANGE;
-
 
 /**
   Initialize the block range for either RRQ or WRQ.
@@ -46,9 +44,9 @@ typedef struct {
 **/
 EFI_STATUS
 Mtftp4InitBlockRange (
-  IN LIST_ENTRY             *Head,
-  IN UINT16                 Start,
-  IN UINT16                 End
+  IN LIST_ENTRY  *Head,
+  IN UINT16      Start,
+  IN UINT16      End
   );
 
 /**
@@ -61,7 +59,7 @@ Mtftp4InitBlockRange (
 **/
 INTN
 Mtftp4GetNextBlockNum (
-  IN LIST_ENTRY             *Head
+  IN LIST_ENTRY  *Head
   );
 
 /**
@@ -77,8 +75,8 @@ Mtftp4GetNextBlockNum (
 **/
 VOID
 Mtftp4SetLastBlockNum (
-  IN LIST_ENTRY             *Head,
-  IN UINT16                 Last
+  IN LIST_ENTRY  *Head,
+  IN UINT16      Last
   );
 
 /**
@@ -96,10 +94,10 @@ Mtftp4SetLastBlockNum (
 **/
 EFI_STATUS
 Mtftp4RemoveBlockNum (
-  IN LIST_ENTRY             *Head,
-  IN UINT16                 Num,
-  IN BOOLEAN                Completed,
-  OUT UINT64                *BlockCounter
+  IN LIST_ENTRY  *Head,
+  IN UINT16      Num,
+  IN BOOLEAN     Completed,
+  OUT UINT64     *BlockCounter
   );
 
 /**
@@ -110,7 +108,7 @@ Mtftp4RemoveBlockNum (
 **/
 VOID
 Mtftp4SetTimeout (
-  IN OUT MTFTP4_PROTOCOL        *Instance
+  IN OUT MTFTP4_PROTOCOL  *Instance
   );
 
 /**
@@ -129,8 +127,8 @@ Mtftp4SetTimeout (
 **/
 EFI_STATUS
 Mtftp4SendPacket (
-  IN OUT MTFTP4_PROTOCOL        *Instance,
-  IN OUT NET_BUF                *Packet
+  IN OUT MTFTP4_PROTOCOL  *Instance,
+  IN OUT NET_BUF          *Packet
   );
 
 /**
@@ -145,7 +143,7 @@ Mtftp4SendPacket (
 **/
 EFI_STATUS
 Mtftp4SendRequest (
-  IN MTFTP4_PROTOCOL        *Instance
+  IN MTFTP4_PROTOCOL  *Instance
   );
 
 /**
@@ -162,11 +160,10 @@ Mtftp4SendRequest (
 **/
 EFI_STATUS
 Mtftp4SendError (
-  IN MTFTP4_PROTOCOL        *Instance,
-  IN UINT16                 ErrCode,
-  IN UINT8                  *ErrInfo
+  IN MTFTP4_PROTOCOL  *Instance,
+  IN UINT16           ErrCode,
+  IN UINT8            *ErrInfo
   );
-
 
 /**
   The timer ticking function in TPL_NOTIFY level for the Mtftp service instance.
@@ -178,8 +175,8 @@ Mtftp4SendError (
 VOID
 EFIAPI
 Mtftp4OnTimerTickNotifyLevel (
-  IN EFI_EVENT              Event,
-  IN VOID                   *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
 
 /**
@@ -192,7 +189,6 @@ Mtftp4OnTimerTickNotifyLevel (
 VOID
 EFIAPI
 Mtftp4OnTimerTick (
-  IN EFI_EVENT              Event,
-  IN VOID                   *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
-#endif

@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_EDB_SUPPORT_H_
-#define _EFI_EDB_SUPPORT_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -17,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #define EFI_DEBUGGER_LINE_NUMBER_IN_PAGE  0x10
 
-#define EFI_DEBUG_MAX_PRINT_BUFFER   (80 * 4)
+#define EFI_DEBUG_MAX_PRINT_BUFFER  (80 * 4)
 
 /**
 
@@ -99,8 +98,8 @@ AsciiAtoi (
 INTN
 EFIAPI
 StrCmpUnicodeAndAscii (
-  IN CHAR16   *String,
-  IN CHAR8    *String2
+  IN CHAR16  *String,
+  IN CHAR8   *String2
   );
 
 /**
@@ -118,8 +117,8 @@ StrCmpUnicodeAndAscii (
 INTN
 EFIAPI
 StriCmp (
-  IN CHAR16   *String,
-  IN CHAR16   *String2
+  IN CHAR16  *String,
+  IN CHAR16  *String2
   );
 
 /**
@@ -137,8 +136,8 @@ StriCmp (
 INTN
 EFIAPI
 StriCmpUnicodeAndAscii (
-  IN CHAR16   *String,
-  IN CHAR8    *String2
+  IN CHAR16  *String,
+  IN CHAR8   *String2
   );
 
 /**
@@ -152,8 +151,8 @@ StriCmpUnicodeAndAscii (
 BOOLEAN
 EFIAPI
 StrEndWith (
-  IN CHAR16                       *Str,
-  IN CHAR16                       *SubStr
+  IN CHAR16  *Str,
+  IN CHAR16  *SubStr
   );
 
 /**
@@ -165,7 +164,7 @@ StrEndWith (
 CHAR16 *
 EFIAPI
 StrDuplicate (
-  IN CHAR16   *Src
+  IN CHAR16  *Src
   );
 
 /**
@@ -179,8 +178,8 @@ StrDuplicate (
 CHAR16 *
 EFIAPI
 StrGetNewTokenLine (
-  IN CHAR16                       *String,
-  IN CHAR16                       *CharSet
+  IN CHAR16  *String,
+  IN CHAR16  *CharSet
   );
 
 /**
@@ -193,7 +192,7 @@ StrGetNewTokenLine (
 CHAR16 *
 EFIAPI
 StrGetNextTokenLine (
-  IN CHAR16                       *CharSet
+  IN CHAR16  *CharSet
   );
 
 /**
@@ -207,8 +206,8 @@ StrGetNextTokenLine (
 CHAR16 *
 EFIAPI
 StrGetNewTokenField (
-  IN CHAR16                       *String,
-  IN CHAR16                       *CharSet
+  IN CHAR16  *String,
+  IN CHAR16  *CharSet
   );
 
 /**
@@ -221,7 +220,7 @@ StrGetNewTokenField (
 CHAR16 *
 EFIAPI
 StrGetNextTokenField (
-  IN CHAR16                       *CharSet
+  IN CHAR16  *CharSet
   );
 
 /**
@@ -235,8 +234,8 @@ StrGetNextTokenField (
 VOID
 EFIAPI
 PatchForStrTokenAfter (
-  IN CHAR16    *Buffer,
-  IN CHAR16    Patch
+  IN CHAR16  *Buffer,
+  IN CHAR16  Patch
   );
 
 /**
@@ -249,8 +248,8 @@ PatchForStrTokenAfter (
 VOID
 EFIAPI
 PatchForStrTokenBefore (
-  IN CHAR16    *Buffer,
-  IN CHAR16    Patch
+  IN CHAR16  *Buffer,
+  IN CHAR16  Patch
   );
 
 /**
@@ -264,8 +263,8 @@ PatchForStrTokenBefore (
 CHAR8 *
 EFIAPI
 AsciiStrGetNewTokenLine (
-  IN CHAR8                       *String,
-  IN CHAR8                       *CharSet
+  IN CHAR8  *String,
+  IN CHAR8  *CharSet
   );
 
 /**
@@ -278,7 +277,7 @@ AsciiStrGetNewTokenLine (
 CHAR8 *
 EFIAPI
 AsciiStrGetNextTokenLine (
-  IN CHAR8                       *CharSet
+  IN CHAR8  *CharSet
   );
 
 /**
@@ -292,8 +291,8 @@ AsciiStrGetNextTokenLine (
 CHAR8 *
 EFIAPI
 AsciiStrGetNewTokenField (
-  IN CHAR8                       *String,
-  IN CHAR8                       *CharSet
+  IN CHAR8  *String,
+  IN CHAR8  *CharSet
   );
 
 /**
@@ -306,7 +305,7 @@ AsciiStrGetNewTokenField (
 CHAR8 *
 EFIAPI
 AsciiStrGetNextTokenField (
-  IN CHAR8                       *CharSet
+  IN CHAR8  *CharSet
   );
 
 /**
@@ -320,8 +319,8 @@ AsciiStrGetNextTokenField (
 VOID
 EFIAPI
 PatchForAsciiStrTokenAfter (
-  IN CHAR8    *Buffer,
-  IN CHAR8    Patch
+  IN CHAR8  *Buffer,
+  IN CHAR8  Patch
   );
 
 /**
@@ -334,8 +333,8 @@ PatchForAsciiStrTokenAfter (
 VOID
 EFIAPI
 PatchForAsciiStrTokenBefore (
-  IN CHAR8    *Buffer,
-  IN CHAR8    Patch
+  IN CHAR8  *Buffer,
+  IN CHAR8  Patch
   );
 
 /**
@@ -351,9 +350,9 @@ PatchForAsciiStrTokenBefore (
 VOID
 EFIAPI
 Input (
-  IN CHAR16    *Prompt OPTIONAL,
-  OUT CHAR16   *InStr,
-  IN UINTN     StrLen
+  IN CHAR16   *Prompt OPTIONAL,
+  OUT CHAR16  *InStr,
+  IN UINTN    StrLen
   );
 
 /**
@@ -446,11 +445,11 @@ EDBSPrintWithOffset (
 EFI_STATUS
 EFIAPI
 ReadFileToBuffer (
-  IN  EFI_DEBUGGER_PRIVATE_DATA   *DebuggerPrivate,
-  IN  CHAR16                      *FileName,
-  OUT UINTN                       *BufferSize,
-  OUT VOID                        **Buffer,
-  IN  BOOLEAN                     ScanFs
+  IN  EFI_DEBUGGER_PRIVATE_DATA  *DebuggerPrivate,
+  IN  CHAR16                     *FileName,
+  OUT UINTN                      *BufferSize,
+  OUT VOID                       **Buffer,
+  IN  BOOLEAN                    ScanFs
   );
 
 /**
@@ -468,10 +467,8 @@ ReadFileToBuffer (
 CHAR16 *
 EFIAPI
 GetFileNameUnderDir (
-  IN  EFI_DEBUGGER_PRIVATE_DATA   *DebuggerPrivate,
-  IN  CHAR16                      *DirName,
-  IN  CHAR16                      *FileName,
-  IN OUT UINTN                    *Index
+  IN  EFI_DEBUGGER_PRIVATE_DATA  *DebuggerPrivate,
+  IN  CHAR16                     *DirName,
+  IN  CHAR16                     *FileName,
+  IN OUT UINTN                   *Index
   );
-
-#endif

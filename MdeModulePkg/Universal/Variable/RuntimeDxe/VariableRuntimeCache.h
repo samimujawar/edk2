@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _VARIABLE_RUNTIME_CACHE_H_
-#define _VARIABLE_RUNTIME_CACHE_H_
+#pragma once
 
 #include "Variable.h"
 
@@ -43,9 +42,7 @@ FlushPendingRuntimeVariableCacheUpdates (
 **/
 EFI_STATUS
 SynchronizeRuntimeVariableCache (
-  IN  VARIABLE_RUNTIME_CACHE          *VariableRuntimeCache,
-  IN  UINTN                           Offset,
-  IN  UINTN                           Length
+  IN  VARIABLE_RUNTIME_CACHE  *VariableRuntimeCache,
+  IN  UINTN                   Offset,
+  IN  UINTN                   Length
   );
-
-#endif

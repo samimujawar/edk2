@@ -2,18 +2,18 @@
   Produces Simple Text Input Protocol, Simple Text Input Extended Protocol and
   Simple Text Output Protocol upon Serial IO Protocol.
 
+Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.<BR>
 Copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
 
 #include "Terminal.h"
 
 //
 // Globals
 //
-EFI_DRIVER_BINDING_PROTOCOL gTerminalDriverBinding = {
+EFI_DRIVER_BINDING_PROTOCOL  gTerminalDriverBinding = {
   TerminalDriverBindingSupported,
   TerminalDriverBindingStart,
   TerminalDriverBindingStop,
@@ -21,7 +21,6 @@ EFI_DRIVER_BINDING_PROTOCOL gTerminalDriverBinding = {
   NULL,
   NULL
 };
-
 
 EFI_GUID  *mTerminalType[] = {
   &gEfiPcAnsiGuid,
@@ -35,8 +34,7 @@ EFI_GUID  *mTerminalType[] = {
   &gEdkiiSCOTermGuid
 };
 
-
-CHAR16 *mSerialConsoleNames[] = {
+CHAR16  *mSerialConsoleNames[] = {
   L"PC-ANSI Serial Console",
   L"VT-100 Serial Console",
   L"VT-100+ Serial Console",
@@ -71,16 +69,16 @@ TERMINAL_DEV  mTerminalDevTemplate = {
     TerminalConOutEnableCursor,
     NULL
   },
-  {   // SimpleTextOutputMode
-    1,                                           // MaxMode
-    0,                                           // Mode
-    EFI_TEXT_ATTR (EFI_LIGHTGRAY, EFI_BLACK),    // Attribute
-    0,                                           // CursorColumn
-    0,                                           // CursorRow
-    TRUE                                         // CursorVisible
+  {                                           // SimpleTextOutputMode
+    1,                                        // MaxMode
+    0,                                        // Mode
+    EFI_TEXT_ATTR (EFI_LIGHTGRAY, EFI_BLACK), // Attribute
+    0,                                        // CursorColumn
+    0,                                        // CursorRow
+    TRUE                                      // CursorVisible
   },
   NULL, // TerminalConsoleModeData
-  0,  // SerialInTimeOut
+  0,    // SerialInTimeOut
 
   NULL, // RawFifo
   NULL, // UnicodeFiFo
@@ -93,9 +91,9 @@ TERMINAL_DEV  mTerminalDevTemplate = {
   INPUT_STATE_DEFAULT,
   RESET_STATE_DEFAULT,
   {
-      0,
-      0,
-      0
+    0,
+    0,
+    0
   },
   0,
   FALSE,
@@ -114,10 +112,13 @@ TERMINAL_DEV  mTerminalDevTemplate = {
   NULL // KeyNotifyProcessEvent
 };
 
-TERMINAL_CONSOLE_MODE_DATA mTerminalConsoleModeData[] = {
-  {80,  25},
-  {80,  50},
-  {100, 31},
+TERMINAL_CONSOLE_MODE_DATA  mTerminalConsoleModeData[] = {
+  { 80,  25 },
+  { 80,  50 },
+  { 100, 31 },  //  800 x 600
+  { 128, 40 },  // 1024 x 768
+  { 160, 42 },  // 1280 x 800
+  { 240, 56 },  // 1920 x 1080
   //
   // New modes can be added here.
   //
@@ -132,16 +133,17 @@ TERMINAL_CONSOLE_MODE_DATA mTerminalConsoleModeData[] = {
 **/
 TERMINAL_TYPE
 TerminalTypeFromGuid (
-  IN EFI_GUID                     *Guid
-)
+  IN EFI_GUID  *Guid
+  )
 {
-  TERMINAL_TYPE                   Type;
+  TERMINAL_TYPE  Type;
 
   for (Type = 0; Type < ARRAY_SIZE (mTerminalType); Type++) {
     if (CompareGuid (Guid, mTerminalType[Type])) {
       break;
     }
   }
+
   return Type;
 }
 
@@ -161,9 +163,9 @@ TerminalTypeFromGuid (
 EFI_STATUS
 EFIAPI
 TerminalDriverBindingSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
   EFI_STATUS                Status;
@@ -185,15 +187,15 @@ TerminalDriverBindingSupported (
       // If RemainingDevicePath isn't the End of Device Path Node,
       // check its validation
       //
-      Node = (VENDOR_DEVICE_PATH *) RemainingDevicePath;
+      Node = (VENDOR_DEVICE_PATH *)RemainingDevicePath;
 
-      if (Node->Header.Type != MESSAGING_DEVICE_PATH ||
-          Node->Header.SubType != MSG_VENDOR_DP ||
-          DevicePathNodeLength(&Node->Header) != sizeof(VENDOR_DEVICE_PATH)) {
-
+      if ((Node->Header.Type != MESSAGING_DEVICE_PATH) ||
+          (Node->Header.SubType != MSG_VENDOR_DP) ||
+          (DevicePathNodeLength (&Node->Header) != sizeof (VENDOR_DEVICE_PATH)))
+      {
         return EFI_UNSUPPORTED;
-
       }
+
       //
       // only supports PC ANSI, VT100, VT100+, VT-UTF8, TtyTerm
       // Linux, XtermR6, VT400 and SCO terminal types
@@ -203,6 +205,7 @@ TerminalDriverBindingSupported (
       }
     }
   }
+
   //
   // Open the IO Abstraction(s) needed to perform the supported test
   // The Controller must support the Serial I/O Protocol.
@@ -212,7 +215,7 @@ TerminalDriverBindingSupported (
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiSerialIoProtocolGuid,
-                  (VOID **) &SerialIo,
+                  (VOID **)&SerialIo,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -229,11 +232,11 @@ TerminalDriverBindingSupported (
   // Close the I/O Abstraction(s) used to perform the supported test
   //
   gBS->CloseProtocol (
-        Controller,
-        &gEfiSerialIoProtocolGuid,
-        This->DriverBindingHandle,
-        Controller
-        );
+         Controller,
+         &gEfiSerialIoProtocolGuid,
+         This->DriverBindingHandle,
+         Controller
+         );
 
   //
   // Open the EFI Device Path protocol needed to perform the supported test
@@ -241,7 +244,7 @@ TerminalDriverBindingSupported (
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &ParentDevicePath,
+                  (VOID **)&ParentDevicePath,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -258,15 +261,14 @@ TerminalDriverBindingSupported (
   // Close protocol, don't use device path protocol in the Support() function
   //
   gBS->CloseProtocol (
-        Controller,
-        &gEfiDevicePathProtocolGuid,
-        This->DriverBindingHandle,
-        Controller
-        );
+         Controller,
+         &gEfiDevicePathProtocolGuid,
+         This->DriverBindingHandle,
+         Controller
+         );
 
   return Status;
 }
-
 
 /**
   Free notify functions list.
@@ -279,14 +281,15 @@ TerminalDriverBindingSupported (
 **/
 EFI_STATUS
 TerminalFreeNotifyList (
-  IN OUT LIST_ENTRY           *ListHead
+  IN OUT LIST_ENTRY  *ListHead
   )
 {
-  TERMINAL_CONSOLE_IN_EX_NOTIFY *NotifyNode;
+  TERMINAL_CONSOLE_IN_EX_NOTIFY  *NotifyNode;
 
   if (ListHead == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+
   while (!IsListEmpty (ListHead)) {
     NotifyNode = CR (
                    ListHead->ForwardLink,
@@ -314,8 +317,8 @@ TerminalFreeNotifyList (
 **/
 TERMINAL_CONSOLE_MODE_DATA *
 InitializeTerminalConsoleTextMode (
-  OUT INT32                         *TextModeCount
-)
+  OUT INT32  *TextModeCount
+  )
 {
   TERMINAL_CONSOLE_MODE_DATA  *TextModeData;
 
@@ -325,15 +328,23 @@ InitializeTerminalConsoleTextMode (
   if (TextModeData == NULL) {
     return NULL;
   }
+
   *TextModeCount = ARRAY_SIZE (mTerminalConsoleModeData);
 
-  DEBUG_CODE (
-    INT32 Index;
-    for (Index = 0; Index < *TextModeCount; Index++) {
-      DEBUG ((DEBUG_INFO, "Terminal - Mode %d, Column = %d, Row = %d\n",
-              Index, TextModeData[Index].Columns, TextModeData[Index].Rows));
-    }
-  );
+  DEBUG_CODE_BEGIN ();
+  INT32  Index;
+
+  for (Index = 0; Index < *TextModeCount; Index++) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Terminal - Mode %d, Column = %d, Row = %d\n",
+      Index,
+      TextModeData[Index].Columns,
+      TextModeData[Index].Rows
+      ));
+  }
+
+  DEBUG_CODE_END ();
   return TextModeData;
 }
 
@@ -344,10 +355,10 @@ InitializeTerminalConsoleTextMode (
 **/
 VOID
 StopTerminalStateMachine (
-  TERMINAL_DEV             *TerminalDevice
+  TERMINAL_DEV  *TerminalDevice
   )
 {
-  EFI_TPL                  OriginalTpl;
+  EFI_TPL  OriginalTpl;
 
   OriginalTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
@@ -364,10 +375,11 @@ StopTerminalStateMachine (
 **/
 VOID
 StartTerminalStateMachine (
-  TERMINAL_DEV             *TerminalDevice
+  TERMINAL_DEV  *TerminalDevice
   )
 {
-  EFI_STATUS               Status;
+  EFI_STATUS  Status;
+
   Status = gBS->CreateEvent (
                   EVT_TIMER | EVT_NOTIFY_SIGNAL,
                   TPL_NOTIFY,
@@ -407,13 +419,13 @@ EFI_STATUS
 InitializeControllerNameTable (
   TERMINAL_TYPE             TerminalType,
   EFI_UNICODE_STRING_TABLE  **ControllerNameTable
-)
+  )
 {
   EFI_STATUS                Status;
   EFI_UNICODE_STRING_TABLE  *Table;
 
   ASSERT (TerminalType < ARRAY_SIZE (mTerminalType));
-  Table = NULL;
+  Table  = NULL;
   Status = AddUnicodeString2 (
              "eng",
              gTerminalComponentName.SupportedLanguages,
@@ -433,9 +445,11 @@ InitializeControllerNameTable (
       FreeUnicodeStringTable (Table);
     }
   }
+
   if (!EFI_ERROR (Status)) {
     *ControllerNameTable = Table;
   }
+
   return Status;
 }
 
@@ -458,26 +472,26 @@ InitializeControllerNameTable (
 EFI_STATUS
 EFIAPI
 TerminalDriverBindingStart (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
-  EFI_STATUS                          Status;
-  EFI_SERIAL_IO_PROTOCOL              *SerialIo;
-  EFI_DEVICE_PATH_PROTOCOL            *ParentDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL            *Vendor;
-  EFI_HANDLE                          SerialIoHandle;
-  EFI_SERIAL_IO_MODE                  *Mode;
-  UINTN                               SerialInTimeOut;
-  TERMINAL_DEV                        *TerminalDevice;
-  UINT8                               TerminalType;
-  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *OpenInfoBuffer;
-  UINTN                               EntryCount;
-  UINTN                               Index;
-  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL     *SimpleTextOutput;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL      *SimpleTextInput;
-  EFI_UNICODE_STRING_TABLE            *ControllerNameTable;
+  EFI_STATUS                           Status;
+  EFI_SERIAL_IO_PROTOCOL               *SerialIo;
+  EFI_DEVICE_PATH_PROTOCOL             *ParentDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL             *Vendor;
+  EFI_HANDLE                           SerialIoHandle;
+  EFI_SERIAL_IO_MODE                   *Mode;
+  UINTN                                SerialInTimeOut;
+  TERMINAL_DEV                         *TerminalDevice;
+  UINT8                                TerminalType;
+  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY  *OpenInfoBuffer;
+  UINTN                                EntryCount;
+  UINTN                                Index;
+  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL      *SimpleTextOutput;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL       *SimpleTextInput;
+  EFI_UNICODE_STRING_TABLE             *ControllerNameTable;
 
   //
   // Get the Device Path Protocol to build the device path of the child device
@@ -485,7 +499,7 @@ TerminalDriverBindingStart (
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &ParentDevicePath,
+                  (VOID **)&ParentDevicePath,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -501,7 +515,7 @@ TerminalDriverBindingStart (
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiSerialIoProtocolGuid,
-                  (VOID **) &SerialIo,
+                  (VOID **)&SerialIo,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -529,7 +543,6 @@ TerminalDriverBindingStart (
   }
 
   if (Status == EFI_ALREADY_STARTED) {
-
     if (RemainingDevicePath == NULL) {
       //
       // If RemainingDevicePath is NULL or is the End of Device Path Node
@@ -554,14 +567,14 @@ TerminalDriverBindingStart (
           Status = gBS->OpenProtocol (
                           OpenInfoBuffer[Index].ControllerHandle,
                           &gEfiSimpleTextInProtocolGuid,
-                          (VOID **) &SimpleTextInput,
+                          (VOID **)&SimpleTextInput,
                           This->DriverBindingHandle,
                           Controller,
                           EFI_OPEN_PROTOCOL_GET_PROTOCOL
                           );
           if (!EFI_ERROR (Status)) {
             TerminalDevice = TERMINAL_CON_IN_DEV_FROM_THIS (SimpleTextInput);
-            TerminalType = TerminalTypeFromGuid (&((VENDOR_DEVICE_PATH *) RemainingDevicePath)->Guid);
+            TerminalType   = TerminalTypeFromGuid (&((VENDOR_DEVICE_PATH *)RemainingDevicePath)->Guid);
             ASSERT (TerminalType < ARRAY_SIZE (mTerminalType));
             if (TerminalDevice->TerminalType != TerminalType) {
               Status = InitializeControllerNameTable (TerminalType, &ControllerNameTable);
@@ -573,7 +586,7 @@ TerminalDriverBindingStart (
                 Vendor = TerminalDevice->DevicePath;
                 Status = gBS->LocateDevicePath (&gEfiSerialIoProtocolGuid, &Vendor, &SerialIoHandle);
                 ASSERT_EFI_ERROR (Status);
-                CopyGuid (&((VENDOR_DEVICE_PATH *) Vendor)->Guid, mTerminalType[TerminalType]);
+                CopyGuid (&((VENDOR_DEVICE_PATH *)Vendor)->Guid, mTerminalType[TerminalType]);
                 Status = gBS->ReinstallProtocolInterface (
                                 TerminalDevice->Handle,
                                 &gEfiDevicePathProtocolGuid,
@@ -589,17 +602,20 @@ TerminalDriverBindingStart (
                   //
                   // Restore the device path on failure
                   //
-                  CopyGuid (&((VENDOR_DEVICE_PATH *) Vendor)->Guid, mTerminalType[TerminalDevice->TerminalType]);
+                  CopyGuid (&((VENDOR_DEVICE_PATH *)Vendor)->Guid, mTerminalType[TerminalDevice->TerminalType]);
                   FreeUnicodeStringTable (ControllerNameTable);
                 }
               }
             }
           }
+
           break;
         }
       }
+
       FreePool (OpenInfoBuffer);
     }
+
     return Status;
   }
 
@@ -626,8 +642,9 @@ TerminalDriverBindingStart (
     // If RemainingDevicePath isn't the End of Device Path Node,
     // Use the RemainingDevicePath to determine the terminal type
     //
-    TerminalDevice->TerminalType = TerminalTypeFromGuid (&((VENDOR_DEVICE_PATH *) RemainingDevicePath)->Guid);
+    TerminalDevice->TerminalType = TerminalTypeFromGuid (&((VENDOR_DEVICE_PATH *)RemainingDevicePath)->Guid);
   }
+
   ASSERT (TerminalDevice->TerminalType < ARRAY_SIZE (mTerminalType));
   TerminalDevice->SerialIo = SerialIo;
 
@@ -682,14 +699,17 @@ TerminalDriverBindingStart (
   if (TerminalDevice->RawFiFo == NULL) {
     goto FreeResources;
   }
+
   TerminalDevice->UnicodeFiFo = AllocateZeroPool (sizeof (UNICODE_FIFO));
   if (TerminalDevice->UnicodeFiFo == NULL) {
     goto FreeResources;
   }
+
   TerminalDevice->EfiKeyFiFo = AllocateZeroPool (sizeof (EFI_KEY_FIFO));
   if (TerminalDevice->EfiKeyFiFo == NULL) {
     goto FreeResources;
   }
+
   TerminalDevice->EfiKeyFiFoForNotify = AllocateZeroPool (sizeof (EFI_KEY_FIFO));
   if (TerminalDevice->EfiKeyFiFoForNotify == NULL) {
     goto FreeResources;
@@ -702,17 +722,17 @@ TerminalDriverBindingStart (
 
   SerialInTimeOut = 0;
   if (Mode->BaudRate != 0) {
-    SerialInTimeOut = (1 + Mode->DataBits + Mode->StopBits) * 2 * 1000000 / (UINTN) Mode->BaudRate;
+    SerialInTimeOut = (1 + Mode->DataBits + Mode->StopBits) * 2 * 1000000 / (UINTN)Mode->BaudRate;
   }
 
   Status = TerminalDevice->SerialIo->SetAttributes (
                                        TerminalDevice->SerialIo,
                                        Mode->BaudRate,
                                        Mode->ReceiveFifoDepth,
-                                       (UINT32) SerialInTimeOut,
-                                       (EFI_PARITY_TYPE) (Mode->Parity),
-                                       (UINT8) Mode->DataBits,
-                                       (EFI_STOP_BITS_TYPE) (Mode->StopBits)
+                                       (UINT32)SerialInTimeOut,
+                                       (EFI_PARITY_TYPE)(Mode->Parity),
+                                       (UINT8)Mode->DataBits,
+                                       (EFI_STOP_BITS_TYPE)(Mode->StopBits)
                                        );
   if (EFI_ERROR (Status)) {
     //
@@ -728,26 +748,28 @@ TerminalDriverBindingStart (
   }
 
   SimpleTextOutput = &TerminalDevice->SimpleTextOutput;
-  SimpleTextInput = &TerminalDevice->SimpleInput;
+  SimpleTextInput  = &TerminalDevice->SimpleInput;
 
   //
   // Initialize SimpleTextOut instance
   //
-  SimpleTextOutput->Mode = &TerminalDevice->SimpleTextOutputMode;
+  SimpleTextOutput->Mode                  = &TerminalDevice->SimpleTextOutputMode;
   TerminalDevice->TerminalConsoleModeData = InitializeTerminalConsoleTextMode (
-    &SimpleTextOutput->Mode->MaxMode
-  );
+                                              &SimpleTextOutput->Mode->MaxMode
+                                              );
   if (TerminalDevice->TerminalConsoleModeData == NULL) {
     goto FreeResources;
   }
+
   //
   // For terminal devices, cursor is always visible
   //
   SimpleTextOutput->Mode->CursorVisible = TRUE;
-  Status = SimpleTextOutput->SetAttribute (SimpleTextOutput, EFI_TEXT_ATTR (EFI_LIGHTGRAY, EFI_BLACK));
+  Status                                = SimpleTextOutput->SetAttribute (SimpleTextOutput, EFI_TEXT_ATTR (EFI_LIGHTGRAY, EFI_BLACK));
   if (!EFI_ERROR (Status)) {
     Status = SimpleTextOutput->Reset (SimpleTextOutput, FALSE);
   }
+
   if (EFI_ERROR (Status)) {
     goto ReportError;
   }
@@ -762,17 +784,21 @@ TerminalDriverBindingStart (
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &TerminalDevice->Handle,
-                  &gEfiSimpleTextInProtocolGuid,      &TerminalDevice->SimpleInput,
-                  &gEfiSimpleTextInputExProtocolGuid, &TerminalDevice->SimpleInputEx,
-                  &gEfiSimpleTextOutProtocolGuid,     &TerminalDevice->SimpleTextOutput,
-                  &gEfiDevicePathProtocolGuid,        TerminalDevice->DevicePath,
+                  &gEfiSimpleTextInProtocolGuid,
+                  &TerminalDevice->SimpleInput,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  &TerminalDevice->SimpleInputEx,
+                  &gEfiSimpleTextOutProtocolGuid,
+                  &TerminalDevice->SimpleTextOutput,
+                  &gEfiDevicePathProtocolGuid,
+                  TerminalDevice->DevicePath,
                   NULL
                   );
   if (!EFI_ERROR (Status)) {
     Status = gBS->OpenProtocol (
                     Controller,
                     &gEfiSerialIoProtocolGuid,
-                    (VOID **) &TerminalDevice->SerialIo,
+                    (VOID **)&TerminalDevice->SerialIo,
                     This->DriverBindingHandle,
                     TerminalDevice->Handle,
                     EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER
@@ -795,9 +821,11 @@ FreeResources:
   if (TerminalDevice->SimpleInput.WaitForKey != NULL) {
     gBS->CloseEvent (TerminalDevice->SimpleInput.WaitForKey);
   }
+
   if (TerminalDevice->SimpleInputEx.WaitForKeyEx != NULL) {
     gBS->CloseEvent (TerminalDevice->SimpleInputEx.WaitForKeyEx);
   }
+
   if (TerminalDevice->KeyNotifyProcessEvent != NULL) {
     gBS->CloseEvent (TerminalDevice->KeyNotifyProcessEvent);
   }
@@ -805,12 +833,15 @@ FreeResources:
   if (TerminalDevice->RawFiFo != NULL) {
     FreePool (TerminalDevice->RawFiFo);
   }
+
   if (TerminalDevice->UnicodeFiFo != NULL) {
     FreePool (TerminalDevice->UnicodeFiFo);
   }
+
   if (TerminalDevice->EfiKeyFiFo != NULL) {
     FreePool (TerminalDevice->EfiKeyFiFo);
   }
+
   if (TerminalDevice->EfiKeyFiFoForNotify != NULL) {
     FreePool (TerminalDevice->EfiKeyFiFoForNotify);
   }
@@ -875,10 +906,10 @@ CloseProtocols:
 EFI_STATUS
 EFIAPI
 TerminalDriverBindingStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    Controller,
-  IN  UINTN                         NumberOfChildren,
-  IN  EFI_HANDLE                    *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   Controller,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   )
 {
   EFI_STATUS                       Status;
@@ -900,7 +931,7 @@ TerminalDriverBindingStop (
     Status = gBS->OpenProtocol (
                     Controller,
                     &gEfiDevicePathProtocolGuid,
-                    (VOID **) &ParentDevicePath,
+                    (VOID **)&ParentDevicePath,
                     This->DriverBindingHandle,
                     Controller,
                     EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -916,18 +947,18 @@ TerminalDriverBindingStop (
     TerminalRemoveConsoleDevVariable (EFI_ERR_OUT_DEV_VARIABLE_NAME, ParentDevicePath);
 
     gBS->CloseProtocol (
-          Controller,
-          &gEfiSerialIoProtocolGuid,
-          This->DriverBindingHandle,
-          Controller
-          );
+           Controller,
+           &gEfiSerialIoProtocolGuid,
+           This->DriverBindingHandle,
+           Controller
+           );
 
     gBS->CloseProtocol (
-          Controller,
-          &gEfiDevicePathProtocolGuid,
-          This->DriverBindingHandle,
-          Controller
-          );
+           Controller,
+           &gEfiDevicePathProtocolGuid,
+           This->DriverBindingHandle,
+           Controller
+           );
 
     return EFI_SUCCESS;
   }
@@ -935,25 +966,23 @@ TerminalDriverBindingStop (
   AllChildrenStopped = TRUE;
 
   for (Index = 0; Index < NumberOfChildren; Index++) {
-
     Status = gBS->OpenProtocol (
                     ChildHandleBuffer[Index],
                     &gEfiSimpleTextOutProtocolGuid,
-                    (VOID **) &SimpleTextOutput,
+                    (VOID **)&SimpleTextOutput,
                     This->DriverBindingHandle,
                     ChildHandleBuffer[Index],
                     EFI_OPEN_PROTOCOL_GET_PROTOCOL
                     );
     if (!EFI_ERROR (Status)) {
-
       TerminalDevice = TERMINAL_CON_OUT_DEV_FROM_THIS (SimpleTextOutput);
 
       gBS->CloseProtocol (
-            Controller,
-            &gEfiSerialIoProtocolGuid,
-            This->DriverBindingHandle,
-            ChildHandleBuffer[Index]
-            );
+             Controller,
+             &gEfiSerialIoProtocolGuid,
+             This->DriverBindingHandle,
+             ChildHandleBuffer[Index]
+             );
 
       Status = gBS->UninstallMultipleProtocolInterfaces (
                       ChildHandleBuffer[Index],
@@ -969,15 +998,14 @@ TerminalDriverBindingStop (
                       );
       if (EFI_ERROR (Status)) {
         gBS->OpenProtocol (
-              Controller,
-              &gEfiSerialIoProtocolGuid,
-              (VOID **) &SerialIo,
-              This->DriverBindingHandle,
-              ChildHandleBuffer[Index],
-              EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER
-              );
+               Controller,
+               &gEfiSerialIoProtocolGuid,
+               (VOID **)&SerialIo,
+               This->DriverBindingHandle,
+               ChildHandleBuffer[Index],
+               EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER
+               );
       } else {
-
         FreeUnicodeStringTable (TerminalDevice->ControllerNameTable);
         StopTerminalStateMachine (TerminalDevice);
         gBS->CloseEvent (TerminalDevice->SimpleInput.WaitForKey);
@@ -1023,8 +1051,8 @@ MatchDevicePaths (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathInst;
   UINTN                     Size;
 
-  DevicePath      = Multi;
-  DevicePathInst  = GetNextDevicePathInstance (&DevicePath, &Size);
+  DevicePath     = Multi;
+  DevicePathInst = GetNextDevicePathInstance (&DevicePath, &Size);
   //
   // Search for the match of 'Single' in 'Multi'
   //
@@ -1058,23 +1086,24 @@ TerminalUpdateConsoleDevVariable (
   IN EFI_DEVICE_PATH_PROTOCOL  *ParentDevicePath
   )
 {
-  EFI_STATUS                Status;
-  UINTN                     NameSize;
-  UINTN                     VariableSize;
-  TERMINAL_TYPE             TerminalType;
-  EFI_DEVICE_PATH_PROTOCOL  *Variable;
-  EFI_DEVICE_PATH_PROTOCOL  *NewVariable;
-  EFI_DEVICE_PATH_PROTOCOL  *TempDevicePath;
-  EDKII_SET_VARIABLE_STATUS *SetVariableStatus;
+  EFI_STATUS                 Status;
+  UINTN                      NameSize;
+  UINTN                      VariableSize;
+  TERMINAL_TYPE              TerminalType;
+  EFI_DEVICE_PATH_PROTOCOL   *Variable;
+  EFI_DEVICE_PATH_PROTOCOL   *NewVariable;
+  EFI_DEVICE_PATH_PROTOCOL   *TempDevicePath;
+  EDKII_SET_VARIABLE_STATUS  *SetVariableStatus;
 
   //
   // Get global variable and its size according to the name given.
   //
-  Status = GetEfiGlobalVariable2 (VariableName, (VOID**)&Variable, NULL);
+  Status = GetEfiGlobalVariable2 (VariableName, (VOID **)&Variable, NULL);
   if (Status == EFI_NOT_FOUND) {
     Status   = EFI_SUCCESS;
     Variable = NULL;
   }
+
   if (EFI_ERROR (Status)) {
     return;
   }
@@ -1092,13 +1121,13 @@ TerminalUpdateConsoleDevVariable (
           if (Variable != NULL) {
             FreePool (Variable);
           }
+
           Variable = NewVariable;
         }
       }
 
       FreePool (TempDevicePath);
     }
-
   }
 
   VariableSize = GetDevicePathSize (Variable);
@@ -1112,7 +1141,7 @@ TerminalUpdateConsoleDevVariable (
                   );
 
   if (EFI_ERROR (Status)) {
-    NameSize = StrSize (VariableName);
+    NameSize          = StrSize (VariableName);
     SetVariableStatus = AllocatePool (sizeof (EDKII_SET_VARIABLE_STATUS) + NameSize + VariableSize);
     if (SetVariableStatus != NULL) {
       CopyGuid (&SetVariableStatus->Guid, &gEfiGlobalVariableGuid);
@@ -1120,8 +1149,8 @@ TerminalUpdateConsoleDevVariable (
       SetVariableStatus->DataSize   = VariableSize;
       SetVariableStatus->SetStatus  = Status;
       SetVariableStatus->Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-      CopyMem (SetVariableStatus + 1,                          VariableName, NameSize);
-      CopyMem (((UINT8 *) (SetVariableStatus + 1)) + NameSize, Variable,     VariableSize);
+      CopyMem (SetVariableStatus + 1, VariableName, NameSize);
+      CopyMem (((UINT8 *)(SetVariableStatus + 1)) + NameSize, Variable, VariableSize);
 
       REPORT_STATUS_CODE_EX (
         EFI_ERROR_CODE,
@@ -1139,9 +1168,8 @@ TerminalUpdateConsoleDevVariable (
 
   FreePool (Variable);
 
-  return ;
+  return;
 }
-
 
 /**
   Remove terminal device path from Console Device Environment Variables.
@@ -1169,19 +1197,19 @@ TerminalRemoveConsoleDevVariable (
   EFI_DEVICE_PATH_PROTOCOL  *SavedNewVariable;
   EFI_DEVICE_PATH_PROTOCOL  *TempDevicePath;
 
-  Instance  = NULL;
+  Instance = NULL;
 
   //
   // Get global variable and its size according to the name given.
   //
-  GetEfiGlobalVariable2 (VariableName, (VOID**)&Variable, NULL);
+  GetEfiGlobalVariable2 (VariableName, (VOID **)&Variable, NULL);
   if (Variable == NULL) {
-    return ;
+    return;
   }
 
-  FoundOne          = FALSE;
-  OriginalVariable  = Variable;
-  NewVariable       = NULL;
+  FoundOne         = FALSE;
+  OriginalVariable = Variable;
+  NewVariable      = NULL;
 
   //
   // Get first device path instance from Variable
@@ -1189,8 +1217,9 @@ TerminalRemoveConsoleDevVariable (
   Instance = GetNextDevicePathInstance (&Variable, &InstanceSize);
   if (Instance == NULL) {
     FreePool (OriginalVariable);
-    return ;
+    return;
   }
+
   //
   // Loop through all the device path instances of Variable
   //
@@ -1200,7 +1229,6 @@ TerminalRemoveConsoleDevVariable (
     //
     Match = FALSE;
     for (TerminalType = 0; TerminalType < ARRAY_SIZE (mTerminalType); TerminalType++) {
-
       SetTerminalDevicePath (TerminalType, ParentDevicePath, &TempDevicePath);
 
       //
@@ -1208,23 +1236,25 @@ TerminalRemoveConsoleDevVariable (
       //
       if (TempDevicePath != NULL) {
         if (CompareMem (Instance, TempDevicePath, InstanceSize) == 0) {
-          Match     = TRUE;
-          FoundOne  = TRUE;
+          Match    = TRUE;
+          FoundOne = TRUE;
         }
 
         FreePool (TempDevicePath);
       }
     }
+
     //
     // If a match was not found, then keep the current device path instance
     //
     if (!Match) {
-      SavedNewVariable  = NewVariable;
-      NewVariable       = AppendDevicePathInstance (NewVariable, Instance);
+      SavedNewVariable = NewVariable;
+      NewVariable      = AppendDevicePathInstance (NewVariable, Instance);
       if (SavedNewVariable != NULL) {
         FreePool (SavedNewVariable);
       }
     }
+
     //
     // Get next device path instance from Variable
     //
@@ -1235,26 +1265,28 @@ TerminalRemoveConsoleDevVariable (
   FreePool (OriginalVariable);
 
   if (FoundOne) {
-    VariableSize = GetDevicePathSize (NewVariable);
+    if (NewVariable != NULL) {
+      VariableSize = GetDevicePathSize (NewVariable);
 
-    Status = gRT->SetVariable (
-                    VariableName,
-                    &gEfiGlobalVariableGuid,
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-                    VariableSize,
-                    NewVariable
-                    );
-    //
-    // Shrinking variable with existing variable driver implementation shouldn't fail.
-    //
-    ASSERT_EFI_ERROR (Status);
+      Status = gRT->SetVariable (
+                      VariableName,
+                      &gEfiGlobalVariableGuid,
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                      VariableSize,
+                      NewVariable
+                      );
+      //
+      // Shrinking variable with existing variable driver implementation shouldn't fail.
+      //
+      ASSERT_EFI_ERROR (Status);
+    }
   }
 
   if (NewVariable != NULL) {
     FreePool (NewVariable);
   }
 
-  return ;
+  return;
 }
 
 /**
@@ -1271,9 +1303,9 @@ TerminalRemoveConsoleDevVariable (
 **/
 EFI_STATUS
 SetTerminalDevicePath (
-  IN  TERMINAL_TYPE               TerminalType,
-  IN  EFI_DEVICE_PATH_PROTOCOL    *ParentDevicePath,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **TerminalDevicePath
+  IN  TERMINAL_TYPE             TerminalType,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *ParentDevicePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **TerminalDevicePath
   )
 {
   VENDOR_DEVICE_PATH  Node;
@@ -1290,7 +1322,7 @@ SetTerminalDevicePath (
   //
   *TerminalDevicePath = AppendDevicePathNode (
                           ParentDevicePath,
-                          (EFI_DEVICE_PATH_PROTOCOL *) &Node
+                          (EFI_DEVICE_PATH_PROTOCOL *)&Node
                           );
   if (*TerminalDevicePath == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -1311,12 +1343,12 @@ SetTerminalDevicePath (
 **/
 EFI_STATUS
 EFIAPI
-InitializeTerminal(
-  IN EFI_HANDLE           ImageHandle,
-  IN EFI_SYSTEM_TABLE     *SystemTable
+InitializeTerminal (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS              Status;
+  EFI_STATUS  Status;
 
   //
   // Install driver model protocol(s).
@@ -1348,10 +1380,10 @@ InitializeTerminal(
 **/
 BOOLEAN
 IsHotPlugDevice (
-  IN  EFI_DEVICE_PATH_PROTOCOL    *DevicePath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_DEVICE_PATH_PROTOCOL     *CheckDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *CheckDevicePath;
 
   CheckDevicePath = DevicePath;
   while (!IsDevicePathEnd (CheckDevicePath)) {
@@ -1359,16 +1391,19 @@ IsHotPlugDevice (
     // Check device whether is hot plug device or not throught Device Path
     //
     if ((DevicePathType (CheckDevicePath) == MESSAGING_DEVICE_PATH) &&
-        (DevicePathSubType (CheckDevicePath) == MSG_USB_DP ||
-         DevicePathSubType (CheckDevicePath) == MSG_USB_CLASS_DP ||
-         DevicePathSubType (CheckDevicePath) == MSG_USB_WWID_DP)) {
+        ((DevicePathSubType (CheckDevicePath) == MSG_USB_DP) ||
+         (DevicePathSubType (CheckDevicePath) == MSG_USB_CLASS_DP) ||
+         (DevicePathSubType (CheckDevicePath) == MSG_USB_WWID_DP)))
+    {
       //
       // If Device is USB device
       //
       return TRUE;
     }
+
     if ((DevicePathType (CheckDevicePath) == HARDWARE_DEVICE_PATH) &&
-        (DevicePathSubType (CheckDevicePath) == HW_PCCARD_DP)) {
+        (DevicePathSubType (CheckDevicePath) == HW_PCCARD_DP))
+    {
       //
       // If Device is PCCard
       //
@@ -1380,4 +1415,3 @@ IsHotPlugDevice (
 
   return FALSE;
 }
-

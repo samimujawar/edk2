@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _UEFI_SHELL_LEVEL3_COMMANDS_LIB_H_
-#define _UEFI_SHELL_LEVEL3_COMMANDS_LIB_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -32,7 +31,7 @@
 #include <Library/HiiLib.h>
 #include <Library/FileHandleLib.h>
 
-extern EFI_HII_HANDLE gShellLevel3HiiHandle;
+extern EFI_HII_HANDLE  gShellLevel3HiiHandle;
 
 /**
   Function for 'type' command.
@@ -150,6 +149,3 @@ ShellCommandRunHelp (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
-#endif
-

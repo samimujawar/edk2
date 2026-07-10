@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __NV_VARS_FILE_LIB__
-#define __NV_VARS_FILE_LIB__
+#pragma once
 
 /**
   Attempts to connect the NvVarsFileLib to the specified file system.
@@ -22,9 +21,8 @@
 EFI_STATUS
 EFIAPI
 ConnectNvVarsToFileSystem (
-  IN EFI_HANDLE    FsHandle
+  IN EFI_HANDLE  FsHandle
   );
-
 
 /**
   Update non-volatile variables stored on the file system.
@@ -39,7 +37,3 @@ EFI_STATUS
 EFIAPI
 UpdateNvVarsOnFileSystem (
   );
-
-
-#endif
-

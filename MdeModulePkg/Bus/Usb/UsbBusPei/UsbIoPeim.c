@@ -33,29 +33,30 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 PeiUsbControlTransfer (
-  IN     EFI_PEI_SERVICES          **PeiServices,
-  IN     PEI_USB_IO_PPI            *This,
-  IN     EFI_USB_DEVICE_REQUEST    *Request,
-  IN     EFI_USB_DATA_DIRECTION    Direction,
-  IN     UINT32                    Timeout,
-  IN OUT VOID                      *Data,      OPTIONAL
-  IN     UINTN                     DataLength  OPTIONAL
+  IN     EFI_PEI_SERVICES        **PeiServices,
+  IN     PEI_USB_IO_PPI          *This,
+  IN     EFI_USB_DEVICE_REQUEST  *Request,
+  IN     EFI_USB_DATA_DIRECTION  Direction,
+  IN     UINT32                  Timeout,
+  IN OUT VOID                    *Data       OPTIONAL,
+  IN     UINTN                   DataLength  OPTIONAL
   )
 {
-  EFI_STATUS                  Status;
-  PEI_USB_DEVICE              *PeiUsbDev;
-  UINT32                      TransferResult;
-  EFI_USB_ENDPOINT_DESCRIPTOR *EndpointDescriptor;
-  UINT8                       EndpointIndex;
+  EFI_STATUS                   Status;
+  PEI_USB_DEVICE               *PeiUsbDev;
+  UINT32                       TransferResult;
+  EFI_USB_ENDPOINT_DESCRIPTOR  *EndpointDescriptor;
+  UINT8                        EndpointIndex;
 
   PeiUsbDev = PEI_USB_DEVICE_FROM_THIS (This);
 
   EndpointDescriptor = NULL;
-  EndpointIndex = 0;
+  EndpointIndex      = 0;
 
   if ((Request->Request     == USB_REQ_CLEAR_FEATURE) &&
       (Request->RequestType == USB_DEV_CLEAR_FEATURE_REQ_TYPE_E) &&
-      (Request->Value       == USB_FEATURE_ENDPOINT_HALT)) {
+      (Request->Value       == USB_FEATURE_ENDPOINT_HALT))
+  {
     //
     // Request->Index is the Endpoint Address, use it to get the Endpoint Index.
     //
@@ -77,49 +78,34 @@ PeiUsbControlTransfer (
     }
   }
 
-  if (PeiUsbDev->Usb2HcPpi != NULL) {
-    Status = PeiUsbDev->Usb2HcPpi->ControlTransfer (
-                        PeiServices,
-                        PeiUsbDev->Usb2HcPpi,
-                        PeiUsbDev->DeviceAddress,
-                        PeiUsbDev->DeviceSpeed,
-                        PeiUsbDev->MaxPacketSize0,
-                        Request,
-                        Direction,
-                        Data,
-                        &DataLength,
-                        Timeout,
-                        &(PeiUsbDev->Translator),
-                        &TransferResult
-                        );
-  } else {
-    Status = PeiUsbDev->UsbHcPpi->ControlTransfer (
-                        PeiServices,
-                        PeiUsbDev->UsbHcPpi,
-                        PeiUsbDev->DeviceAddress,
-                        PeiUsbDev->DeviceSpeed,
-                        (UINT8) PeiUsbDev->MaxPacketSize0,
-                        Request,
-                        Direction,
-                        Data,
-                        &DataLength,
-                        Timeout,
-                        &TransferResult
-                        );
-  }
+  Status = PeiUsbDev->Usb2HcPpi->ControlTransfer (
+                                   PeiServices,
+                                   PeiUsbDev->Usb2HcPpi,
+                                   PeiUsbDev->DeviceAddress,
+                                   PeiUsbDev->DeviceSpeed,
+                                   PeiUsbDev->MaxPacketSize0,
+                                   Request,
+                                   Direction,
+                                   Data,
+                                   &DataLength,
+                                   Timeout,
+                                   &(PeiUsbDev->Translator),
+                                   &TransferResult
+                                   );
 
   //
   // Reset the endpoint toggle when endpoint stall is cleared
   //
   if ((Request->Request     == USB_REQ_CLEAR_FEATURE) &&
       (Request->RequestType == USB_DEV_CLEAR_FEATURE_REQ_TYPE_E) &&
-      (Request->Value       == USB_FEATURE_ENDPOINT_HALT)) {
+      (Request->Value       == USB_FEATURE_ENDPOINT_HALT))
+  {
     if ((PeiUsbDev->DataToggle & (1 << EndpointIndex)) != 0) {
-      PeiUsbDev->DataToggle = (UINT16) (PeiUsbDev->DataToggle ^ (1 << EndpointIndex));
+      PeiUsbDev->DataToggle = (UINT16)(PeiUsbDev->DataToggle ^ (1 << EndpointIndex));
     }
   }
 
-  DEBUG ((EFI_D_INFO, "PeiUsbControlTransfer: %r\n", Status));
+  DEBUG ((DEBUG_INFO, "PeiUsbControlTransfer: %r\n", Status));
   return Status;
 }
 
@@ -147,30 +133,30 @@ PeiUsbControlTransfer (
 EFI_STATUS
 EFIAPI
 PeiUsbBulkTransfer (
-  IN     EFI_PEI_SERVICES    **PeiServices,
-  IN     PEI_USB_IO_PPI      *This,
-  IN     UINT8               DeviceEndpoint,
-  IN OUT VOID                *Data,
-  IN OUT UINTN               *DataLength,
-  IN     UINTN               Timeout
+  IN     EFI_PEI_SERVICES  **PeiServices,
+  IN     PEI_USB_IO_PPI    *This,
+  IN     UINT8             DeviceEndpoint,
+  IN OUT VOID              *Data,
+  IN OUT UINTN             *DataLength,
+  IN     UINTN             Timeout
   )
 {
-  EFI_STATUS                  Status;
-  PEI_USB_DEVICE              *PeiUsbDev;
-  UINT32                      TransferResult;
-  UINTN                       MaxPacketLength;
-  UINT8                       DataToggle;
-  UINT8                       OldToggle;
-  EFI_USB_ENDPOINT_DESCRIPTOR *EndpointDescriptor;
-  UINT8                       EndpointIndex;
-  VOID                        *Data2[EFI_USB_MAX_BULK_BUFFER_NUM];
+  EFI_STATUS                   Status;
+  PEI_USB_DEVICE               *PeiUsbDev;
+  UINT32                       TransferResult;
+  UINTN                        MaxPacketLength;
+  UINT8                        DataToggle;
+  UINT8                        OldToggle;
+  EFI_USB_ENDPOINT_DESCRIPTOR  *EndpointDescriptor;
+  UINT8                        EndpointIndex;
+  VOID                         *Data2[EFI_USB_MAX_BULK_BUFFER_NUM];
 
-  PeiUsbDev     = PEI_USB_DEVICE_FROM_THIS (This);
+  PeiUsbDev = PEI_USB_DEVICE_FROM_THIS (This);
 
   EndpointDescriptor = NULL;
-  EndpointIndex = 0;
-  Data2[0] = Data;
-  Data2[1] = NULL;
+  EndpointIndex      = 0;
+  Data2[0]           = Data;
+  Data2[1]           = NULL;
 
   while (EndpointIndex < MAX_ENDPOINT) {
     Status = PeiUsbGetEndpointDescriptor (PeiServices, This, EndpointIndex, &EndpointDescriptor);
@@ -198,41 +184,26 @@ PeiUsbBulkTransfer (
 
   OldToggle = DataToggle;
 
-  if (PeiUsbDev->Usb2HcPpi != NULL) {
-    Status = PeiUsbDev->Usb2HcPpi->BulkTransfer (
-                        PeiServices,
-                        PeiUsbDev->Usb2HcPpi,
-                        PeiUsbDev->DeviceAddress,
-                        DeviceEndpoint,
-                        PeiUsbDev->DeviceSpeed,
-                        MaxPacketLength,
-                        Data2,
-                        DataLength,
-                        &DataToggle,
-                        Timeout,
-                        &(PeiUsbDev->Translator),
-                        &TransferResult
-                        );
-  } else {
-    Status = PeiUsbDev->UsbHcPpi->BulkTransfer (
-                        PeiServices,
-                        PeiUsbDev->UsbHcPpi,
-                        PeiUsbDev->DeviceAddress,
-                        DeviceEndpoint,
-                        (UINT8) MaxPacketLength,
-                        Data,
-                        DataLength,
-                        &DataToggle,
-                        Timeout,
-                        &TransferResult
-                        );
-  }
+  Status = PeiUsbDev->Usb2HcPpi->BulkTransfer (
+                                   PeiServices,
+                                   PeiUsbDev->Usb2HcPpi,
+                                   PeiUsbDev->DeviceAddress,
+                                   DeviceEndpoint,
+                                   PeiUsbDev->DeviceSpeed,
+                                   MaxPacketLength,
+                                   Data2,
+                                   DataLength,
+                                   &DataToggle,
+                                   Timeout,
+                                   &(PeiUsbDev->Translator),
+                                   &TransferResult
+                                   );
 
   if (OldToggle != DataToggle) {
-    PeiUsbDev->DataToggle = (UINT16) (PeiUsbDev->DataToggle ^ (1 << EndpointIndex));
+    PeiUsbDev->DataToggle = (UINT16)(PeiUsbDev->DataToggle ^ (1 << EndpointIndex));
   }
 
-  DEBUG ((EFI_D_INFO, "PeiUsbBulkTransfer: %r\n", Status));
+  DEBUG ((DEBUG_INFO, "PeiUsbBulkTransfer: %r\n", Status));
   return Status;
 }
 
@@ -250,14 +221,15 @@ PeiUsbBulkTransfer (
 EFI_STATUS
 EFIAPI
 PeiUsbGetInterfaceDescriptor (
-  IN  EFI_PEI_SERVICES               **PeiServices,
-  IN  PEI_USB_IO_PPI                 *This,
-  OUT EFI_USB_INTERFACE_DESCRIPTOR   **InterfaceDescriptor
+  IN  EFI_PEI_SERVICES              **PeiServices,
+  IN  PEI_USB_IO_PPI                *This,
+  OUT EFI_USB_INTERFACE_DESCRIPTOR  **InterfaceDescriptor
   )
 {
   PEI_USB_DEVICE  *PeiUsbDev;
-  PeiUsbDev             = PEI_USB_DEVICE_FROM_THIS (This);
-  *InterfaceDescriptor  = PeiUsbDev->InterfaceDesc;
+
+  PeiUsbDev            = PEI_USB_DEVICE_FROM_THIS (This);
+  *InterfaceDescriptor = PeiUsbDev->InterfaceDesc;
   return EFI_SUCCESS;
 }
 
@@ -276,10 +248,10 @@ PeiUsbGetInterfaceDescriptor (
 EFI_STATUS
 EFIAPI
 PeiUsbGetEndpointDescriptor (
-  IN  EFI_PEI_SERVICES               **PeiServices,
-  IN  PEI_USB_IO_PPI                 *This,
-  IN  UINT8                          EndpointIndex,
-  OUT EFI_USB_ENDPOINT_DESCRIPTOR    **EndpointDescriptor
+  IN  EFI_PEI_SERVICES             **PeiServices,
+  IN  PEI_USB_IO_PPI               *This,
+  IN  UINT8                        EndpointIndex,
+  OUT EFI_USB_ENDPOINT_DESCRIPTOR  **EndpointDescriptor
   )
 {
   PEI_USB_DEVICE  *PeiUsbDev;
@@ -317,8 +289,8 @@ PeiUsbGetEndpointDescriptor (
 EFI_STATUS
 EFIAPI
 PeiUsbPortReset (
-  IN EFI_PEI_SERVICES               **PeiServices,
-  IN PEI_USB_IO_PPI                 *This
+  IN EFI_PEI_SERVICES  **PeiServices,
+  IN PEI_USB_IO_PPI    *This
   )
 {
   PEI_USB_DEVICE  *PeiUsbDev;
@@ -329,7 +301,6 @@ PeiUsbPortReset (
 
   ResetRootPort (
     PeiServices,
-    PeiUsbDev->UsbHcPpi,
     PeiUsbDev->Usb2HcPpi,
     PeiUsbDev->DeviceAddress,
     0
@@ -338,14 +309,14 @@ PeiUsbPortReset (
   //
   // Set address
   //
-  Address                   = PeiUsbDev->DeviceAddress;
-  PeiUsbDev->DeviceAddress  = 0;
+  Address                  = PeiUsbDev->DeviceAddress;
+  PeiUsbDev->DeviceAddress = 0;
 
   Status = PeiUsbSetDeviceAddress (
-            PeiServices,
-            This,
-            Address
-            );
+             PeiServices,
+             This,
+             Address
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -357,9 +328,9 @@ PeiUsbPortReset (
   // Set default configuration
   //
   Status = PeiUsbSetConfiguration (
-            PeiServices,
-            This
-            );
+             PeiServices,
+             This
+             );
 
   return Status;
 }

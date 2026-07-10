@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "HttpBootDxe.h"
 #include <Library/UefiBootManagerLib.h>
 
-CHAR16  mHttpBootConfigStorageName[]     = L"HTTP_BOOT_CONFIG_IFR_NVDATA";
+CHAR16  mHttpBootConfigStorageName[] = L"HTTP_BOOT_CONFIG_IFR_NVDATA";
 
 /**
   Add new boot option for HTTP boot.
@@ -18,6 +18,7 @@ CHAR16  mHttpBootConfigStorageName[]     = L"HTTP_BOOT_CONFIG_IFR_NVDATA";
   @param[in]  UsingIpv6           Set to TRUE if creating boot option for IPv6.
   @param[in]  Description         The description text of the boot option.
   @param[in]  Uri                 The URI string of the boot file.
+  @param[in]  ProxyUri            The Proxy URI string for the boot path.
 
   @retval EFI_SUCCESS             The boot option is created successfully.
   @retval Others                  Failed to create new boot option.
@@ -25,50 +26,64 @@ CHAR16  mHttpBootConfigStorageName[]     = L"HTTP_BOOT_CONFIG_IFR_NVDATA";
 **/
 EFI_STATUS
 HttpBootAddBootOption (
-  IN   HTTP_BOOT_PRIVATE_DATA   *Private,
-  IN   BOOLEAN                  UsingIpv6,
-  IN   CHAR16                   *Description,
-  IN   CHAR16                   *Uri
+  IN   HTTP_BOOT_PRIVATE_DATA  *Private,
+  IN   BOOLEAN                 UsingIpv6,
+  IN   CHAR16                  *Description,
+  IN   CHAR16                  *Uri,
+  IN   CHAR16                  *ProxyUri
   )
 {
-  EFI_DEV_PATH                      *Node;
-  EFI_DEVICE_PATH_PROTOCOL          *TmpDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL          *NewDevicePath;
-  UINTN                             Length;
-  CHAR8                             AsciiUri[URI_STR_MAX_SIZE];
-  EFI_STATUS                        Status;
-  UINTN                             Index;
-  EFI_BOOT_MANAGER_LOAD_OPTION      NewOption;
+  EFI_DEV_PATH                  *Node;
+  EFI_DEVICE_PATH_PROTOCOL      *TmpDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL      *NewDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL      *FinalDevicePath;
+  UINTN                         Length;
+  CHAR8                         AsciiUri[URI_STR_MAX_SIZE];
+  CHAR8                         AsciiProxyUri[URI_STR_MAX_SIZE];
+  UINTN                         AsciiProxyUriSize;
+  EFI_STATUS                    Status;
+  EFI_BOOT_MANAGER_LOAD_OPTION  NewOption;
 
-  NewDevicePath = NULL;
-  Node          = NULL;
-  TmpDevicePath = NULL;
+  NewDevicePath   = NULL;
+  Node            = NULL;
+  TmpDevicePath   = NULL;
+  FinalDevicePath = NULL;
 
   if (StrLen (Description) == 0) {
     return EFI_INVALID_PARAMETER;
   }
 
   //
-  // Convert the scheme to all lower case.
+  // Check the URI Scheme
   //
-  for (Index = 0; Index < StrLen (Uri); Index++) {
-    if (Uri[Index] == L':') {
-      break;
+  UnicodeStrToAsciiStrS (Uri, AsciiUri, sizeof (AsciiUri));
+  UnicodeStrToAsciiStrS (ProxyUri, AsciiProxyUri, sizeof (AsciiProxyUri));
+  Status = HttpBootCheckUriScheme (AsciiUri);
+  if (EFI_ERROR (Status)) {
+    if (Status == EFI_INVALID_PARAMETER) {
+      DEBUG ((DEBUG_ERROR, "Error: Invalid URI address.\n"));
+    } else if (Status == EFI_ACCESS_DENIED) {
+      DEBUG ((DEBUG_ERROR, "Error: Access forbidden, only HTTPS connection is allowed.\n"));
     }
-    if (Uri[Index] >= L'A' && Uri[Index] <= L'Z') {
-      Uri[Index] -= (CHAR16)(L'A' - L'a');
+
+    return Status;
+  }
+
+  if (StrLen (ProxyUri) != 0) {
+    Status = HttpBootCheckUriScheme (AsciiProxyUri);
+    if (EFI_ERROR (Status)) {
+      if (Status == EFI_INVALID_PARAMETER) {
+        DEBUG ((DEBUG_ERROR, "Error: Invalid URI address.\n"));
+      } else if (Status == EFI_ACCESS_DENIED) {
+        DEBUG ((DEBUG_ERROR, "Error: Access forbidden, only HTTPS connection is allowed.\n"));
+      }
+
+      return Status;
     }
   }
 
   //
-  // Only accept empty URI, or http and https URI.
-  //
-  if ((StrLen (Uri) != 0) && (StrnCmp (Uri, L"http://", 7) != 0) && (StrnCmp (Uri, L"https://", 8) != 0)) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Create a new device path by appending the IP node and URI node to
+  // Create a new device path by appending the IP node, Proxy node and URI node to
   // the driver's parent device path
   //
   if (!UsingIpv6) {
@@ -77,6 +92,7 @@ HttpBootAddBootOption (
       Status = EFI_OUT_OF_RESOURCES;
       goto ON_EXIT;
     }
+
     Node->Ipv4.Header.Type    = MESSAGING_DEVICE_PATH;
     Node->Ipv4.Header.SubType = MSG_IPv4_DP;
     SetDevicePathNodeLength (Node, sizeof (IPv4_DEVICE_PATH));
@@ -86,34 +102,65 @@ HttpBootAddBootOption (
       Status = EFI_OUT_OF_RESOURCES;
       goto ON_EXIT;
     }
-    Node->Ipv6.Header.Type     = MESSAGING_DEVICE_PATH;
-    Node->Ipv6.Header.SubType  = MSG_IPv6_DP;
+
+    Node->Ipv6.Header.Type    = MESSAGING_DEVICE_PATH;
+    Node->Ipv6.Header.SubType = MSG_IPv6_DP;
     SetDevicePathNodeLength (Node, sizeof (IPv6_DEVICE_PATH));
   }
-  TmpDevicePath = AppendDevicePathNode (Private->ParentDevicePath, (EFI_DEVICE_PATH_PROTOCOL*) Node);
+
+  TmpDevicePath = AppendDevicePathNode (Private->ParentDevicePath, (EFI_DEVICE_PATH_PROTOCOL *)Node);
   FreePool (Node);
   if (TmpDevicePath == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  //
+  // Update the Proxy node with the input Proxy URI
+  //
+  if (StrLen (ProxyUri) != 0) {
+    AsciiProxyUriSize = AsciiStrSize (AsciiProxyUri);
+    Length            = sizeof (EFI_DEVICE_PATH_PROTOCOL) + AsciiProxyUriSize;
+    Node              = AllocatePool (Length);
+    if (Node == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto ON_EXIT;
+    }
+
+    Node->DevPath.Type    = MESSAGING_DEVICE_PATH;
+    Node->DevPath.SubType = MSG_URI_DP;
+    SetDevicePathNodeLength (Node, Length);
+    CopyMem (
+      (UINT8 *)Node + sizeof (EFI_DEVICE_PATH_PROTOCOL),
+      AsciiProxyUri,
+      AsciiProxyUriSize
+      );
+    NewDevicePath = AppendDevicePathNode (TmpDevicePath, (EFI_DEVICE_PATH_PROTOCOL *)Node);
+    FreePool (Node);
+    if (NewDevicePath == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto ON_EXIT;
+    }
+  } else {
+    NewDevicePath = TmpDevicePath;
+  }
+
   //
   // Update the URI node with the input boot file URI.
   //
-  UnicodeStrToAsciiStrS (Uri, AsciiUri, sizeof (AsciiUri));
   Length = sizeof (EFI_DEVICE_PATH_PROTOCOL) + AsciiStrSize (AsciiUri);
-  Node = AllocatePool (Length);
+  Node   = AllocatePool (Length);
   if (Node == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
-    FreePool (TmpDevicePath);
     goto ON_EXIT;
   }
+
   Node->DevPath.Type    = MESSAGING_DEVICE_PATH;
   Node->DevPath.SubType = MSG_URI_DP;
   SetDevicePathNodeLength (Node, Length);
-  CopyMem ((UINT8*) Node + sizeof (EFI_DEVICE_PATH_PROTOCOL), AsciiUri, AsciiStrSize (AsciiUri));
-  NewDevicePath = AppendDevicePathNode (TmpDevicePath, (EFI_DEVICE_PATH_PROTOCOL*) Node);
+  CopyMem ((UINT8 *)Node + sizeof (EFI_DEVICE_PATH_PROTOCOL), AsciiUri, AsciiStrSize (AsciiUri));
+  FinalDevicePath = AppendDevicePathNode (NewDevicePath, (EFI_DEVICE_PATH_PROTOCOL *)Node);
   FreePool (Node);
-  FreePool (TmpDevicePath);
-  if (NewDevicePath == NULL) {
+  if (FinalDevicePath == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
     goto ON_EXIT;
   }
@@ -122,26 +169,38 @@ HttpBootAddBootOption (
   // Add a new load option.
   //
   Status = EfiBootManagerInitializeLoadOption (
-                 &NewOption,
-                 LoadOptionNumberUnassigned,
-                 LoadOptionTypeBoot,
-                 LOAD_OPTION_ACTIVE,
-                 Description,
-                 NewDevicePath,
-                 NULL,
-                 0
-                 );
+             &NewOption,
+             LoadOptionNumberUnassigned,
+             LoadOptionTypeBoot,
+             LOAD_OPTION_ACTIVE,
+             Description,
+             FinalDevicePath,
+             NULL,
+             0
+             );
   if (EFI_ERROR (Status)) {
     goto ON_EXIT;
   }
 
-  Status = EfiBootManagerAddLoadOptionVariable (&NewOption, (UINTN) -1);
+  Status = EfiBootManagerAddLoadOptionVariable (&NewOption, (UINTN)-1);
   EfiBootManagerFreeLoadOption (&NewOption);
 
 ON_EXIT:
 
+  if (TmpDevicePath != NULL) {
+    if (TmpDevicePath == NewDevicePath) {
+      NewDevicePath = NULL;
+    }
+
+    FreePool (TmpDevicePath);
+  }
+
   if (NewDevicePath != NULL) {
     FreePool (NewDevicePath);
+  }
+
+  if (FinalDevicePath != NULL) {
+    FreePool (FinalDevicePath);
   }
 
   return Status;
@@ -221,21 +280,21 @@ ON_EXIT:
 EFI_STATUS
 EFIAPI
 HttpBootFormExtractConfig (
-  IN  CONST EFI_HII_CONFIG_ACCESS_PROTOCOL   *This,
-  IN  CONST EFI_STRING                       Request,
-  OUT EFI_STRING                             *Progress,
-  OUT EFI_STRING                             *Results
+  IN  CONST EFI_HII_CONFIG_ACCESS_PROTOCOL  *This,
+  IN  CONST EFI_STRING                      Request,
+  OUT EFI_STRING                            *Progress,
+  OUT EFI_STRING                            *Results
   )
 {
-  EFI_STATUS                       Status;
-  UINTN                            BufferSize;
-  HTTP_BOOT_FORM_CALLBACK_INFO     *CallbackInfo;
-  EFI_STRING                       ConfigRequestHdr;
-  EFI_STRING                       ConfigRequest;
-  BOOLEAN                          AllocatedRequest;
-  UINTN                            Size;
+  EFI_STATUS                    Status;
+  UINTN                         BufferSize;
+  HTTP_BOOT_FORM_CALLBACK_INFO  *CallbackInfo;
+  EFI_STRING                    ConfigRequestHdr;
+  EFI_STRING                    ConfigRequest;
+  BOOLEAN                       AllocatedRequest;
+  UINTN                         Size;
 
-  if (Progress == NULL || Results == NULL) {
+  if ((Progress == NULL) || (Results == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -265,11 +324,12 @@ HttpBootFormExtractConfig (
     // followed by "&OFFSET=0&WIDTH=WWWWWWWWWWWWWWWW" followed by a Null-terminator
     //
     ConfigRequestHdr = HiiConstructConfigHdr (&gHttpBootConfigGuid, mHttpBootConfigStorageName, CallbackInfo->ChildHandle);
-    Size = (StrLen (ConfigRequestHdr) + 32 + 1) * sizeof (CHAR16);
-    ConfigRequest = AllocateZeroPool (Size);
+    Size             = (StrLen (ConfigRequestHdr) + 32 + 1) * sizeof (CHAR16);
+    ConfigRequest    = AllocateZeroPool (Size);
     if (ConfigRequest == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
+
     AllocatedRequest = TRUE;
     UnicodeSPrint (ConfigRequest, Size, L"%s&OFFSET=0&WIDTH=%016LX", ConfigRequestHdr, (UINT64)BufferSize);
     FreePool (ConfigRequestHdr);
@@ -278,7 +338,7 @@ HttpBootFormExtractConfig (
   Status = gHiiConfigRouting->BlockToConfig (
                                 gHiiConfigRouting,
                                 ConfigRequest,
-                                (UINT8 *) &CallbackInfo->HttpBootNvData,
+                                (UINT8 *)&CallbackInfo->HttpBootNvData,
                                 BufferSize,
                                 Results,
                                 Progress
@@ -291,6 +351,7 @@ HttpBootFormExtractConfig (
     FreePool (ConfigRequest);
     ConfigRequest = NULL;
   }
+
   //
   // Set Progress string to the original request string.
   //
@@ -346,19 +407,20 @@ HttpBootFormExtractConfig (
 EFI_STATUS
 EFIAPI
 HttpBootFormRouteConfig (
-  IN  CONST EFI_HII_CONFIG_ACCESS_PROTOCOL   *This,
-  IN  CONST EFI_STRING                       Configuration,
-  OUT EFI_STRING                             *Progress
+  IN  CONST EFI_HII_CONFIG_ACCESS_PROTOCOL  *This,
+  IN  CONST EFI_STRING                      Configuration,
+  OUT EFI_STRING                            *Progress
   )
 {
-  EFI_STATUS                       Status;
-  UINTN                            BufferSize;
-  HTTP_BOOT_FORM_CALLBACK_INFO     *CallbackInfo;
-  HTTP_BOOT_PRIVATE_DATA           *Private;
+  EFI_STATUS                    Status;
+  UINTN                         BufferSize;
+  HTTP_BOOT_FORM_CALLBACK_INFO  *CallbackInfo;
+  HTTP_BOOT_PRIVATE_DATA        *Private;
 
   if (Progress == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+
   *Progress = Configuration;
 
   if (Configuration == NULL) {
@@ -380,12 +442,12 @@ HttpBootFormRouteConfig (
   ZeroMem (&CallbackInfo->HttpBootNvData, BufferSize);
 
   Status = gHiiConfigRouting->ConfigToBlock (
-                            gHiiConfigRouting,
-                            Configuration,
-                            (UINT8 *) &CallbackInfo->HttpBootNvData,
-                            &BufferSize,
-                            Progress
-                            );
+                                gHiiConfigRouting,
+                                Configuration,
+                                (UINT8 *)&CallbackInfo->HttpBootNvData,
+                                &BufferSize,
+                                Progress
+                                );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -397,7 +459,8 @@ HttpBootFormRouteConfig (
     Private,
     (CallbackInfo->HttpBootNvData.IpVersion == HTTP_BOOT_IP_VERSION_6) ? TRUE : FALSE,
     CallbackInfo->HttpBootNvData.Description,
-    CallbackInfo->HttpBootNvData.Uri
+    CallbackInfo->HttpBootNvData.Uri,
+    CallbackInfo->HttpBootNvData.ProxyUri
     );
 
   return EFI_SUCCESS;
@@ -431,27 +494,27 @@ HttpBootFormRouteConfig (
 EFI_STATUS
 EFIAPI
 HttpBootFormCallback (
-  IN CONST  EFI_HII_CONFIG_ACCESS_PROTOCOL   *This,
-  IN        EFI_BROWSER_ACTION               Action,
-  IN        EFI_QUESTION_ID                  QuestionId,
-  IN        UINT8                            Type,
-  IN OUT    EFI_IFR_TYPE_VALUE               *Value,
-  OUT       EFI_BROWSER_ACTION_REQUEST       *ActionRequest
+  IN CONST  EFI_HII_CONFIG_ACCESS_PROTOCOL  *This,
+  IN        EFI_BROWSER_ACTION              Action,
+  IN        EFI_QUESTION_ID                 QuestionId,
+  IN        UINT8                           Type,
+  IN OUT    EFI_IFR_TYPE_VALUE              *Value,
+  OUT       EFI_BROWSER_ACTION_REQUEST      *ActionRequest
   )
 {
-  EFI_INPUT_KEY                   Key;
-  CHAR16                          *Uri;
-  UINTN                           UriLen;
-  CHAR8                           *AsciiUri;
-  HTTP_BOOT_FORM_CALLBACK_INFO    *CallbackInfo;
-  EFI_STATUS                      Status;
+  EFI_INPUT_KEY                 Key;
+  CHAR16                        *Uri;
+  UINTN                         UriLen;
+  CHAR8                         *AsciiUri;
+  HTTP_BOOT_FORM_CALLBACK_INFO  *CallbackInfo;
+  EFI_STATUS                    Status;
 
   Uri      = NULL;
   UriLen   = 0;
   AsciiUri = NULL;
   Status   = EFI_SUCCESS;
 
-  if (This == NULL || Value == NULL) {
+  if ((This == NULL) || (Value == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -462,68 +525,67 @@ HttpBootFormCallback (
   }
 
   switch (QuestionId) {
-  case KEY_INITIATOR_URI:
-    //
-    // Get user input URI string
-    //
-    Uri = HiiGetString (CallbackInfo->RegisteredHandle, Value->string, NULL);
-    if(Uri == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
+    case KEY_INITIATOR_URI:
+    case KEY_INITIATOR_PROXY_URI:
+      //
+      // Get user input URI string
+      //
+      Uri = HiiGetString (CallbackInfo->RegisteredHandle, Value->string, NULL);
+      if (Uri == NULL) {
+        return EFI_INVALID_PARAMETER;
+      }
 
-    //
-    // The URI should be either an empty string (for corporate environment) ,or http(s) for home environment.
-    // Pop up a message box for the unsupported URI.
-    //
-    if (StrLen (Uri) != 0) {
-      UriLen = StrLen (Uri) + 1;
-      AsciiUri = AllocateZeroPool (UriLen);
-      if (AsciiUri == NULL) {
+      //
+      // The URI should be either an empty string (for corporate environment) ,or http(s) for home environment.
+      // Pop up a message box for the unsupported URI.
+      //
+      if (StrLen (Uri) != 0) {
+        UriLen   = StrLen (Uri) + 1;
+        AsciiUri = AllocateZeroPool (UriLen);
+        if (AsciiUri == NULL) {
+          FreePool (Uri);
+          return EFI_OUT_OF_RESOURCES;
+        }
+
+        UnicodeStrToAsciiStrS (Uri, AsciiUri, UriLen);
+
+        Status = HttpBootCheckUriScheme (AsciiUri);
+
+        if (Status == EFI_INVALID_PARAMETER) {
+          DEBUG ((DEBUG_ERROR, "HttpBootFormCallback: %r.\n", Status));
+
+          CreatePopUp (
+            EFI_LIGHTGRAY | EFI_BACKGROUND_BLUE,
+            &Key,
+            L"ERROR: Unsupported URI!",
+            L"Only supports HTTP and HTTPS",
+            NULL
+            );
+        } else if (Status == EFI_ACCESS_DENIED) {
+          DEBUG ((DEBUG_ERROR, "HttpBootFormCallback: %r.\n", Status));
+
+          CreatePopUp (
+            EFI_LIGHTGRAY | EFI_BACKGROUND_BLUE,
+            &Key,
+            L"ERROR: Unsupported URI!",
+            L"HTTP is disabled",
+            NULL
+            );
+        }
+      }
+
+      if (Uri != NULL) {
         FreePool (Uri);
-        return EFI_OUT_OF_RESOURCES;
       }
 
-      UnicodeStrToAsciiStrS (Uri, AsciiUri, UriLen);
-
-      Status = HttpBootCheckUriScheme (AsciiUri);
-
-      if (Status == EFI_INVALID_PARAMETER) {
-
-        DEBUG ((EFI_D_ERROR, "HttpBootFormCallback: %r.\n", Status));
-
-        CreatePopUp (
-          EFI_LIGHTGRAY | EFI_BACKGROUND_BLUE,
-          &Key,
-          L"ERROR: Unsupported URI!",
-          L"Only supports HTTP and HTTPS",
-          NULL
-          );
-      } else if (Status == EFI_ACCESS_DENIED) {
-
-        DEBUG ((EFI_D_ERROR, "HttpBootFormCallback: %r.\n", Status));
-
-        CreatePopUp (
-          EFI_LIGHTGRAY | EFI_BACKGROUND_BLUE,
-          &Key,
-          L"ERROR: Unsupported URI!",
-          L"HTTP is disabled",
-          NULL
-          );
+      if (AsciiUri != NULL) {
+        FreePool (AsciiUri);
       }
-    }
 
-    if (Uri != NULL) {
-      FreePool (Uri);
-    }
+      break;
 
-    if (AsciiUri != NULL) {
-      FreePool (AsciiUri);
-    }
-
-    break;
-
-  default:
-    break;
+    default:
+      break;
   }
 
   return Status;
@@ -540,15 +602,15 @@ HttpBootFormCallback (
 **/
 EFI_STATUS
 HttpBootConfigFormInit (
-  IN HTTP_BOOT_PRIVATE_DATA     *Private
+  IN HTTP_BOOT_PRIVATE_DATA  *Private
   )
 {
-  EFI_STATUS                        Status;
-  HTTP_BOOT_FORM_CALLBACK_INFO      *CallbackInfo;
-  VENDOR_DEVICE_PATH                VendorDeviceNode;
-  CHAR16                            *MacString;
-  CHAR16                            *OldMenuString;
-  CHAR16                            MenuString[128];
+  EFI_STATUS                    Status;
+  HTTP_BOOT_FORM_CALLBACK_INFO  *CallbackInfo;
+  VENDOR_DEVICE_PATH            VendorDeviceNode;
+  CHAR16                        *MacString;
+  CHAR16                        *OldMenuString;
+  CHAR16                        MenuString[128];
 
   CallbackInfo = &Private->CallbackInfo;
 
@@ -570,7 +632,7 @@ HttpBootConfigFormInit (
   SetDevicePathNodeLength (&VendorDeviceNode.Header, sizeof (VENDOR_DEVICE_PATH));
   CallbackInfo->HiiVendorDevicePath = AppendDevicePathNode (
                                         Private->ParentDevicePath,
-                                        (EFI_DEVICE_PATH_PROTOCOL *) &VendorDeviceNode
+                                        (EFI_DEVICE_PATH_PROTOCOL *)&VendorDeviceNode
                                         );
   if (CallbackInfo->HiiVendorDevicePath == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
@@ -655,12 +717,12 @@ Error:
 **/
 EFI_STATUS
 HttpBootConfigFormUnload (
-  IN HTTP_BOOT_PRIVATE_DATA     *Private
+  IN HTTP_BOOT_PRIVATE_DATA  *Private
   )
 {
-  HTTP_BOOT_FORM_CALLBACK_INFO      *CallbackInfo;
+  HTTP_BOOT_FORM_CALLBACK_INFO  *CallbackInfo;
 
-  if (Private->Ip4Nic != NULL || Private->Ip6Nic != NULL) {
+  if ((Private->Ip4Nic != NULL) || (Private->Ip6Nic != NULL)) {
     //
     // Only unload the configuration form when both IP4 and IP6 stack are stopped.
     //

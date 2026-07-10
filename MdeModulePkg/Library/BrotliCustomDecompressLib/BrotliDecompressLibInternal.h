@@ -8,24 +8,22 @@
 
 **/
 
-#ifndef __BROTLI_DECOMPRESS_INTERNAL_H__
-#define __BROTLI_DECOMPRESS_INTERNAL_H__
+#pragma once
 
 #include <PiPei.h>
 #include <Library/ExtractGuidedSectionLib.h>
 #include <brotli/c/include/brotli/types.h>
 #include <brotli/c/include/brotli/decode.h>
 
-typedef struct
-{
+typedef struct {
   VOID     *Buff;
   UINTN    BuffSize;
 } BROTLI_BUFF;
 
-#define FILE_BUFFER_SIZE     65536
-#define BROTLI_INFO_SIZE     8
-#define BROTLI_DECODE_MAX    8
-#define BROTLI_SCRATCH_MAX   16
+#define FILE_BUFFER_SIZE    65536
+#define BROTLI_INFO_SIZE    8
+#define BROTLI_DECODE_MAX   8
+#define BROTLI_SCRATCH_MAX  16
 
 EFI_STATUS
 EFIAPI
@@ -44,5 +42,3 @@ BrotliUefiDecompress (
   IN OUT VOID    *Destination,
   IN OUT VOID    *Scratch
   );
-
-#endif

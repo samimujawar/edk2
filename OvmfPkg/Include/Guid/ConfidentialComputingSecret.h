@@ -1,4 +1,4 @@
- /** @file
+/** @file
    UEFI Configuration Table for exposing the SEV Launch Secret location to UEFI
    applications (boot loaders).
 
@@ -6,8 +6,7 @@
    SPDX-License-Identifier: BSD-2-Clause-Patent
  **/
 
-#ifndef CONFIDENTIAL_COMPUTING_SECRET_H_
-#define CONFIDENTIAL_COMPUTING_SECRET_H_
+#pragma once
 
 #include <Uefi/UefiBaseType.h>
 
@@ -19,10 +18,8 @@
   }
 
 typedef struct {
-  UINT64 Base;
-  UINT64 Size;
+  UINT64    Base;
+  UINT64    Size;
 } CONFIDENTIAL_COMPUTING_SECRET_LOCATION;
 
-extern EFI_GUID gConfidentialComputingSecretGuid;
-
-#endif // SEV_LAUNCH_SECRET_H_
+extern EFI_GUID  gConfidentialComputingSecretGuid;

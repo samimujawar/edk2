@@ -6,9 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
-#ifndef _EFI_PCI_BUS_COMPONENT_NAME_H_
-#define _EFI_PCI_BUS_COMPONENT_NAME_H_
+#pragma once
 
 extern EFI_COMPONENT_NAME_PROTOCOL   gPciBusComponentName;
 extern EFI_COMPONENT_NAME2_PROTOCOL  gPciBusComponentName2;
@@ -16,6 +14,7 @@ extern EFI_COMPONENT_NAME2_PROTOCOL  gPciBusComponentName2;
 //
 // EFI Component Name Functions
 //
+
 /**
   Retrieves a Unicode string that is the user readable name of the driver.
 
@@ -62,7 +61,6 @@ PciBusComponentNameGetDriverName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **DriverName
   );
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the controller
@@ -135,12 +133,9 @@ PciBusComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 PciBusComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   );
-
-
-#endif

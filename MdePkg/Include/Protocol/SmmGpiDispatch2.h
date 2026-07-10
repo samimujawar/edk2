@@ -17,17 +17,16 @@
 
 **/
 
-#ifndef _SMM_GPI_DISPATCH2_H_
-#define _SMM_GPI_DISPATCH2_H_
+#pragma once
 
 #include <Protocol/MmGpiDispatch.h>
 #include <Pi/PiSmmCis.h>
 
-#define EFI_SMM_GPI_DISPATCH2_PROTOCOL_GUID    EFI_MM_GPI_DISPATCH_PROTOCOL_GUID
+#define EFI_SMM_GPI_DISPATCH2_PROTOCOL_GUID  EFI_MM_GPI_DISPATCH_PROTOCOL_GUID
 ///
 /// The dispatch function's context.
 ///
-typedef EFI_MM_GPI_REGISTER_CONTEXT  EFI_SMM_GPI_REGISTER_CONTEXT;
+typedef EFI_MM_GPI_REGISTER_CONTEXT EFI_SMM_GPI_REGISTER_CONTEXT;
 
 typedef EFI_MM_GPI_REGISTER EFI_SMM_GPI_REGISTER2;
 
@@ -35,9 +34,4 @@ typedef EFI_MM_GPI_UNREGISTER EFI_SMM_GPI_UNREGISTER2;
 
 typedef EFI_MM_GPI_DISPATCH_PROTOCOL EFI_SMM_GPI_DISPATCH2_PROTOCOL;
 
-
-
-extern EFI_GUID gEfiSmmGpiDispatch2ProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmmGpiDispatch2ProtocolGuid;

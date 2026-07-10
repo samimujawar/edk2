@@ -7,6 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "InternalCryptLib.h"
+#include "KeyContext.h"
 #include <openssl/pem.h>
 
 /**
@@ -30,18 +31,101 @@ PasswordCallback (
 {
   INTN  KeyLength;
 
-  ZeroMem ((VOID *) Buf, (UINTN) Size);
+  ZeroMem ((VOID *)Buf, (UINTN)Size);
   if (Key != NULL) {
     //
     // Duplicate key phrase directly.
     //
-    KeyLength = (INTN) AsciiStrLen ((CHAR8 *)Key);
-    KeyLength = (KeyLength > Size ) ? Size : KeyLength;
-    CopyMem (Buf, Key, (UINTN) KeyLength);
+    KeyLength = (INTN)AsciiStrLen ((CHAR8 *)Key);
+    KeyLength = (KeyLength > Size) ? Size : KeyLength;
+    CopyMem (Buf, Key, (UINTN)KeyLength);
     return KeyLength;
   } else {
     return 0;
   }
+}
+
+/**
+  Retrieve a private key from PEM-encoded data using OpenSSL BIO.
+  This helper function creates a memory BIO, writes the PEM data to it, and reads
+  the private key using OpenSSL's PEM_read_bio_PrivateKey function. It supports
+  password-protected PEM data.
+
+  @param[in]  PemData   Pointer to the PEM-encoded key data.
+  @param[in]  PemSize   Size of the PEM key data in bytes.
+  @param[in]  Password  NULL-terminated passphrase used for encrypted PEM key data.
+  @param[out] Pkey      Pointer to receive the EVP_PKEY structure containing the private key.
+
+  @retval TRUE   Private key was retrieved successfully.
+  @retval FALSE  Failed to create BIO, write data, or read private key.
+**/
+STATIC
+BOOLEAN
+GetPrivateKeyFromPem (
+  IN   CONST UINT8  *PemData,
+  IN   UINTN        PemSize,
+  IN   CONST CHAR8  *Password,
+  OUT  EVP_PKEY     **Pkey
+  )
+{
+  BIO      *PemBio;
+  BOOLEAN  Result;
+
+  // Create a memory BIO and write PEM data to it
+  PemBio = BIO_new (BIO_s_mem ());
+  if (PemBio == NULL) {
+    return FALSE;
+  }
+
+  if (BIO_write (PemBio, PemData, (int)PemSize) <= 0) {
+    BIO_free (PemBio);
+    return FALSE;
+  }
+
+  Result = FALSE;
+
+  // Read Private Key from encrypted PEM data
+  *Pkey = PEM_read_bio_PrivateKey (PemBio, NULL, (pem_password_cb *)&PasswordCallback, (void *)Password);
+  if (*Pkey != NULL) {
+    Result = TRUE;
+  }
+
+  // Always free the BIO before returning
+  BIO_free (PemBio);
+  return Result;
+}
+
+/**
+  Allocate and initialize a KEY_CONTEXT structure wrapping an EVP_PKEY.
+  This helper function allocates a KEY_CONTEXT structure and wraps the provided
+  EVP_PKEY pointer within it.
+
+  @param[in]  Pkey     Pointer to an EVP_PKEY structure to be wrapped.
+  @param[in]  Nid      The NID representing the type of key (e.g., EVP_PKEY_ED448).
+  @param[out] Context  Pointer to receive the allocated KEY_CONTEXT structure.
+
+  @retval TRUE   KEY_CONTEXT was allocated and initialized successfully.
+  @retval FALSE  Memory allocation failed.
+**/
+STATIC
+BOOLEAN
+AllocateKeyContext (
+  IN   EVP_PKEY  *Pkey,
+  IN   INT32     Nid,
+  OUT  VOID      **Context
+  )
+{
+  KEY_CONTEXT  *Ctx;
+
+  Ctx = (KEY_CONTEXT *)AllocateZeroPool (sizeof (KEY_CONTEXT));
+  if (Ctx == NULL) {
+    return FALSE;
+  }
+
+  Ctx->EvpPkey = Pkey;
+  Ctx->Nid     = Nid;
+  *Context     = (VOID *)Ctx;
+  return TRUE;
 }
 
 /**
@@ -76,7 +160,7 @@ RsaGetPrivateKeyFromPem (
   //
   // Check input parameters.
   //
-  if (PemData == NULL || RsaContext == NULL || PemSize > INT_MAX) {
+  if ((PemData == NULL) || (RsaContext == NULL) || (PemSize > INT_MAX)) {
     return FALSE;
   }
 
@@ -87,9 +171,11 @@ RsaGetPrivateKeyFromPem (
   if (EVP_add_cipher (EVP_aes_128_cbc ()) == 0) {
     return FALSE;
   }
+
   if (EVP_add_cipher (EVP_aes_192_cbc ()) == 0) {
     return FALSE;
   }
+
   if (EVP_add_cipher (EVP_aes_256_cbc ()) == 0) {
     return FALSE;
   }
@@ -104,14 +190,14 @@ RsaGetPrivateKeyFromPem (
     goto _Exit;
   }
 
-  if (BIO_write (PemBio, PemData, (int) PemSize) <= 0) {
+  if (BIO_write (PemBio, PemData, (int)PemSize) <= 0) {
     goto _Exit;
   }
 
   //
   // Retrieve RSA Private Key from encrypted PEM data.
   //
-  *RsaContext = PEM_read_bio_RSAPrivateKey (PemBio, NULL, (pem_password_cb *) &PasswordCallback, (void *) Password);
+  *RsaContext = PEM_read_bio_RSAPrivateKey (PemBio, NULL, (pem_password_cb *)&PasswordCallback, (void *)Password);
   if (*RsaContext != NULL) {
     Status = TRUE;
   }
@@ -123,4 +209,141 @@ _Exit:
   BIO_free (PemBio);
 
   return Status;
+}
+
+/**
+  Retrieve the EC Private Key from the password-protected PEM key data.
+
+  @param[in]  PemData      Pointer to the PEM-encoded key data to be retrieved.
+  @param[in]  PemSize      Size of the PEM key data in bytes.
+  @param[in]  Password     NULL-terminated passphrase used for encrypted PEM key data.
+  @param[out] EcContext    Pointer to new-generated EC DSA context which contain the retrieved
+                           EC private key component. Use EcFree() function to free the
+                           resource.
+
+  If PemData is NULL, then return FALSE.
+  If EcContext is NULL, then return FALSE.
+
+  @retval  TRUE   EC Private Key was retrieved successfully.
+  @retval  FALSE  Invalid PEM key data or incorrect password.
+
+**/
+BOOLEAN
+EFIAPI
+EcGetPrivateKeyFromPem (
+  IN   CONST UINT8  *PemData,
+  IN   UINTN        PemSize,
+  IN   CONST CHAR8  *Password,
+  OUT  VOID         **EcContext
+  )
+{
+  BOOLEAN  Status;
+  BIO      *PemBio;
+
+  //
+  // Check input parameters.
+  //
+  if ((PemData == NULL) || (EcContext == NULL) || (PemSize > INT_MAX)) {
+    return FALSE;
+  }
+
+  //
+  // Add possible block-cipher descriptor for PEM data decryption.
+  // NOTE: Only support most popular ciphers AES for the encrypted PEM.
+  //
+  if (EVP_add_cipher (EVP_aes_128_cbc ()) == 0) {
+    return FALSE;
+  }
+
+  if (EVP_add_cipher (EVP_aes_192_cbc ()) == 0) {
+    return FALSE;
+  }
+
+  if (EVP_add_cipher (EVP_aes_256_cbc ()) == 0) {
+    return FALSE;
+  }
+
+  Status = FALSE;
+
+  //
+  // Read encrypted PEM Data.
+  //
+  PemBio = BIO_new (BIO_s_mem ());
+  if (PemBio == NULL) {
+    goto _Exit;
+  }
+
+  if (BIO_write (PemBio, PemData, (int)PemSize) <= 0) {
+    goto _Exit;
+  }
+
+  //
+  // Retrieve EC Private Key from encrypted PEM data.
+  //
+  *EcContext = PEM_read_bio_ECPrivateKey (PemBio, NULL, (pem_password_cb *)&PasswordCallback, (void *)Password);
+  if (*EcContext != NULL) {
+    Status = TRUE;
+  }
+
+_Exit:
+  //
+  // Release Resources.
+  //
+  BIO_free (PemBio);
+
+  return Status;
+}
+
+/**
+   Retrieve the EdDSA Private Key from the password-protected PEM key data.
+
+   @param[in]  PemData        Pointer to the PEM-encoded key data to be retrieved.
+   @param[in]  PemSize        Size of the PEM key data in bytes.
+   @param[in]  Password       NULL-terminated passphrase used for encrypted PEM key data.
+   @param[out] EdDsaContext   Pointer to new-generated EdDSA context which contains the retrieved
+   EdDSA private key component. Use EdDsaFree() function to free the
+   resource.
+
+   If PemData is NULL, then return FALSE.
+   If EdDsaContext is NULL, then return FALSE.
+
+   @retval  TRUE   EdDSA Private Key was retrieved successfully.
+   @retval  FALSE  Invalid PEM key data or incorrect password.
+
+**/
+BOOLEAN
+EFIAPI
+EdDsaGetPrivateKeyFromPem (
+  IN   CONST UINT8  *PemData,
+  IN   UINTN        PemSize,
+  IN   CONST CHAR8  *Password,
+  OUT  VOID         **EdDsaContext
+  )
+{
+  EVP_PKEY  *Pkey;
+  INT32     Nid;
+
+  // Check input parameters
+  if ((PemData == NULL) || (EdDsaContext == NULL) || (PemSize > INT_MAX)) {
+    return FALSE;
+  }
+
+  // Read PEM data
+  if (!GetPrivateKeyFromPem (PemData, PemSize, Password, &Pkey)) {
+    return FALSE;
+  }
+
+  Nid = EVP_PKEY_id (Pkey);
+  if (Nid != EVP_PKEY_ED448) {
+    EVP_PKEY_free (Pkey);
+    return FALSE;
+  }
+
+  // Allocate wrapper structure (now consistent with other key types)
+  if (!AllocateKeyContext (Pkey, Nid, EdDsaContext)) {
+    EVP_PKEY_free (Pkey);
+    return FALSE;
+  }
+
+  return TRUE;
 }

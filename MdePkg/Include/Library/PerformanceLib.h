@@ -6,52 +6,51 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PERFORMANCE_LIB_H__
-#define __PERFORMANCE_LIB_H__
+#pragma once
 
 ///
-/// Performance library propery mask bits
+/// Performance library property mask bits
 ///
 #define PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED  0x00000001
 
 //
 // Public Progress Identifiers for Event Records.
 //
-#define PERF_EVENT_ID                   0x00
+#define PERF_EVENT_ID  0x00
 
-#define MODULE_START_ID                 0x01
-#define MODULE_END_ID                   0x02
-#define MODULE_LOADIMAGE_START_ID       0x03
-#define MODULE_LOADIMAGE_END_ID         0x04
-#define MODULE_DB_START_ID              0x05
-#define MODULE_DB_END_ID                0x06
-#define MODULE_DB_SUPPORT_START_ID      0x07
-#define MODULE_DB_SUPPORT_END_ID        0x08
-#define MODULE_DB_STOP_START_ID         0x09
-#define MODULE_DB_STOP_END_ID           0x0A
+#define MODULE_START_ID             0x01
+#define MODULE_END_ID               0x02
+#define MODULE_LOADIMAGE_START_ID   0x03
+#define MODULE_LOADIMAGE_END_ID     0x04
+#define MODULE_DB_START_ID          0x05
+#define MODULE_DB_END_ID            0x06
+#define MODULE_DB_SUPPORT_START_ID  0x07
+#define MODULE_DB_SUPPORT_END_ID    0x08
+#define MODULE_DB_STOP_START_ID     0x09
+#define MODULE_DB_STOP_END_ID       0x0A
 
-#define PERF_EVENTSIGNAL_START_ID       0x10
-#define PERF_EVENTSIGNAL_END_ID         0x11
-#define PERF_CALLBACK_START_ID          0x20
-#define PERF_CALLBACK_END_ID            0x21
-#define PERF_FUNCTION_START_ID          0x30
-#define PERF_FUNCTION_END_ID            0x31
-#define PERF_INMODULE_START_ID          0x40
-#define PERF_INMODULE_END_ID            0x41
-#define PERF_CROSSMODULE_START_ID       0x50
-#define PERF_CROSSMODULE_END_ID         0x51
+#define PERF_EVENTSIGNAL_START_ID  0x10
+#define PERF_EVENTSIGNAL_END_ID    0x11
+#define PERF_CALLBACK_START_ID     0x20
+#define PERF_CALLBACK_END_ID       0x21
+#define PERF_FUNCTION_START_ID     0x30
+#define PERF_FUNCTION_END_ID       0x31
+#define PERF_INMODULE_START_ID     0x40
+#define PERF_INMODULE_END_ID       0x41
+#define PERF_CROSSMODULE_START_ID  0x50
+#define PERF_CROSSMODULE_END_ID    0x51
 
 //
 // Declare bits for PcdPerformanceLibraryPropertyMask and
 // also used as the Type parameter of LogPerformanceMeasurementEnabled().
 //
-#define PERF_CORE_START_IMAGE            0x0002
-#define PERF_CORE_LOAD_IMAGE             0x0004
-#define PERF_CORE_DB_SUPPORT             0x0008
-#define PERF_CORE_DB_START               0x0010
-#define PERF_CORE_DB_STOP                0x0020
+#define PERF_CORE_START_IMAGE  0x0002
+#define PERF_CORE_LOAD_IMAGE   0x0004
+#define PERF_CORE_DB_SUPPORT   0x0008
+#define PERF_CORE_DB_START     0x0010
+#define PERF_CORE_DB_STOP      0x0020
 
-#define PERF_GENERAL_TYPE                0x0040
+#define PERF_GENERAL_TYPE  0x0040
 
 /**
   Creates a record for the beginning of a performance measurement.
@@ -77,9 +76,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 RETURN_STATUS
 EFIAPI
 StartPerformanceMeasurement (
-  IN CONST VOID   *Handle,  OPTIONAL
-  IN CONST CHAR8  *Token,   OPTIONAL
-  IN CONST CHAR8  *Module,  OPTIONAL
+  IN CONST VOID   *Handle   OPTIONAL,
+  IN CONST CHAR8  *Token    OPTIONAL,
+  IN CONST CHAR8  *Module   OPTIONAL,
   IN UINT64       TimeStamp
   );
 
@@ -109,9 +108,9 @@ StartPerformanceMeasurement (
 RETURN_STATUS
 EFIAPI
 EndPerformanceMeasurement (
-  IN CONST VOID   *Handle,  OPTIONAL
-  IN CONST CHAR8  *Token,   OPTIONAL
-  IN CONST CHAR8  *Module,  OPTIONAL
+  IN CONST VOID   *Handle   OPTIONAL,
+  IN CONST CHAR8  *Token    OPTIONAL,
+  IN CONST CHAR8  *Module   OPTIONAL,
   IN UINT64       TimeStamp
   );
 
@@ -139,7 +138,7 @@ EndPerformanceMeasurement (
 
   @param  LogEntryKey             On entry, the key of the performance measurement log entry to retrieve.
                                   0, then the first performance measurement log entry is retrieved.
-                                  On exit, the key of the next performance lof entry entry.
+                                  On exit, the key of the next performance log entry.
   @param  Handle                  Pointer to environment specific context used to identify the component
                                   being measured.
   @param  Token                   Pointer to a Null-terminated ASCII string that identifies the component
@@ -157,12 +156,12 @@ EndPerformanceMeasurement (
 UINTN
 EFIAPI
 GetPerformanceMeasurement (
-  IN  UINTN       LogEntryKey,
-  OUT CONST VOID  **Handle,
-  OUT CONST CHAR8 **Token,
-  OUT CONST CHAR8 **Module,
-  OUT UINT64      *StartTimeStamp,
-  OUT UINT64      *EndTimeStamp
+  IN  UINTN        LogEntryKey,
+  OUT CONST VOID   **Handle,
+  OUT CONST CHAR8  **Token,
+  OUT CONST CHAR8  **Module,
+  OUT UINT64       *StartTimeStamp,
+  OUT UINT64       *EndTimeStamp
   );
 
 /**
@@ -191,9 +190,9 @@ GetPerformanceMeasurement (
 RETURN_STATUS
 EFIAPI
 StartPerformanceMeasurementEx (
-  IN CONST VOID   *Handle,  OPTIONAL
-  IN CONST CHAR8  *Token,   OPTIONAL
-  IN CONST CHAR8  *Module,  OPTIONAL
+  IN CONST VOID   *Handle   OPTIONAL,
+  IN CONST CHAR8  *Token    OPTIONAL,
+  IN CONST CHAR8  *Module   OPTIONAL,
   IN UINT64       TimeStamp,
   IN UINT32       Identifier
   );
@@ -226,9 +225,9 @@ StartPerformanceMeasurementEx (
 RETURN_STATUS
 EFIAPI
 EndPerformanceMeasurementEx (
-  IN CONST VOID   *Handle,  OPTIONAL
-  IN CONST CHAR8  *Token,   OPTIONAL
-  IN CONST CHAR8  *Module,  OPTIONAL
+  IN CONST VOID   *Handle   OPTIONAL,
+  IN CONST CHAR8  *Token    OPTIONAL,
+  IN CONST CHAR8  *Module   OPTIONAL,
   IN UINT64       TimeStamp,
   IN UINT32       Identifier
   );
@@ -277,13 +276,13 @@ EndPerformanceMeasurementEx (
 UINTN
 EFIAPI
 GetPerformanceMeasurementEx (
-  IN  UINTN       LogEntryKey,
-  OUT CONST VOID  **Handle,
-  OUT CONST CHAR8 **Token,
-  OUT CONST CHAR8 **Module,
-  OUT UINT64      *StartTimeStamp,
-  OUT UINT64      *EndTimeStamp,
-  OUT UINT32      *Identifier
+  IN  UINTN        LogEntryKey,
+  OUT CONST VOID   **Handle,
+  OUT CONST CHAR8  **Token,
+  OUT CONST CHAR8  **Module,
+  OUT UINT64       *StartTimeStamp,
+  OUT UINT64       *EndTimeStamp,
+  OUT UINT32       *Identifier
   );
 
 /**
@@ -304,7 +303,6 @@ PerformanceMeasurementEnabled (
   VOID
   );
 
-
 /**
   Check whether the specified performance measurement can be logged.
 
@@ -320,7 +318,7 @@ PerformanceMeasurementEnabled (
 BOOLEAN
 EFIAPI
 LogPerformanceMeasurementEnabled (
-  IN  CONST UINTN        Type
+  IN  CONST UINTN  Type
   );
 
 /**
@@ -342,10 +340,10 @@ LogPerformanceMeasurementEnabled (
 RETURN_STATUS
 EFIAPI
 LogPerformanceMeasurement (
-  IN CONST VOID   *CallerIdentifier, OPTIONAL
-  IN CONST VOID   *Guid,    OPTIONAL
-  IN CONST CHAR8  *String,  OPTIONAL
-  IN UINT64       Address,  OPTIONAL
+  IN CONST VOID   *CallerIdentifier  OPTIONAL,
+  IN CONST VOID   *Guid     OPTIONAL,
+  IN CONST CHAR8  *String   OPTIONAL,
+  IN UINT64       Address   OPTIONAL,
   IN UINT32       Identifier
   );
 
@@ -353,7 +351,7 @@ LogPerformanceMeasurement (
   Begin Macro to measure the performance of StartImage in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT1(dsiable PERF_CORE_START_IMAGE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT1 (disable PERF_CORE_START_IMAGE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -368,7 +366,7 @@ LogPerformanceMeasurement (
   End Macro to measure the performance of StartImage in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT1 (dsiable PERF_CORE_START_IMAGE)of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT1 (disable PERF_CORE_START_IMAGE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -383,7 +381,7 @@ LogPerformanceMeasurement (
   Begin Macro to measure the performance of LoadImage in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT2 (dsiable PERF_CORE_LOAD_IAMGE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT2 (disable PERF_CORE_LOAD_IMAGE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -398,7 +396,7 @@ LogPerformanceMeasurement (
   End Macro to measure the performance of LoadImage in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT2 (dsiable PERF_CORE_LOAD_IAMGE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT2 (disable PERF_CORE_LOAD_IMAGE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -413,7 +411,7 @@ LogPerformanceMeasurement (
   Start Macro to measure the performance of DriverBinding Support in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT3 (dsiable PERF_CORE_DB_SUPPORT) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT3 (disable PERF_CORE_DB_SUPPORT) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -428,7 +426,7 @@ LogPerformanceMeasurement (
   End Macro to measure the performance of DriverBinding Support in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT3 (dsiable PERF_CORE_DB_SUPPORT) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT3 (disable PERF_CORE_DB_SUPPORT) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -443,7 +441,7 @@ LogPerformanceMeasurement (
   Begin Macro to measure the performance of DriverBinding Start in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT4 (dsiable PERF_CORE_DB_START) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT4 (disable PERF_CORE_DB_START) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -458,7 +456,7 @@ LogPerformanceMeasurement (
   End Macro to measure the performance of DriverBinding Start in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT4 (dsiable PERF_CORE_DB_START) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT4 (disable PERF_CORE_DB_START) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -473,7 +471,7 @@ LogPerformanceMeasurement (
   Start Macro to measure the performance of DriverBinding Stop in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT5 (dsiable PERF_CORE_DB_STOP) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT5 (disable PERF_CORE_DB_STOP) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -488,7 +486,7 @@ LogPerformanceMeasurement (
   End Macro to measure the performance of DriverBinding Stop in core.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT5 (dsiable PERF_CORE_DB_STOP) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT5 (disable PERF_CORE_DB_STOP) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -504,7 +502,7 @@ LogPerformanceMeasurement (
   It can be used to log a meaningful thing which happens at a time point.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -516,104 +514,104 @@ LogPerformanceMeasurement (
   } while (FALSE)
 
 /**
-  Begin Macro to measure the perofrmance of evnent signal behavior in any module.
+  Begin Macro to measure the performance of event signal behavior in any module.
   The event guid will be passed with this macro.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_EVENT_SIGNAL_BEGIN(EventGuid) \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, EventGuid, __FUNCTION__ , 0, PERF_EVENTSIGNAL_START_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, EventGuid, __func__ , 0, PERF_EVENTSIGNAL_START_ID); \
     } \
   } while (FALSE)
 
 /**
-  End Macro to measure the perofrmance of evnent signal behavior in any module.
+  End Macro to measure the performance of event signal behavior in any module.
   The event guid will be passed with this macro.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_EVENT_SIGNAL_END(EventGuid) \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, EventGuid, __FUNCTION__ , 0, PERF_EVENTSIGNAL_END_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, EventGuid, __func__ , 0, PERF_EVENTSIGNAL_END_ID); \
     } \
   } while (FALSE)
 
 /**
-  Begin Macro to measure the perofrmance of a callback function in any module.
+  Begin Macro to measure the performance of a callback function in any module.
   The event guid which trigger the callback function will be passed with this macro.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_CALLBACK_BEGIN(TriggerGuid) \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, TriggerGuid, __FUNCTION__ , 0, PERF_CALLBACK_START_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, TriggerGuid, __func__ , 0, PERF_CALLBACK_START_ID); \
     } \
   } while (FALSE)
 
 /**
-  End Macro to measure the perofrmance of a callback function in any module.
+  End Macro to measure the performance of a callback function in any module.
   The event guid which trigger the callback function will be passed with this macro.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_CALLBACK_END(TriggerGuid) \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, TriggerGuid, __FUNCTION__ , 0, PERF_CALLBACK_END_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, TriggerGuid, __func__ , 0, PERF_CALLBACK_END_ID); \
     } \
   } while (FALSE)
 
 /**
-  Begin Macro to measure the perofrmance of a general function in any module.
+  Begin Macro to measure the performance of a general function in any module.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_FUNCTION_BEGIN() \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, NULL, __FUNCTION__ , 0, PERF_FUNCTION_START_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, NULL, __func__ , 0, PERF_FUNCTION_START_ID); \
     } \
   } while (FALSE)
 
 /**
-  End Macro to measure the perofrmance of a general function in any module.
+  End Macro to measure the performance of a general function in any module.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
 #define PERF_FUNCTION_END() \
   do { \
     if (LogPerformanceMeasurementEnabled (PERF_GENERAL_TYPE)) { \
-      LogPerformanceMeasurement (&gEfiCallerIdGuid, NULL, __FUNCTION__ , 0, PERF_FUNCTION_END_ID); \
+      LogPerformanceMeasurement (&gEfiCallerIdGuid, NULL, __func__ , 0, PERF_FUNCTION_END_ID); \
     } \
   } while (FALSE)
 
 /**
-  Begin Macro to measure the perofrmance of a behavior within one module.
+  Begin Macro to measure the performance of a behavior within one module.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -625,10 +623,10 @@ LogPerformanceMeasurement (
   } while (FALSE)
 
 /**
-  End Macro to measure the perofrmance of a behavior within one module.
+  End Macro to measure the performance of a behavior within one module.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -640,11 +638,11 @@ LogPerformanceMeasurement (
   } while (FALSE)
 
 /**
-  Begin Macro to measure the perofrmance of a behavior in different modules.
+  Begin Macro to measure the performance of a behavior in different modules.
   Such as the performance of PEI phase, DXE phase, BDS phase.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -656,11 +654,11 @@ LogPerformanceMeasurement (
   } while (FALSE)
 
 /**
-  End Macro to measure the perofrmance of a behavior in different modules.
+  End Macro to measure the performance of a behavior in different modules.
   Such as the performance of PEI phase, DXE phase, BDS phase.
 
   If the PERFORMANCE_LIBRARY_PROPERTY_MEASUREMENT_ENABLED bit of PcdPerformanceLibraryPropertyMask is set,
-  and the BIT6 (dsiable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set.
+  and the BIT6 (disable PERF_GENERAL_TYPE) of PcdPerformanceLibraryPropertyMask is not set,
   then LogPerformanceMeasurement() is called.
 
 **/
@@ -735,7 +733,10 @@ LogPerformanceMeasurement (
   Otherwise, the source lines between PERF_CODE_BEGIN() and PERF_CODE_END() are not included in a module.
 
 **/
-#define PERF_CODE_BEGIN()  do { if (PerformanceMeasurementEnabled ()) { UINT8  __PerformanceCodeLocal
+#define PERF_CODE_BEGIN()                   \
+  do {                                      \
+    if (PerformanceMeasurementEnabled ()) { \
+      do { } while (FALSE)
 
 /**
   Macro that marks the end of performance measurement source code.
@@ -745,7 +746,9 @@ LogPerformanceMeasurement (
   Otherwise, the source lines between PERF_CODE_BEGIN() and PERF_CODE_END() are not included in a module.
 
 **/
-#define PERF_CODE_END()    __PerformanceCodeLocal = 0; __PerformanceCodeLocal++; } } while (FALSE)
+#define PERF_CODE_END()                \
+    }                                  \
+  } while (FALSE)
 
 /**
   Macro that declares a section of performance measurement source code.
@@ -761,6 +764,3 @@ LogPerformanceMeasurement (
   PERF_CODE_BEGIN ();          \
   Expression                   \
   PERF_CODE_END ()
-
-
-#endif

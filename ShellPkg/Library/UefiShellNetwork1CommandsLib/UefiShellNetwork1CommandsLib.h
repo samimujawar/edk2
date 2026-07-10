@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _UEFI_SHELL_NETWORK1_COMMANDS_LIB_H_
-#define _UEFI_SHELL_NETWORK1_COMMANDS_LIB_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -38,7 +37,7 @@
 #include <Library/DevicePathLib.h>
 #include <Library/PrintLib.h>
 
-extern EFI_HII_HANDLE gShellNetwork1HiiHandle;
+extern EFI_HII_HANDLE  gShellNetwork1HiiHandle;
 
 /**
   Function for 'ping' command.
@@ -65,6 +64,3 @@ ShellCommandRunIfconfig (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
-#endif
-

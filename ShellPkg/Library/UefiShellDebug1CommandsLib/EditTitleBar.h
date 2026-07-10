@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _LIB_TITLE_BAR_H_
-#define _LIB_TITLE_BAR_H_
+#pragma once
 
 /**
   Initialize a title bar.
@@ -19,7 +18,7 @@
 **/
 EFI_STATUS
 MainTitleBarInit (
-  CONST CHAR16 *Prompt
+  CONST CHAR16  *Prompt
   );
 
 /**
@@ -55,14 +54,12 @@ typedef enum {
 **/
 EFI_STATUS
 MainTitleBarRefresh (
-  IN CONST CHAR16                 *FileName OPTIONAL,
-  IN CONST EDIT_FILE_TYPE         FileType,
-  IN CONST BOOLEAN                ReadOnly,
-  IN CONST BOOLEAN                Modified,
-  IN CONST UINTN                  LastCol,
-  IN CONST UINTN                  LastRow,
-  IN CONST UINTN                  Offset,
-  IN CONST UINTN                  Size
+  IN CONST CHAR16          *FileName OPTIONAL,
+  IN CONST EDIT_FILE_TYPE  FileType,
+  IN CONST BOOLEAN         ReadOnly,
+  IN CONST BOOLEAN         Modified,
+  IN CONST UINTN           LastCol,
+  IN CONST UINTN           LastRow,
+  IN CONST UINTN           Offset,
+  IN CONST UINTN           Size
   );
-
-#endif

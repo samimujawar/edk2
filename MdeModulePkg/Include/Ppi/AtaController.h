@@ -8,8 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _PEI_ATA_CONTROLLER_PPI_H_
-#define _PEI_ATA_CONTROLLER_PPI_H_
+#pragma once
 
 ///
 /// Global ID for the PEI_ATA_CONTROLLER_PPI.
@@ -30,7 +29,7 @@ typedef struct _PEI_ATA_CONTROLLER_PPI PEI_ATA_CONTROLLER_PPI;
 /// This is designed for old generation chipset with PATA/SATA controllers.
 /// It may be ignored in PPI implementation for new generation chipset without PATA controller.
 ///
-#define PEI_ICH_IDE_NONE        0x00
+#define PEI_ICH_IDE_NONE  0x00
 
 ///
 /// This bit is used in the ChannelMask parameter of EnableAtaChannel() to
@@ -38,7 +37,7 @@ typedef struct _PEI_ATA_CONTROLLER_PPI PEI_ATA_CONTROLLER_PPI;
 /// This is designed for old generation chipset with PATA/SATA controllers.
 /// It may be ignored in PPI implementation for new generation chipset without PATA controller.
 ///
-#define PEI_ICH_IDE_PRIMARY     0x01
+#define PEI_ICH_IDE_PRIMARY  0x01
 
 ///
 /// This bit is used in the ChannelMask parameter of EnableAtaChannel() to
@@ -46,7 +45,7 @@ typedef struct _PEI_ATA_CONTROLLER_PPI PEI_ATA_CONTROLLER_PPI;
 /// This is designed for old generation chipset with PATA/SATA controllers.
 /// It may be ignored in PPI implementation for new generation chipset without PATA controller.
 ///
-#define PEI_ICH_IDE_SECONDARY   0x02
+#define PEI_ICH_IDE_SECONDARY  0x02
 
 ///
 /// This bit is used in the ChannelMask parameter of EnableAtaChannel() to
@@ -54,7 +53,7 @@ typedef struct _PEI_ATA_CONTROLLER_PPI PEI_ATA_CONTROLLER_PPI;
 /// This is designed for old generation chipset with PATA/SATA controllers.
 /// It may be ignored in PPI implementation for new generation chipset without PATA controller.
 ///
-#define PEI_ICH_SATA_NONE       0x04
+#define PEI_ICH_SATA_NONE  0x04
 
 ///
 /// This bit is used in the ChannelMask parameter of EnableAtaChannel() to
@@ -62,7 +61,7 @@ typedef struct _PEI_ATA_CONTROLLER_PPI PEI_ATA_CONTROLLER_PPI;
 /// This is designed for old generation chipset with PATA/SATA controllers.
 /// It may be ignored in PPI implementation for new generation chipset without PATA controller.
 ///
-#define PEI_ICH_SATA_PRIMARY    0x08
+#define PEI_ICH_SATA_PRIMARY  0x08
 
 ///
 /// This bit is used in the ChannelMask parameter of EnableAtaChannel() to
@@ -79,11 +78,11 @@ typedef struct {
   ///
   /// Base I/O port address of the IDE controller's command block
   ///
-  UINT16  CommandBlockBaseAddr;
+  UINT16    CommandBlockBaseAddr;
   ///
   /// Base I/O port address of the IDE controller's control block
   ///
-  UINT16  ControlBlockBaseAddr;
+  UINT16    ControlBlockBaseAddr;
 } IDE_REGS_BASE_ADDR;
 
 /**
@@ -144,12 +143,8 @@ UINT32
 /// retrieves the base I/O port addresses to the enabled IDE and SATA channels.
 ///
 struct _PEI_ATA_CONTROLLER_PPI {
-  PEI_ENABLE_ATA          EnableAtaChannel;
-  GET_IDE_REGS_BASE_ADDR  GetIdeRegsBaseAddr;
+  PEI_ENABLE_ATA            EnableAtaChannel;
+  GET_IDE_REGS_BASE_ADDR    GetIdeRegsBaseAddr;
 };
 
-extern EFI_GUID gPeiAtaControllerPpiGuid;
-
-#endif
-
-
+extern EFI_GUID  gPeiAtaControllerPpiGuid;

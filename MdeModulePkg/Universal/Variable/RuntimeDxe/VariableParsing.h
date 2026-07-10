@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _VARIABLE_PARSING_H_
-#define _VARIABLE_PARSING_H_
+#pragma once
 
 #include <Guid/ImageAuthentication.h>
 #include "Variable.h"
@@ -26,8 +25,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 BOOLEAN
 IsValidVariableHeader (
-  IN  VARIABLE_HEADER       *Variable,
-  IN  VARIABLE_HEADER       *VariableStoreEnd
+  IN  VARIABLE_HEADER  *Variable,
+  IN  VARIABLE_HEADER  *VariableStoreEnd
   );
 
 /**
@@ -43,7 +42,7 @@ IsValidVariableHeader (
 **/
 VARIABLE_STORE_STATUS
 GetVariableStoreStatus (
-  IN VARIABLE_STORE_HEADER *VarStoreHeader
+  IN VARIABLE_STORE_HEADER  *VarStoreHeader
   );
 
 /**
@@ -57,7 +56,7 @@ GetVariableStoreStatus (
 **/
 UINTN
 GetVariableHeaderSize (
-  IN  BOOLEAN   AuthFormat
+  IN  BOOLEAN  AuthFormat
   );
 
 /**
@@ -73,8 +72,8 @@ GetVariableHeaderSize (
 **/
 UINTN
 NameSizeOfVariable (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -88,9 +87,9 @@ NameSizeOfVariable (
 **/
 VOID
 SetNameSizeOfVariable (
-  IN VARIABLE_HEADER    *Variable,
-  IN UINTN              NameSize,
-  IN BOOLEAN            AuthFormat
+  IN VARIABLE_HEADER  *Variable,
+  IN UINTN            NameSize,
+  IN BOOLEAN          AuthFormat
   );
 
 /**
@@ -106,8 +105,8 @@ SetNameSizeOfVariable (
 **/
 UINTN
 DataSizeOfVariable (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -121,9 +120,9 @@ DataSizeOfVariable (
 **/
 VOID
 SetDataSizeOfVariable (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  UINTN             DataSize,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  UINTN            DataSize,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -139,8 +138,8 @@ SetDataSizeOfVariable (
 **/
 CHAR16 *
 GetVariableNamePtr (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -155,8 +154,8 @@ GetVariableNamePtr (
 **/
 EFI_GUID *
 GetVendorGuidPtr (
-  IN  VARIABLE_HEADER    *Variable,
-  IN  BOOLEAN            AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -172,8 +171,8 @@ GetVendorGuidPtr (
 **/
 UINT8 *
 GetVariableDataPtr (
-  IN  VARIABLE_HEADER    *Variable,
-  IN  BOOLEAN            AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -188,8 +187,8 @@ GetVariableDataPtr (
 **/
 UINTN
 GetVariableDataOffset (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -205,8 +204,8 @@ GetVariableDataOffset (
 **/
 VARIABLE_HEADER *
 GetNextVariablePtr (
-  IN  VARIABLE_HEADER   *Variable,
-  IN  BOOLEAN           AuthFormat
+  IN  VARIABLE_HEADER  *Variable,
+  IN  BOOLEAN          AuthFormat
   );
 
 /**
@@ -220,7 +219,7 @@ GetNextVariablePtr (
 **/
 VARIABLE_HEADER *
 GetStartPointer (
-  IN VARIABLE_STORE_HEADER       *VarStoreHeader
+  IN VARIABLE_STORE_HEADER  *VarStoreHeader
   );
 
 /**
@@ -237,7 +236,7 @@ GetStartPointer (
 **/
 VARIABLE_HEADER *
 GetEndPointer (
-  IN VARIABLE_STORE_HEADER       *VarStoreHeader
+  IN VARIABLE_STORE_HEADER  *VarStoreHeader
   );
 
 /**
@@ -253,8 +252,8 @@ GetEndPointer (
 **/
 BOOLEAN
 VariableCompareTimeStampInternal (
-  IN EFI_TIME               *FirstTime,
-  IN EFI_TIME               *SecondTime
+  IN EFI_TIME  *FirstTime,
+  IN EFI_TIME  *SecondTime
   );
 
 /**
@@ -304,11 +303,11 @@ FindVariableEx (
 EFI_STATUS
 EFIAPI
 VariableServiceGetNextVariableInternal (
-  IN  CHAR16                *VariableName,
-  IN  EFI_GUID              *VendorGuid,
-  IN  VARIABLE_STORE_HEADER **VariableStoreList,
-  OUT VARIABLE_HEADER       **VariablePtr,
-  IN  BOOLEAN               AuthFormat
+  IN  CHAR16                 *VariableName,
+  IN  EFI_GUID               *VendorGuid,
+  IN  VARIABLE_STORE_HEADER  **VariableStoreList,
+  OUT VARIABLE_HEADER        **VariablePtr,
+  IN  BOOLEAN                AuthFormat
   );
 
 /**
@@ -343,5 +342,3 @@ UpdateVariableInfo (
   IN  BOOLEAN                 Cache,
   IN OUT VARIABLE_INFO_ENTRY  **VariableInfo
   );
-
-#endif

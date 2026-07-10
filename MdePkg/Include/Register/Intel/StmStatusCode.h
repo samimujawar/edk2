@@ -9,13 +9,12 @@
 
 **/
 
-#ifndef _INTEL_STM_STATUS_CODE_H_
-#define _INTEL_STM_STATUS_CODE_H_
+#pragma once
 
 /**
   STM Status Codes
 **/
-typedef UINT32  STM_STATUS;
+typedef UINT32 STM_STATUS;
 
 /**
   Success code have BIT31 clear.
@@ -68,5 +67,3 @@ typedef UINT32  STM_STATUS;
 #define STM_CRASH_DOMAIN_DEGRADATION_FAILURE    (BIT31 | BIT30 | 0xF003)
 #define STM_CRASH_BIOS_PANIC                    (BIT31 | BIT30 | 0xE000)
 /// @}
-
-#endif

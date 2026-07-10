@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _SHELL_CONSOLE_WRAPPERS_HEADER_
-#define _SHELL_CONSOLE_WRAPPERS_HEADER_
+#pragma once
 
 /**
   Function to create a EFI_SIMPLE_TEXT_INPUT_PROTOCOL on top of a
@@ -20,8 +19,8 @@
   @retval NULL                There was insufficient memory available.
   @return                     A pointer to the allocated protocol structure;
 **/
-EFI_SIMPLE_TEXT_INPUT_PROTOCOL*
-CreateSimpleTextInOnFile(
+EFI_SIMPLE_TEXT_INPUT_PROTOCOL *
+CreateSimpleTextInOnFile (
   IN SHELL_FILE_HANDLE  FileHandleToUse,
   IN EFI_HANDLE         *HandleLocation
   );
@@ -35,7 +34,7 @@ CreateSimpleTextInOnFile(
   @retval EFI_SUCCESS         The object was closed.
 **/
 EFI_STATUS
-CloseSimpleTextInOnFile(
+CloseSimpleTextInOnFile (
   IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *SimpleTextIn
   );
 
@@ -50,11 +49,11 @@ CloseSimpleTextInOnFile(
   @retval NULL                There was insufficient memory available.
   @return                     A pointer to the allocated protocol structure;
 **/
-EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL*
-CreateSimpleTextOutOnFile(
-  IN SHELL_FILE_HANDLE               FileHandleToUse,
-  IN EFI_HANDLE                      *HandleLocation,
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *OriginalProtocol
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *
+CreateSimpleTextOutOnFile (
+  IN SHELL_FILE_HANDLE                FileHandleToUse,
+  IN EFI_HANDLE                       *HandleLocation,
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *OriginalProtocol
   );
 
 /**
@@ -66,9 +65,6 @@ CreateSimpleTextOutOnFile(
   @retval EFI_SUCCESS         The object was closed.
 **/
 EFI_STATUS
-CloseSimpleTextOutOnFile(
+CloseSimpleTextOutOnFile (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *SimpleTextOut
   );
-
-#endif //_SHELL_CONSOLE_WRAPPERS_HEADER_
-

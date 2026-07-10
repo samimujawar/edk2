@@ -2,12 +2,12 @@
     Implementation of resetting a network adapter.
 
 Copyright (c) 2004 - 2018, Intel Corporation. All rights reserved.<BR>
+SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "Snp.h"
-
 
 /**
   Call UNDI to reset the NIC.
@@ -20,33 +20,38 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_STATUS
 PxeReset (
-  SNP_DRIVER *Snp
+  SNP_DRIVER  *Snp
   )
 {
-  Snp->Cdb.OpCode     = PXE_OPCODE_RESET;
-  Snp->Cdb.OpFlags    = PXE_OPFLAGS_NOT_USED;
-  Snp->Cdb.CPBsize    = PXE_CPBSIZE_NOT_USED;
-  Snp->Cdb.DBsize     = PXE_DBSIZE_NOT_USED;
-  Snp->Cdb.CPBaddr    = PXE_CPBADDR_NOT_USED;
-  Snp->Cdb.DBaddr     = PXE_DBADDR_NOT_USED;
-  Snp->Cdb.StatCode   = PXE_STATCODE_INITIALIZE;
-  Snp->Cdb.StatFlags  = PXE_STATFLAGS_INITIALIZE;
-  Snp->Cdb.IFnum      = Snp->IfNum;
-  Snp->Cdb.Control    = PXE_CONTROL_LAST_CDB_IN_LIST;
+  if (Snp->Cdb == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Snp->Cdb is NULL\n", __func__));
+    return EFI_DEVICE_ERROR;
+  }
+
+  Snp->Cdb->OpCode    = PXE_OPCODE_RESET;
+  Snp->Cdb->OpFlags   = PXE_OPFLAGS_NOT_USED;
+  Snp->Cdb->CPBsize   = PXE_CPBSIZE_NOT_USED;
+  Snp->Cdb->DBsize    = PXE_DBSIZE_NOT_USED;
+  Snp->Cdb->CPBaddr   = PXE_CPBADDR_NOT_USED;
+  Snp->Cdb->DBaddr    = PXE_DBADDR_NOT_USED;
+  Snp->Cdb->StatCode  = PXE_STATCODE_INITIALIZE;
+  Snp->Cdb->StatFlags = PXE_STATFLAGS_INITIALIZE;
+  Snp->Cdb->IFnum     = Snp->IfNum;
+  Snp->Cdb->Control   = PXE_CONTROL_LAST_CDB_IN_LIST;
 
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nsnp->undi.reset()  "));
+  DEBUG ((DEBUG_NET, "\nsnp->undi.reset()  "));
 
-  (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
+  (*Snp->IssueUndi32Command)((UINT64)(UINTN)Snp->Cdb);
 
-  if (Snp->Cdb.StatCode != PXE_STATCODE_SUCCESS) {
+  if (Snp->Cdb->StatCode != PXE_STATCODE_SUCCESS) {
     DEBUG (
-      (EFI_D_WARN,
-      "\nsnp->undi32.reset()  %xh:%xh\n",
-      Snp->Cdb.StatFlags,
-      Snp->Cdb.StatCode)
+      (DEBUG_WARN,
+       "\nsnp->undi32.reset()  %xh:%xh\n",
+       Snp->Cdb->StatFlags,
+       Snp->Cdb->StatCode)
       );
 
     //
@@ -57,7 +62,6 @@ PxeReset (
 
   return EFI_SUCCESS;
 }
-
 
 /**
   Resets a network adapter and reinitializes it with the parameters that were
@@ -86,8 +90,8 @@ PxeReset (
 EFI_STATUS
 EFIAPI
 SnpUndi32Reset (
-  IN EFI_SIMPLE_NETWORK_PROTOCOL *This,
-  IN BOOLEAN                     ExtendedVerification
+  IN EFI_SIMPLE_NETWORK_PROTOCOL  *This,
+  IN BOOLEAN                      ExtendedVerification
   )
 {
   SNP_DRIVER  *Snp;
@@ -95,10 +99,12 @@ SnpUndi32Reset (
   EFI_STATUS  Status;
 
   //
-  // Resolve Warning 4 unreferenced parameter problem
+  // There is no support when ExtendedVerification is set to FALSE.
   //
-  ExtendedVerification = 0;
-  DEBUG ((EFI_D_WARN, "ExtendedVerification = %d is not implemented!\n", ExtendedVerification));
+  if (!ExtendedVerification) {
+    DEBUG ((DEBUG_WARN, "ExtendedVerification = %d is not implemented!\n", ExtendedVerification));
+    return EFI_INVALID_PARAMETER;
+  }
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -109,16 +115,16 @@ SnpUndi32Reset (
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
   switch (Snp->Mode.State) {
-  case EfiSimpleNetworkInitialized:
-    break;
+    case EfiSimpleNetworkInitialized:
+      break;
 
-  case EfiSimpleNetworkStopped:
-    Status = EFI_NOT_STARTED;
-    goto ON_EXIT;
+    case EfiSimpleNetworkStopped:
+      Status = EFI_NOT_STARTED;
+      goto ON_EXIT;
 
-  default:
-    Status = EFI_DEVICE_ERROR;
-    goto ON_EXIT;
+    default:
+      Status = EFI_DEVICE_ERROR;
+      goto ON_EXIT;
   }
 
   Status = PxeReset (Snp);

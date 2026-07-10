@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PLATFORM_LOGO_H__
-#define __PLATFORM_LOGO_H__
+#pragma once
 
 #include <Protocol/HiiImage.h>
 
@@ -50,18 +49,14 @@ EFI_STATUS
 (EFIAPI *EDKII_PLATFORM_LOGO_GET_IMAGE)(
   IN     EDKII_PLATFORM_LOGO_PROTOCOL          *This,
   IN OUT UINT32                                *Instance,
-     OUT EFI_IMAGE_INPUT                       *Image,
-     OUT EDKII_PLATFORM_LOGO_DISPLAY_ATTRIBUTE *Attribute,
-     OUT INTN                                  *OffsetX,
-     OUT INTN                                  *OffsetY
+  OUT EFI_IMAGE_INPUT                       *Image,
+  OUT EDKII_PLATFORM_LOGO_DISPLAY_ATTRIBUTE *Attribute,
+  OUT INTN                                  *OffsetX,
+  OUT INTN                                  *OffsetY
   );
 
-
 struct _EDKII_PLATFORM_LOGO_PROTOCOL {
-  EDKII_PLATFORM_LOGO_GET_IMAGE GetImage;
+  EDKII_PLATFORM_LOGO_GET_IMAGE    GetImage;
 };
 
-
-extern EFI_GUID gEdkiiPlatformLogoProtocolGuid;
-
-#endif
+extern EFI_GUID  gEdkiiPlatformLogoProtocolGuid;

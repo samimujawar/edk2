@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PERIODIC_SMI_LIB_H__
-#define __PERIODIC_SMI_LIB_H__
+#pragma once
 
 #define PERIODIC_SMI_LIBRARY_ANY_CPU  0xffffffff
 
@@ -96,7 +95,7 @@ PeriodicSmiYield (
 **/
 typedef
 VOID
-(EFIAPI *PERIODIC_SMI_LIBRARY_HANDLER) (
+(EFIAPI *PERIODIC_SMI_LIBRARY_HANDLER)(
   IN CONST VOID  *Context OPTIONAL,
   IN UINT64      ElapsedTime
   );
@@ -144,9 +143,9 @@ VOID
 EFI_STATUS
 EFIAPI
 PeriodicSmiEnable (
-  IN OUT EFI_HANDLE                    *DispatchHandle,    OPTIONAL
+  IN OUT EFI_HANDLE                    *DispatchHandle     OPTIONAL,
   IN     PERIODIC_SMI_LIBRARY_HANDLER  DispatchFunction,
-  IN     CONST VOID                    *Context,           OPTIONAL
+  IN     CONST VOID                    *Context            OPTIONAL,
   IN     UINT64                        TickPeriod,
   IN     UINTN                         Cpu,
   IN     UINTN                         StackSize
@@ -174,5 +173,3 @@ EFIAPI
 PeriodicSmiDisable (
   IN EFI_HANDLE  DispatchHandle    OPTIONAL
   );
-
-#endif

@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef __ISCSI_INITIATOR_NAME_H__
-#define __ISCSI_INITIATOR_NAME_H__
+#pragma once
 
 #define EFI_ISCSI_INITIATOR_NAME_PROTOCOL_GUID \
 { \
@@ -41,8 +40,6 @@ EFI_STATUS
   OUT VOID                             *Buffer
   );
 
-
-
 /**
   Sets the iSCSI Initiator Name.
 
@@ -71,11 +68,8 @@ typedef EFI_STATUS
 /// iSCSI Initiator Name Protocol for setting and obtaining the iSCSI Initiator Name.
 ///
 struct _EFI_ISCSI_INITIATOR_NAME_PROTOCOL {
-  EFI_ISCSI_INITIATOR_NAME_GET         Get;
-  EFI_ISCSI_INITIATOR_NAME_SET         Set;
+  EFI_ISCSI_INITIATOR_NAME_GET    Get;
+  EFI_ISCSI_INITIATOR_NAME_SET    Set;
 };
 
-extern EFI_GUID gEfiIScsiInitiatorNameProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiIScsiInitiatorNameProtocolGuid;

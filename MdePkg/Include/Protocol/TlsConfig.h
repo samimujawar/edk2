@@ -9,8 +9,8 @@
   This Protocol is introduced in UEFI Specification 2.5
 
 **/
-#ifndef __EFI_TLS_CONFIGURATION_PROTOCOL_H__
-#define __EFI_TLS_CONFIGURATION_PROTOCOL_H__
+
+#pragma once
 
 ///
 /// The EFI Configuration protocol provides a way to set and get TLS configuration.
@@ -48,7 +48,6 @@ typedef enum {
   EfiTlsConfigDataTypeCertRevocationList,
 
   EfiTlsConfigDataTypeMaximum
-
 } EFI_TLS_CONFIG_DATA_TYPE;
 
 /**
@@ -108,7 +107,7 @@ EFI_STATUS
 (EFIAPI *EFI_TLS_CONFIGURATION_GET_DATA)(
   IN EFI_TLS_CONFIGURATION_PROTOCOL  *This,
   IN EFI_TLS_CONFIG_DATA_TYPE        DataType,
-  IN OUT VOID                        *Data,  OPTIONAL
+  IN OUT VOID                        *Data   OPTIONAL,
   IN OUT UINTN                       *DataSize
   );
 
@@ -117,11 +116,8 @@ EFI_STATUS
 /// TLS configuration, such as Certificate, private key data.
 ///
 struct _EFI_TLS_CONFIGURATION_PROTOCOL {
-  EFI_TLS_CONFIGURATION_SET_DATA     SetData;
-  EFI_TLS_CONFIGURATION_GET_DATA     GetData;
+  EFI_TLS_CONFIGURATION_SET_DATA    SetData;
+  EFI_TLS_CONFIGURATION_GET_DATA    GetData;
 };
 
-extern EFI_GUID gEfiTlsConfigurationProtocolGuid;
-
-#endif  //__EFI_TLS_CONFIGURATION_PROTOCOL_H__
-
+extern EFI_GUID  gEfiTlsConfigurationProtocolGuid;

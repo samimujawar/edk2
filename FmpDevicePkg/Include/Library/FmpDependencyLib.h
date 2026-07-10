@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __FMP_DEPENDENCY_LIB__
-#define __FMP_DEPENDENCY_LIB__
+#pragma once
 
 #include <PiDxe.h>
 #include <Protocol/FirmwareManagement.h>
@@ -19,8 +18,8 @@
 // Data struct to store FMP ImageType and version for dependency check.
 //
 typedef struct {
-  EFI_GUID ImageTypeId;
-  UINT32   Version;
+  EFI_GUID    ImageTypeId;
+  UINT32      Version;
 } FMP_DEPEX_CHECK_VERSION_DATA;
 
 /**
@@ -61,13 +60,13 @@ ValidateDependency (
   @retval  Null
 
 **/
-EFI_FIRMWARE_IMAGE_DEP*
+EFI_FIRMWARE_IMAGE_DEP *
 EFIAPI
 GetImageDependency (
-  IN  EFI_FIRMWARE_IMAGE_AUTHENTICATION *Image,
-  IN  UINTN                             ImageSize,
-  OUT UINT32                            *DepexSize,
-  OUT UINT32                            *LastAttemptStatus  OPTIONAL
+  IN  EFI_FIRMWARE_IMAGE_AUTHENTICATION  *Image,
+  IN  UINTN                              ImageSize,
+  OUT UINT32                             *DepexSize,
+  OUT UINT32                             *LastAttemptStatus  OPTIONAL
   );
 
 /**
@@ -96,9 +95,7 @@ EFIAPI
 EvaluateDependency (
   IN  EFI_FIRMWARE_IMAGE_DEP        *Dependencies,
   IN  UINTN                         DependenciesSize,
-  IN  FMP_DEPEX_CHECK_VERSION_DATA  *FmpVersions,      OPTIONAL
+  IN  FMP_DEPEX_CHECK_VERSION_DATA  *FmpVersions       OPTIONAL,
   IN  UINTN                         FmpVersionsCount,
   OUT UINT32                        *LastAttemptStatus OPTIONAL
   );
-
-#endif

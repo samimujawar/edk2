@@ -1,13 +1,12 @@
 /** @file
-  Internal data structure defintions for Base UEFI Decompress Library.
+  Internal data structure definitions for Base UEFI Decompress Library.
 
   Copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __BASE_UEFI_DECOMPRESS_LIB_INTERNALS_H__
-#define __BASE_UEFI_DECOMPRESS_LIB_INTERNALS_H__
+#pragma once
 
 #include <Base.h>
 #include <Library/BaseLib.h>
@@ -17,55 +16,55 @@
 //
 // Decompression algorithm begins here
 //
-#define BITBUFSIZ 32
-#define MAXMATCH  256
-#define THRESHOLD 3
-#define CODE_BIT  16
-#define BAD_TABLE - 1
+#define BITBUFSIZ  32
+#define MAXMATCH   256
+#define THRESHOLD  3
+#define CODE_BIT   16
+#define BAD_TABLE  - 1
 
 //
 // C: Char&Len Set; P: Position Set; T: exTra Set
 //
-#define NC      (0xff + MAXMATCH + 2 - THRESHOLD)
-#define CBIT    9
-#define MAXPBIT 5
-#define TBIT    5
-#define MAXNP   ((1U << MAXPBIT) - 1)
-#define NT      (CODE_BIT + 3)
+#define NC       (0xff + MAXMATCH + 2 - THRESHOLD)
+#define CBIT     9
+#define MAXPBIT  5
+#define TBIT     5
+#define MAXNP    ((1U << MAXPBIT) - 1)
+#define NT       (CODE_BIT + 3)
 #if NT > MAXNP
-#define NPT NT
+#define NPT  NT
 #else
-#define NPT MAXNP
+#define NPT  MAXNP
 #endif
 
 typedef struct {
-  UINT8   *mSrcBase;  // The starting address of compressed data
-  UINT8   *mDstBase;  // The starting address of decompressed data
-  UINT32  mOutBuf;
-  UINT32  mInBuf;
+  UINT8     *mSrcBase; // The starting address of compressed data
+  UINT8     *mDstBase; // The starting address of decompressed data
+  UINT32    mOutBuf;
+  UINT32    mInBuf;
 
-  UINT16  mBitCount;
-  UINT32  mBitBuf;
-  UINT32  mSubBitBuf;
-  UINT16  mBlockSize;
-  UINT32  mCompSize;
-  UINT32  mOrigSize;
+  UINT16    mBitCount;
+  UINT32    mBitBuf;
+  UINT32    mSubBitBuf;
+  UINT16    mBlockSize;
+  UINT32    mCompSize;
+  UINT32    mOrigSize;
 
-  UINT16  mBadTableFlag;
+  UINT16    mBadTableFlag;
 
-  UINT16  mLeft[2 * NC - 1];
-  UINT16  mRight[2 * NC - 1];
-  UINT8   mCLen[NC];
-  UINT8   mPTLen[NPT];
-  UINT16  mCTable[4096];
-  UINT16  mPTTable[256];
+  UINT16    mLeft[2 * NC - 1];
+  UINT16    mRight[2 * NC - 1];
+  UINT8     mCLen[NC];
+  UINT8     mPTLen[NPT];
+  UINT16    mCTable[4096];
+  UINT16    mPTTable[256];
 
   ///
   /// The length of the field 'Position Set Code Length Array Size' in Block Header.
   /// For UEFI 2.0 de/compression algorithm, mPBit = 4.
   /// For Tiano de/compression algorithm, mPBit = 5.
   ///
-  UINT8   mPBit;
+  UINT8     mPBit;
 } SCRATCH_DATA;
 
 /**
@@ -230,7 +229,7 @@ Decode (
   @param  Scratch     A temporary scratch buffer that is used to perform the decompression.
                       This is an optional parameter that may be NULL if the
                       required scratch buffer size is 0.
-  @param  Version     1 for UEFI Decompress algoruthm, 2 for Tiano Decompess algorithm.
+  @param  Version     1 for UEFI Decompress algorithm, 2 for Tiano Decompress algorithm.
 
   @retval  RETURN_SUCCESS Decompression completed successfully, and
                           the uncompressed buffer is returned in Destination.
@@ -245,4 +244,3 @@ UefiTianoDecompress (
   IN OUT VOID    *Scratch,
   IN UINT32      Version
   );
-#endif

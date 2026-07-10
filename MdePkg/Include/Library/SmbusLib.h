@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __SMBUS_LIB__
-#define __SMBUS_LIB__
+#pragma once
 
 /**
   Macro that converts SMBUS slave address, SMBUS command, SMBUS data length,
@@ -24,7 +23,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   @param  Pec             TRUE if Packet Error Checking is enabled.  Otherwise FALSE.
 
 **/
-#define SMBUS_LIB_ADDRESS(SlaveAddress,Command,Length,Pec)  \
+#define SMBUS_LIB_ADDRESS(SlaveAddress, Command, Length, Pec)  \
   ( ((Pec) ? BIT22: 0)                  | \
     (((SlaveAddress) & 0x7f) << 1)      | \
     (((Command)      & 0xff) << 8)      | \
@@ -36,35 +35,35 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
   @param SmBusAddress   Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_SLAVE_ADDRESS(SmBusAddress)      (((SmBusAddress) >> 1)  & 0x7f)
+#define SMBUS_LIB_SLAVE_ADDRESS(SmBusAddress)  (((SmBusAddress) >> 1)  & 0x7f)
 
 /**
   Macro that returns the SMBUS Command value from an SmBusAddress Parameter value.
 
   @param SmBusAddress   Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_COMMAND(SmBusAddress)            (((SmBusAddress) >> 8)  & 0xff)
+#define SMBUS_LIB_COMMAND(SmBusAddress)  (((SmBusAddress) >> 8)  & 0xff)
 
 /**
   Macro that returns the SMBUS Data Length value from an SmBusAddress Parameter value.
 
   @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_LENGTH(SmBusAddress)             (((SmBusAddress) >> 16) & 0x3f)
+#define SMBUS_LIB_LENGTH(SmBusAddress)  (((SmBusAddress) >> 16) & 0x3f)
 
 /**
   Macro that returns the SMBUS PEC value from an SmBusAddress Parameter value.
 
   @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_PEC(SmBusAddress)                ((BOOLEAN) (((SmBusAddress) & BIT22) != 0))
+#define SMBUS_LIB_PEC(SmBusAddress)  ((BOOLEAN) (((SmBusAddress) & BIT22) != 0))
 
 /**
   Macro that returns the set of reserved bits from an SmBusAddress Parameter value.
 
   @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_RESERVED(SmBusAddress)           ((SmBusAddress) & ~(BIT23 - 2))
+#define SMBUS_LIB_RESERVED(SmBusAddress)  ((SmBusAddress) & ~(BIT23 - 2))
 
 /**
   Executes an SMBUS quick read command.
@@ -93,8 +92,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 VOID
 EFIAPI
 SmBusQuickRead (
-  IN  UINTN                     SmBusAddress,
-  OUT RETURN_STATUS             *Status       OPTIONAL
+  IN  UINTN          SmBusAddress,
+  OUT RETURN_STATUS  *Status       OPTIONAL
   );
 
 /**
@@ -124,8 +123,8 @@ SmBusQuickRead (
 VOID
 EFIAPI
 SmBusQuickWrite (
-  IN  UINTN                     SmBusAddress,
-  OUT RETURN_STATUS             *Status       OPTIONAL
+  IN  UINTN          SmBusAddress,
+  OUT RETURN_STATUS  *Status       OPTIONAL
   );
 
 /**
@@ -486,6 +485,3 @@ SmBusBlockProcessCall (
   OUT VOID           *ReadBuffer,
   OUT RETURN_STATUS  *Status        OPTIONAL
   );
-
-
-#endif

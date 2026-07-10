@@ -10,8 +10,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef __FW_CFG_S3_LIB__
-#define __FW_CFG_S3_LIB__
+#pragma once
 
 #include <Base.h>
 
@@ -31,7 +30,6 @@ EFIAPI
 QemuFwCfgS3Enabled (
   VOID
   );
-
 
 /**
   Prototype for the callback function that the client module provides.
@@ -86,11 +84,10 @@ QemuFwCfgS3Enabled (
                                 ScratchBuffer is aligned at 8 bytes.
 **/
 typedef
-VOID (EFIAPI FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION) (
-  IN OUT VOID *Context,      OPTIONAL
+VOID(EFIAPI FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION)(
+  IN OUT VOID *Context       OPTIONAL,
   IN OUT VOID *ScratchBuffer
   );
-
 
 /**
   Install the client module's FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION callback for
@@ -152,11 +149,10 @@ VOID (EFIAPI FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION) (
 RETURN_STATUS
 EFIAPI
 QemuFwCfgS3CallWhenBootScriptReady (
-  IN     FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION *Callback,
-  IN OUT VOID                                 *Context,          OPTIONAL
-  IN     UINTN                                ScratchBufferSize
+  IN     FW_CFG_BOOT_SCRIPT_CALLBACK_FUNCTION  *Callback,
+  IN OUT VOID                                  *Context           OPTIONAL,
+  IN     UINTN                                 ScratchBufferSize
   );
-
 
 /**
   Produce ACPI S3 Boot Script opcodes that (optionally) select an fw_cfg item,
@@ -201,10 +197,9 @@ QemuFwCfgS3CallWhenBootScriptReady (
 RETURN_STATUS
 EFIAPI
 QemuFwCfgS3ScriptWriteBytes (
-  IN INT32 FirmwareConfigItem,
-  IN UINTN NumberOfBytes
+  IN INT32  FirmwareConfigItem,
+  IN UINTN  NumberOfBytes
   );
-
 
 /**
   Produce ACPI S3 Boot Script opcodes that (optionally) select an fw_cfg item,
@@ -248,10 +243,9 @@ QemuFwCfgS3ScriptWriteBytes (
 RETURN_STATUS
 EFIAPI
 QemuFwCfgS3ScriptReadBytes (
-  IN INT32 FirmwareConfigItem,
-  IN UINTN NumberOfBytes
+  IN INT32  FirmwareConfigItem,
+  IN UINTN  NumberOfBytes
   );
-
 
 /**
   Produce ACPI S3 Boot Script opcodes that (optionally) select an fw_cfg item,
@@ -288,10 +282,9 @@ QemuFwCfgS3ScriptReadBytes (
 RETURN_STATUS
 EFIAPI
 QemuFwCfgS3ScriptSkipBytes (
-  IN INT32 FirmwareConfigItem,
-  IN UINTN NumberOfBytes
+  IN INT32  FirmwareConfigItem,
+  IN UINTN  NumberOfBytes
   );
-
 
 /**
   Produce ACPI S3 Boot Script opcodes that check a value in ScratchBuffer.
@@ -346,10 +339,8 @@ QemuFwCfgS3ScriptSkipBytes (
 RETURN_STATUS
 EFIAPI
 QemuFwCfgS3ScriptCheckValue (
-  IN VOID   *ScratchData,
-  IN UINT8  ValueSize,
-  IN UINT64 ValueMask,
-  IN UINT64 Value
+  IN VOID    *ScratchData,
+  IN UINT8   ValueSize,
+  IN UINT64  ValueMask,
+  IN UINT64  Value
   );
-
-#endif

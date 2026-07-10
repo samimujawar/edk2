@@ -19,27 +19,32 @@
   @retval EFI_SUCCESS          Returns success if platform implements a
                                PL111 controller.
 
-  @retval EFI_NOT_FOUND        PL111 display controller not found the plaform.
+  @retval EFI_NOT_FOUND        PL111 display controller not found the platform.
 **/
 EFI_STATUS
 LcdIdentify (
   VOID
   )
 {
-  DEBUG ((EFI_D_WARN, "Probing ID registers at 0x%lx for a PL111\n",
-    PL111_REG_CLCD_PERIPH_ID_0));
+  DEBUG ((
+    DEBUG_WARN,
+    "Probing ID registers at 0x%lx for a PL111\n",
+    PL111_REG_CLCD_PERIPH_ID_0
+    ));
 
   // Check if this is a PL111
-  if (MmioRead8 (PL111_REG_CLCD_PERIPH_ID_0) == PL111_CLCD_PERIPH_ID_0 &&
-      MmioRead8 (PL111_REG_CLCD_PERIPH_ID_1) == PL111_CLCD_PERIPH_ID_1 &&
-     (MmioRead8 (PL111_REG_CLCD_PERIPH_ID_2) & 0xf) == PL111_CLCD_PERIPH_ID_2 &&
-      MmioRead8 (PL111_REG_CLCD_PERIPH_ID_3) == PL111_CLCD_PERIPH_ID_3 &&
-      MmioRead8 (PL111_REG_CLCD_P_CELL_ID_0) == PL111_CLCD_P_CELL_ID_0 &&
-      MmioRead8 (PL111_REG_CLCD_P_CELL_ID_1) == PL111_CLCD_P_CELL_ID_1 &&
-      MmioRead8 (PL111_REG_CLCD_P_CELL_ID_2) == PL111_CLCD_P_CELL_ID_2 &&
-      MmioRead8 (PL111_REG_CLCD_P_CELL_ID_3) == PL111_CLCD_P_CELL_ID_3) {
+  if ((MmioRead8 (PL111_REG_CLCD_PERIPH_ID_0) == PL111_CLCD_PERIPH_ID_0) &&
+      (MmioRead8 (PL111_REG_CLCD_PERIPH_ID_1) == PL111_CLCD_PERIPH_ID_1) &&
+      ((MmioRead8 (PL111_REG_CLCD_PERIPH_ID_2) & 0xf) == PL111_CLCD_PERIPH_ID_2) &&
+      (MmioRead8 (PL111_REG_CLCD_PERIPH_ID_3) == PL111_CLCD_PERIPH_ID_3) &&
+      (MmioRead8 (PL111_REG_CLCD_P_CELL_ID_0) == PL111_CLCD_P_CELL_ID_0) &&
+      (MmioRead8 (PL111_REG_CLCD_P_CELL_ID_1) == PL111_CLCD_P_CELL_ID_1) &&
+      (MmioRead8 (PL111_REG_CLCD_P_CELL_ID_2) == PL111_CLCD_P_CELL_ID_2) &&
+      (MmioRead8 (PL111_REG_CLCD_P_CELL_ID_3) == PL111_CLCD_P_CELL_ID_3))
+  {
     return EFI_SUCCESS;
   }
+
   return EFI_NOT_FOUND;
 }
 
@@ -51,7 +56,7 @@ LcdIdentify (
 **/
 EFI_STATUS
 LcdInitialize (
-  IN EFI_PHYSICAL_ADDRESS   VramBaseAddress
+  IN EFI_PHYSICAL_ADDRESS  VramBaseAddress
   )
 {
   // Define start of the VRAM. This never changes for any graphics mode
@@ -66,9 +71,9 @@ LcdInitialize (
 
 /** Set requested mode of the display.
 
-  @param[in] ModeNumbe           Display mode number.
+  @param[in] ModeNumber          Display mode number.
 
-  @retval EFI_SUCCESS            Display mode set successfuly.
+  @retval EFI_SUCCESS            Display mode set successfully.
   @retval !(EFI_SUCCESS)         Other errors.
 **/
 EFI_STATUS
@@ -76,11 +81,11 @@ LcdSetMode (
   IN UINT32  ModeNumber
   )
 {
-  EFI_STATUS        Status;
-  SCAN_TIMINGS      *Horizontal;
-  SCAN_TIMINGS      *Vertical;
-  UINT32            LcdControl;
-  LCD_BPP           LcdBpp;
+  EFI_STATUS    Status;
+  SCAN_TIMINGS  *Horizontal;
+  SCAN_TIMINGS  *Vertical;
+  UINT32        LcdControl;
+  LCD_BPP       LcdBpp;
 
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  ModeInfo;
 
@@ -148,6 +153,7 @@ LcdSetMode (
   if (ModeInfo.PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
     LcdControl |= PL111_CTRL_BGR;
   }
+
   MmioWrite32 (PL111_REG_LCD_CONTROL, LcdControl);
 
   return EFI_SUCCESS;

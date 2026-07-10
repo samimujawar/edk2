@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __S3_IO_LIB_H__
-#define __S3_IO_LIB_H__
+#pragma once
 
 /**
   Reads an 8-bit I/O port and saves the value in the S3 script to be replayed
@@ -1940,9 +1939,9 @@ S3MmioAnd32 (
 UINT32
 EFIAPI
 S3MmioAndThenOr32 (
-  IN UINTN    Address,
-  IN UINT32   AndData,
-  IN UINT32   OrData
+  IN UINTN   Address,
+  IN UINT32  AndData,
+  IN UINT32  OrData
   );
 
 /**
@@ -2214,8 +2213,8 @@ S3MmioOr64 (
 UINT64
 EFIAPI
 S3MmioAnd64 (
-  IN UINTN              Address,
-  IN UINT64             AndData
+  IN UINTN   Address,
+  IN UINT64  AndData
   );
 
 /**
@@ -2377,10 +2376,10 @@ S3MmioBitFieldOr64 (
 UINT64
 EFIAPI
 S3MmioBitFieldAnd64 (
-  IN UINTN    Address,
-  IN UINTN    StartBit,
-  IN UINTN    EndBit,
-  IN UINT64   AndData
+  IN UINTN   Address,
+  IN UINTN   StartBit,
+  IN UINTN   EndBit,
+  IN UINT64  AndData
   );
 
 /**
@@ -2539,9 +2538,9 @@ S3MmioReadBuffer32 (
 UINT64 *
 EFIAPI
 S3MmioReadBuffer64 (
-  IN  UINTN       StartAddress,
-  IN  UINTN       Length,
-  OUT UINT64      *Buffer
+  IN  UINTN   StartAddress,
+  IN  UINTN   Length,
+  OUT UINT64  *Buffer
   );
 
 /**
@@ -2566,9 +2565,9 @@ S3MmioReadBuffer64 (
 UINT8 *
 EFIAPI
 S3MmioWriteBuffer8 (
-  IN  UINTN         StartAddress,
-  IN  UINTN         Length,
-  IN  CONST UINT8   *Buffer
+  IN  UINTN        StartAddress,
+  IN  UINTN        Length,
+  IN  CONST UINT8  *Buffer
   );
 
 /**
@@ -2666,5 +2665,3 @@ S3MmioWriteBuffer64 (
   IN  UINTN         Length,
   IN  CONST UINT64  *Buffer
   );
-
-#endif

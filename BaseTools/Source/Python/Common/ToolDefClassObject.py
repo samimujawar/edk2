@@ -1,7 +1,7 @@
 ## @file
 # This file is used to define each component of tools_def.txt file
 #
-# Copyright (c) 2007 - 2019, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2007 - 2021, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
@@ -30,9 +30,9 @@ from .DataType import TAB_TOD_DEFINES_TARGET, TAB_TOD_DEFINES_TOOL_CHAIN_TAG,\
 ##
 # Static variables used for pattern
 #
-gMacroRefPattern = re.compile('(DEF\([^\(\)]+\))')
-gEnvRefPattern = re.compile('(ENV\([^\(\)]+\))')
-gMacroDefPattern = re.compile("DEFINE\s+([^\s]+)")
+gMacroRefPattern = re.compile(r'(DEF\([^\(\)]+\))')
+gEnvRefPattern = re.compile(r'(ENV\([^\(\)]+\))')
+gMacroDefPattern = re.compile(r"DEFINE\s+([^\s]+)")
 gDefaultToolsDefFile = "tools_def.txt"
 
 ## ToolDefClassObject
@@ -86,23 +86,6 @@ class ToolDefClassObject(object):
         self.ToolsDefTxtDatabase[TAB_TOD_DEFINES_TARGET_ARCH].sort()
         self.ToolsDefTxtDatabase[TAB_TOD_DEFINES_COMMAND_TYPE].sort()
 
-        KeyList = [TAB_TOD_DEFINES_TARGET, TAB_TOD_DEFINES_TOOL_CHAIN_TAG, TAB_TOD_DEFINES_TARGET_ARCH, TAB_TOD_DEFINES_COMMAND_TYPE]
-        for Index in range(3, -1, -1):
-            # make a copy of the keys to enumerate over to prevent issues when
-            # adding/removing items from the original dict.
-            for Key in list(self.ToolsDefTxtDictionary.keys()):
-                List = Key.split('_')
-                if List[Index] == TAB_STAR:
-                    for String in self.ToolsDefTxtDatabase[KeyList[Index]]:
-                        List[Index] = String
-                        NewKey = '%s_%s_%s_%s_%s' % tuple(List)
-                        if NewKey not in self.ToolsDefTxtDictionary:
-                            self.ToolsDefTxtDictionary[NewKey] = self.ToolsDefTxtDictionary[Key]
-                    del self.ToolsDefTxtDictionary[Key]
-                elif List[Index] not in self.ToolsDefTxtDatabase[KeyList[Index]]:
-                    del self.ToolsDefTxtDictionary[Key]
-
-
     ## IncludeToolDefFile
     #
     # Load target.txt file and parse it as if its contents were inside the main file
@@ -124,6 +107,10 @@ class ToolDefClassObject(object):
             Line = FileContent[Index].strip()
             if Line == "" or Line[0] == '#':
                 continue
+
+            if '#' in Line:
+                EdkLogger.error("tools_def.txt parser", FILE_PARSE_FAILURE,
+                                "tools_def.txt: Inline comments are not allowed. Line: " + str(Index + 1))
 
             if Line.startswith("!include"):
                 IncFile = Line[8:].strip()

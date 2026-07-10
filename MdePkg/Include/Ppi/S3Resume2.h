@@ -16,8 +16,7 @@
 
 **/
 
-#ifndef __PEI_S3_RESUME_PPI_H__
-#define __PEI_S3_RESUME_PPI_H__
+#pragma once
 
 ///
 /// Global ID for EFI_PEI_S3_RESUME2_PPI
@@ -30,7 +29,7 @@
 ///
 /// Forward declaration for EFI_PEI_S3_RESUME_PPI
 ///
-typedef struct _EFI_PEI_S3_RESUME2_PPI  EFI_PEI_S3_RESUME2_PPI;
+typedef struct _EFI_PEI_S3_RESUME2_PPI EFI_PEI_S3_RESUME2_PPI;
 
 /**
   Restores the platform to its preboot configuration for an S3 resume and
@@ -78,9 +77,7 @@ struct _EFI_PEI_S3_RESUME2_PPI {
   /// Restores the platform to its preboot configuration for an S3 resume and
   /// jumps to the OS waking vector.
   ///
-  EFI_PEI_S3_RESUME_PPI_RESTORE_CONFIG2  S3RestoreConfig2;
+  EFI_PEI_S3_RESUME_PPI_RESTORE_CONFIG2    S3RestoreConfig2;
 };
 
-extern EFI_GUID gEfiPeiS3Resume2PpiGuid;
-
-#endif
+extern EFI_GUID  gEfiPeiS3Resume2PpiGuid;

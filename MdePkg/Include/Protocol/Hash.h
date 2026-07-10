@@ -10,8 +10,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_HASH_PROTOCOL_H__
-#define __EFI_HASH_PROTOCOL_H__
+#pragma once
 
 #define EFI_HASH_SERVICE_BINDING_PROTOCOL_GUID \
   { \
@@ -48,10 +47,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
     0xcaa4381e, 0x750c, 0x4770, {0xb8, 0x70, 0x7a, 0x23, 0xb4, 0xe4, 0x21, 0x30 } \
   }
 
-#define EFI_HASH_ALGORTIHM_MD5_GUID \
+#define EFI_HASH_ALGORITHM_MD5_GUID \
   { \
     0xaf7c79c, 0x65b5, 0x4319, {0xb0, 0xae, 0x44, 0xec, 0x48, 0x4e, 0x4a, 0xd7 } \
   }
+// This misspelling is kept temporarily for backwards compatibility and will
+// be removed in a future PR. Consumers must migrate to the new definition
+#define EFI_HASH_ALGORTIHM_MD5_GUID  EFI_HASH_ALGORITHM_MD5_GUID
 
 #define EFI_HASH_ALGORITHM_SHA1_NOPAD_GUID \
   { \
@@ -70,25 +72,25 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //       EFI_HASH_ALGORITHM_SHA256_GUID
 //       EFI_HASH_ALGORITHM_SHA384_GUID
 //       EFI_HASH_ALGORITHM_SHA512_GUID
-//       EFI_HASH_ALGORTIHM_MD5_GUID
+//       EFI_HASH_ALGORITHM_MD5_GUID
 //
 
 typedef struct _EFI_HASH_PROTOCOL EFI_HASH_PROTOCOL;
 
-typedef UINT8  EFI_MD5_HASH[16];
-typedef UINT8  EFI_SHA1_HASH[20];
-typedef UINT8  EFI_SHA224_HASH[28];
-typedef UINT8  EFI_SHA256_HASH[32];
-typedef UINT8  EFI_SHA384_HASH[48];
-typedef UINT8  EFI_SHA512_HASH[64];
+typedef UINT8 EFI_MD5_HASH[16];
+typedef UINT8 EFI_SHA1_HASH[20];
+typedef UINT8 EFI_SHA224_HASH[28];
+typedef UINT8 EFI_SHA256_HASH[32];
+typedef UINT8 EFI_SHA384_HASH[48];
+typedef UINT8 EFI_SHA512_HASH[64];
 
 typedef union {
-  EFI_MD5_HASH     *Md5Hash;
-  EFI_SHA1_HASH    *Sha1Hash;
-  EFI_SHA224_HASH  *Sha224Hash;
-  EFI_SHA256_HASH  *Sha256Hash;
-  EFI_SHA384_HASH  *Sha384Hash;
-  EFI_SHA512_HASH  *Sha512Hash;
+  EFI_MD5_HASH       *Md5Hash;
+  EFI_SHA1_HASH      *Sha1Hash;
+  EFI_SHA224_HASH    *Sha224Hash;
+  EFI_SHA256_HASH    *Sha256Hash;
+  EFI_SHA384_HASH    *Sha384Hash;
+  EFI_SHA512_HASH    *Sha512Hash;
 } EFI_HASH_OUTPUT;
 
 /**
@@ -151,19 +153,17 @@ EFI_STATUS
 /// using one or more hash algorithms.
 ///
 struct _EFI_HASH_PROTOCOL {
-  EFI_HASH_GET_HASH_SIZE          GetHashSize;
-  EFI_HASH_HASH                   Hash;
+  EFI_HASH_GET_HASH_SIZE    GetHashSize;
+  EFI_HASH_HASH             Hash;
 };
 
-extern EFI_GUID gEfiHashServiceBindingProtocolGuid;
-extern EFI_GUID gEfiHashProtocolGuid;
-extern EFI_GUID gEfiHashAlgorithmSha1Guid;
-extern EFI_GUID gEfiHashAlgorithmSha224Guid;
-extern EFI_GUID gEfiHashAlgorithmSha256Guid;
-extern EFI_GUID gEfiHashAlgorithmSha384Guid;
-extern EFI_GUID gEfiHashAlgorithmSha512Guid;
-extern EFI_GUID gEfiHashAlgorithmMD5Guid;
-extern EFI_GUID gEfiHashAlgorithmSha1NoPadGuid;
-extern EFI_GUID gEfiHashAlgorithmSha256NoPadGuid;
-
-#endif
+extern EFI_GUID  gEfiHashServiceBindingProtocolGuid;
+extern EFI_GUID  gEfiHashProtocolGuid;
+extern EFI_GUID  gEfiHashAlgorithmSha1Guid;
+extern EFI_GUID  gEfiHashAlgorithmSha224Guid;
+extern EFI_GUID  gEfiHashAlgorithmSha256Guid;
+extern EFI_GUID  gEfiHashAlgorithmSha384Guid;
+extern EFI_GUID  gEfiHashAlgorithmSha512Guid;
+extern EFI_GUID  gEfiHashAlgorithmMD5Guid;
+extern EFI_GUID  gEfiHashAlgorithmSha1NoPadGuid;
+extern EFI_GUID  gEfiHashAlgorithmSha256NoPadGuid;

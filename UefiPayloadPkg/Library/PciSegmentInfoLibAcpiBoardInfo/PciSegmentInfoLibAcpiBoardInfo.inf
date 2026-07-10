@@ -29,8 +29,17 @@
 [Packages]
   MdePkg/MdePkg.dec
   UefiPayloadPkg/UefiPayloadPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
 
 [LibraryClasses]
   PcdLib
   HobLib
   DebugLib
+
+[Guids]
+  gUefiAcpiBoardInfoGuid
+  gUplPciSegmentInfoHobGuid
+  gUniversalPayloadPciRootBridgeInfoGuid
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPciDisableBusEnumeration

@@ -37,8 +37,7 @@
 
 **/
 
-#ifndef __PCI_HOTPLUG_REQUEST_H_
-#define __PCI_HOTPLUG_REQUEST_H_
+#pragma once
 
 ///
 /// Global ID for EFI_PCI_HOTPLUG_REQUEST_PROTOCOL
@@ -51,7 +50,7 @@
 ///
 /// Forward declaration for EFI_PCI_HOTPLUG_REQUEST_PROTOCOL
 ///
-typedef struct _EFI_PCI_HOTPLUG_REQUEST_PROTOCOL  EFI_PCI_HOTPLUG_REQUEST_PROTOCOL;
+typedef struct _EFI_PCI_HOTPLUG_REQUEST_PROTOCOL EFI_PCI_HOTPLUG_REQUEST_PROTOCOL;
 
 ///
 /// Enumeration of PCI hot plug operations
@@ -156,9 +155,7 @@ struct _EFI_PCI_HOTPLUG_REQUEST_PROTOCOL {
   /// to create or destroy handles for the PCI-like devices. See Section 0 for
   /// a detailed description.
   ///
-  EFI_PCI_HOTPLUG_REQUEST_NOTIFY  Notify;
+  EFI_PCI_HOTPLUG_REQUEST_NOTIFY    Notify;
 };
 
-extern EFI_GUID gEfiPciHotPlugRequestProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiPciHotPlugRequestProtocolGuid;

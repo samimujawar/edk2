@@ -13,10 +13,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/HobLib.h>
+#include <Library/FdtLib.h>
 #include "X64/VirtualMemory.h"
 #include "UefiPayloadEntry.h"
-#define STACK_SIZE            0x20000
+#define STACK_SIZE  0x20000
 
+extern VOID  *mHobList;
 
 /**
    Transfers control to DxeCore.
@@ -31,24 +33,24 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 VOID
 HandOffToDxeCore (
-  IN EFI_PHYSICAL_ADDRESS   DxeCoreEntryPoint,
-  IN EFI_PEI_HOB_POINTERS   HobList
+  IN EFI_PHYSICAL_ADDRESS  DxeCoreEntryPoint,
+  IN EFI_PEI_HOB_POINTERS  HobList
   )
 {
-  VOID                            *BaseOfStack;
-  VOID                            *TopOfStack;
-  UINTN                           PageTables;
-  VOID                            *GhcbBase;
-  UINTN                           GhcbSize;
+  VOID   *BaseOfStack;
+  VOID   *TopOfStack;
+  UINTN  PageTables;
+  VOID   *GhcbBase;
+  UINTN  GhcbSize;
+
+  // Initialize floating point operating environment to be compliant with UEFI spec.
+  InitializeFloatingPointUnits ();
 
   //
-  // Clear page 0 and mark it as allocated if NULL pointer detection is enabled.
+  // Mask off all legacy 8259 interrupt sources
   //
-  if (IsNullDetectionEnabled ()) {
-    ClearFirst4KPage (HobList.Raw);
-    BuildMemoryAllocationHob (0, EFI_PAGES_TO_SIZE (1), EfiBootServicesData);
-  }
-
+  IoWrite8 (LEGACY_8259_MASK_REGISTER_MASTER, 0xFF);
+  IoWrite8 (LEGACY_8259_MASK_REGISTER_SLAVE, 0xFF);
 
   //
   // Allocate 128KB for the Stack
@@ -60,22 +62,26 @@ HandOffToDxeCore (
   // Compute the top of the stack we were allocated. Pre-allocate a UINTN
   // for safety.
   //
-  TopOfStack = (VOID *) ((UINTN) BaseOfStack + EFI_SIZE_TO_PAGES (STACK_SIZE) * EFI_PAGE_SIZE - CPU_STACK_ALIGNMENT);
+  TopOfStack = (VOID *)((UINTN)BaseOfStack + EFI_SIZE_TO_PAGES (STACK_SIZE) * EFI_PAGE_SIZE - CPU_STACK_ALIGNMENT);
   TopOfStack = ALIGN_POINTER (TopOfStack, CPU_STACK_ALIGNMENT);
 
   //
   // Get the address and size of the GHCB pages
   //
-  GhcbBase = (VOID *) PcdGet64 (PcdGhcbBase);
-  GhcbSize = PcdGet64 (PcdGhcbSize);
+  GhcbBase = 0;
+  GhcbSize = 0;
 
   PageTables = 0;
   if (FeaturePcdGet (PcdDxeIplBuildPageTables)) {
     //
     // Create page table and save PageMapLevel4 to CR3
     //
-    PageTables = CreateIdentityMappingPageTables ((EFI_PHYSICAL_ADDRESS) (UINTN) BaseOfStack, STACK_SIZE,
-                                                  (EFI_PHYSICAL_ADDRESS) (UINTN) GhcbBase, GhcbSize);
+    PageTables = CreateIdentityMappingPageTables (
+                   (EFI_PHYSICAL_ADDRESS)(UINTN)BaseOfStack,
+                   STACK_SIZE,
+                   (EFI_PHYSICAL_ADDRESS)(UINTN)GhcbBase,
+                   GhcbSize
+                   );
   } else {
     //
     // Set NX for stack feature also require PcdDxeIplBuildPageTables be TRUE
@@ -85,7 +91,6 @@ HandOffToDxeCore (
     ASSERT (PcdGetBool (PcdCpuStackGuard) == FALSE);
   }
 
-
   if (FeaturePcdGet (PcdDxeIplBuildPageTables)) {
     AsmWriteCr3 (PageTables);
   }
@@ -93,7 +98,7 @@ HandOffToDxeCore (
   //
   // Update the contents of BSP stack HOB to reflect the real stack info passed to DxeCore.
   //
-  UpdateStackHob ((EFI_PHYSICAL_ADDRESS)(UINTN) BaseOfStack, STACK_SIZE);
+  UpdateStackHob ((EFI_PHYSICAL_ADDRESS)(UINTN)BaseOfStack, STACK_SIZE);
 
   //
   // Transfer the control to the entry point of DxeCore.

@@ -13,8 +13,7 @@
   - https://bugzilla.tianocore.org/show_bug.cgi?id=1747
 **/
 
-#ifndef OVMF_PK_KEK1_APP_PREFIX_H_
-#define OVMF_PK_KEK1_APP_PREFIX_H_
+#pragma once
 
 #include <Uefi/UefiBaseType.h>
 
@@ -40,6 +39,4 @@
     { 0x81, 0xd3, 0x5b, 0xb9, 0x71, 0x5f, 0x97, 0x27 }, \
   }
 
-extern EFI_GUID gOvmfPkKek1AppPrefixGuid;
-
-#endif /* OVMF_PK_KEK1_APP_PREFIX_H_ */
+extern EFI_GUID  gOvmfPkKek1AppPrefixGuid;

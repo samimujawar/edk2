@@ -7,33 +7,30 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
-#ifndef __E820_H__
-#define __E820_H__
+#pragma once
 
 #pragma pack(1)
 
 typedef enum {
-  EfiAcpiAddressRangeMemory   = 1,
-  EfiAcpiAddressRangeReserved = 2,
-  EfiAcpiAddressRangeACPI     = 3,
-  EfiAcpiAddressRangeNVS      = 4
+  EfiAcpiAddressRangeMemory       = 1,
+  EfiAcpiAddressRangeReserved     = 2,
+  EfiAcpiAddressRangeACPI         = 3,
+  EfiAcpiAddressRangeNVS          = 4,
+  EfiAcpiAddressRangeSoftReserved = 0xEFFFFFFF
 } EFI_ACPI_MEMORY_TYPE;
 
 typedef struct {
-  UINT64                BaseAddr;
-  UINT64                Length;
-  EFI_ACPI_MEMORY_TYPE  Type;
+  UINT64                  BaseAddr;
+  UINT64                  Length;
+  EFI_ACPI_MEMORY_TYPE    Type;
 } EFI_E820_ENTRY64;
 
 typedef struct {
-  UINT32                BassAddrLow;
-  UINT32                BaseAddrHigh;
-  UINT32                LengthLow;
-  UINT32                LengthHigh;
-  EFI_ACPI_MEMORY_TYPE  Type;
+  UINT32                  BassAddrLow;
+  UINT32                  BaseAddrHigh;
+  UINT32                  LengthLow;
+  UINT32                  LengthHigh;
+  EFI_ACPI_MEMORY_TYPE    Type;
 } EFI_E820_ENTRY;
 
 #pragma pack()
-
-#endif /* __E820_H__ */

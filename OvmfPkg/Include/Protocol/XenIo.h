@@ -14,8 +14,7 @@
 
 **/
 
-#ifndef __PROTOCOL_XENIO_H__
-#define __PROTOCOL_XENIO_H__
+#pragma once
 
 #include <IndustryStandard/Xen/xen.h>
 
@@ -34,9 +33,7 @@ struct _XENIO_PROTOCOL {
   //
   // Protocol data fields
   //
-  EFI_PHYSICAL_ADDRESS          GrantTableAddress;
+  EFI_PHYSICAL_ADDRESS    GrantTableAddress;
 };
 
-extern EFI_GUID gXenIoProtocolGuid;
-
-#endif
+extern EFI_GUID  gXenIoProtocolGuid;

@@ -7,13 +7,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __CAPSULE_LIB_H__
-#define __CAPSULE_LIB_H__
+#pragma once
 
 //
 // BOOLEAN Variable to indicate whether system is in the capsule on disk state.
 //
-#define COD_RELOCATION_INFO_VAR_NAME   L"CodRelocationInfo"
+#define COD_RELOCATION_INFO_VAR_NAME  L"CodRelocationInfo"
 
 /**
   The firmware checks whether the capsule image is supported
@@ -24,13 +23,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
   @param  CapsuleHeader    Pointer to the UEFI capsule image to be checked.
 
-  @retval EFI_SUCESS       Input capsule is supported by firmware.
+  @retval EFI_SUCCESS      Input capsule is supported by firmware.
   @retval EFI_UNSUPPORTED  Input capsule is not supported by the firmware.
 **/
 EFI_STATUS
 EFIAPI
 SupportCapsuleImage (
-  IN EFI_CAPSULE_HEADER *CapsuleHeader
+  IN EFI_CAPSULE_HEADER  *CapsuleHeader
   );
 
 /**
@@ -41,13 +40,13 @@ SupportCapsuleImage (
 
   @param  CapsuleHeader    Pointer to the UEFI capsule image to be processed.
 
-  @retval EFI_SUCESS       Capsule Image processed successfully.
+  @retval EFI_SUCCESS      Capsule Image processed successfully.
   @retval EFI_UNSUPPORTED  Capsule image is not supported by the firmware.
 **/
 EFI_STATUS
 EFIAPI
 ProcessCapsuleImage (
-  IN EFI_CAPSULE_HEADER *CapsuleHeader
+  IN EFI_CAPSULE_HEADER  *CapsuleHeader
   );
 
 /**
@@ -96,7 +95,7 @@ ProcessCapsules (
 **/
 BOOLEAN
 EFIAPI
-CoDCheckCapsuleOnDiskFlag(
+CoDCheckCapsuleOnDiskFlag (
   VOID
   );
 
@@ -108,7 +107,7 @@ CoDCheckCapsuleOnDiskFlag(
 **/
 EFI_STATUS
 EFIAPI
-CoDClearCapsuleOnDiskFlag(
+CoDClearCapsuleOnDiskFlag (
   VOID
   );
 
@@ -136,8 +135,8 @@ CoDClearCapsuleOnDiskFlag(
 **/
 EFI_STATUS
 EFIAPI
-CoDRelocateCapsule(
-  UINTN     MaxRetry
+CoDRelocateCapsule (
+  UINTN  MaxRetry
   );
 
 /**
@@ -154,7 +153,5 @@ CoDRelocateCapsule(
 EFI_STATUS
 EFIAPI
 CoDRemoveTempFile (
-  UINTN    MaxRetry
+  UINTN  MaxRetry
   );
-
-#endif

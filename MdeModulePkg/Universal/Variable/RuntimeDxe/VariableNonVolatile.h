@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _VARIABLE_NON_VOLATILE_H_
-#define _VARIABLE_NON_VOLATILE_H_
+#pragma once
 
 #include "Variable.h"
 
@@ -48,7 +47,7 @@ InitEmuNonVolatileVariableStore (
 **/
 EFI_STATUS
 InitRealNonVolatileVariableStore (
-  OUT EFI_PHYSICAL_ADDRESS              *VariableStoreBase
+  OUT EFI_PHYSICAL_ADDRESS  *VariableStoreBase
   );
 
 /**
@@ -63,5 +62,3 @@ EFI_STATUS
 InitNonVolatileVariableStore (
   VOID
   );
-
-#endif

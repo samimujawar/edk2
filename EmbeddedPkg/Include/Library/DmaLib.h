@@ -31,8 +31,7 @@
 
 **/
 
-#ifndef __DMA_LIB_H__
-#define __DMA_LIB_H__
+#pragma once
 
 typedef enum {
   ///
@@ -50,9 +49,6 @@ typedef enum {
   MapOperationBusMasterCommonBuffer,
   MapOperationMaximum
 } DMA_MAP_OPERATION;
-
-
-
 
 /**
   Provides the DMA controller-specific addresses needed to access system memory.
@@ -77,15 +73,12 @@ typedef enum {
 EFI_STATUS
 EFIAPI
 DmaMap (
-  IN     DMA_MAP_OPERATION              Operation,
-  IN     VOID                           *HostAddress,
-  IN OUT UINTN                          *NumberOfBytes,
-  OUT    PHYSICAL_ADDRESS               *DeviceAddress,
-  OUT    VOID                           **Mapping
+  IN     DMA_MAP_OPERATION  Operation,
+  IN     VOID               *HostAddress,
+  IN OUT UINTN              *NumberOfBytes,
+  OUT    PHYSICAL_ADDRESS   *DeviceAddress,
+  OUT    VOID               **Mapping
   );
-
-
-
 
 /**
   Completes the DmaMapBusMasterRead, DmaMapBusMasterWrite, or DmaMapBusMasterCommonBuffer
@@ -100,9 +93,8 @@ DmaMap (
 EFI_STATUS
 EFIAPI
 DmaUnmap (
-  IN  VOID                         *Mapping
+  IN  VOID  *Mapping
   );
-
 
 /**
   Allocates pages that are suitable for an DmaMap() of type MapOperationBusMasterCommonBuffer.
@@ -124,11 +116,10 @@ DmaUnmap (
 EFI_STATUS
 EFIAPI
 DmaAllocateBuffer (
-  IN  EFI_MEMORY_TYPE              MemoryType,
-  IN  UINTN                        Pages,
-  OUT VOID                         **HostAddress
+  IN  EFI_MEMORY_TYPE  MemoryType,
+  IN  UINTN            Pages,
+  OUT VOID             **HostAddress
   );
-
 
 /**
   Frees memory that was allocated with DmaAllocateBuffer().
@@ -144,10 +135,9 @@ DmaAllocateBuffer (
 EFI_STATUS
 EFIAPI
 DmaFreeBuffer (
-  IN  UINTN                        Pages,
-  IN  VOID                         *HostAddress
+  IN  UINTN  Pages,
+  IN  VOID   *HostAddress
   );
-
 
 /**
   Allocates pages that are suitable for an DmaMap() of type
@@ -171,11 +161,8 @@ DmaFreeBuffer (
 EFI_STATUS
 EFIAPI
 DmaAllocateAlignedBuffer (
-  IN  EFI_MEMORY_TYPE              MemoryType,
-  IN  UINTN                        Pages,
-  IN  UINTN                        Alignment,
-  OUT VOID                         **HostAddress
+  IN  EFI_MEMORY_TYPE  MemoryType,
+  IN  UINTN            Pages,
+  IN  UINTN            Alignment,
+  OUT VOID             **HostAddress
   );
-
-
-#endif

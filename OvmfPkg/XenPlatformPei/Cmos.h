@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef __CMOS_H__
-#define __CMOS_H__
+#pragma once
 
 /**
   Reads 8-bits of CMOS data.
@@ -25,7 +24,7 @@
 UINT8
 EFIAPI
 CmosRead8 (
-  IN      UINTN                     Index
+  IN      UINTN  Index
   );
 
 /**
@@ -43,10 +42,6 @@ CmosRead8 (
 UINT8
 EFIAPI
 CmosWrite8 (
-  IN      UINTN                     Index,
-  IN      UINT8                     Value
+  IN      UINTN  Index,
+  IN      UINT8  Value
   );
-
-
-#endif
-

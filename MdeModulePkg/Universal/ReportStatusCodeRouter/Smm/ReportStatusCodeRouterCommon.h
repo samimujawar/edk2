@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __REPORT_STATUS_CODE_ROUTER_COMMON_H__
-#define __REPORT_STATUS_CODE_ROUTER_COMMON_H__
+#pragma once
 
 #include <Protocol/MmReportStatusCodeHandler.h>
 #include <Protocol/MmStatusCode.h>
@@ -22,9 +21,9 @@
 #define MM_RSC_HANDLER_CALLBACK_ENTRY_SIGNATURE  SIGNATURE_32 ('s', 'h', 'c', 'e')
 
 typedef struct {
-  UINTN                         Signature;
-  EFI_MM_RSC_HANDLER_CALLBACK   RscHandlerCallback;
-  LIST_ENTRY                    Node;
+  UINTN                          Signature;
+  EFI_MM_RSC_HANDLER_CALLBACK    RscHandlerCallback;
+  LIST_ENTRY                     Node;
 } MM_RSC_HANDLER_CALLBACK_ENTRY;
 
 /**
@@ -46,7 +45,7 @@ typedef struct {
 EFI_STATUS
 EFIAPI
 Register (
-  IN EFI_MM_RSC_HANDLER_CALLBACK    Callback
+  IN EFI_MM_RSC_HANDLER_CALLBACK  Callback
   );
 
 /**
@@ -90,12 +89,12 @@ Unregister (
 EFI_STATUS
 EFIAPI
 ReportDispatcher (
-  IN CONST EFI_MM_STATUS_CODE_PROTOCOL   *This,
-  IN EFI_STATUS_CODE_TYPE                CodeType,
-  IN EFI_STATUS_CODE_VALUE               Value,
-  IN UINT32                              Instance,
-  IN CONST EFI_GUID                      *CallerId,
-  IN EFI_STATUS_CODE_DATA                *Data      OPTIONAL
+  IN CONST EFI_MM_STATUS_CODE_PROTOCOL  *This,
+  IN EFI_STATUS_CODE_TYPE               CodeType,
+  IN EFI_STATUS_CODE_VALUE              Value,
+  IN UINT32                             Instance,
+  IN CONST EFI_GUID                     *CallerId,
+  IN EFI_STATUS_CODE_DATA               *Data      OPTIONAL
   );
 
 /**
@@ -111,5 +110,3 @@ EFI_STATUS
 GenericStatusCodeCommonEntry (
   VOID
   );
-
-#endif

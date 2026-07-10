@@ -18,11 +18,11 @@
 
 VOID
 InstallProtocolInterfaces (
-  IN EFI_FW_VOL_BLOCK_DEVICE *FvbDevice
+  IN EFI_FW_VOL_BLOCK_DEVICE  *FvbDevice
   )
 {
-  EFI_HANDLE FvbHandle;
-  EFI_STATUS Status;
+  EFI_HANDLE  FvbHandle;
+  EFI_STATUS  Status;
 
   ASSERT (FeaturePcdGet (PcdSmmSmramRequire));
 
@@ -64,8 +64,8 @@ InstallVirtualAddressChangeHandler (
 
 EFI_STATUS
 MarkIoMemoryRangeForRuntimeAccess (
-  IN EFI_PHYSICAL_ADDRESS                BaseAddress,
-  IN UINTN                               Length
+  IN EFI_PHYSICAL_ADDRESS  BaseAddress,
+  IN UINTN                 Length
   )
 {
   //
@@ -83,4 +83,15 @@ SetPcdFlashNvStorageBaseAddresses (
   //
   // Do nothing.
   //
+}
+
+VOID
+UpdateQemuFlashVariablesEnable (
+  VOID
+  )
+{
+  RETURN_STATUS  PcdStatus;
+
+  PcdStatus = PcdSetBoolS (PcdOvmfFlashVariablesEnable, TRUE);
+  ASSERT_RETURN_ERROR (PcdStatus);
 }

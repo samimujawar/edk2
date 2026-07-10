@@ -7,13 +7,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _FAT_API_H_
-#define _FAT_API_H_
+#pragma once
 
 //
 // API data structures
 //
-typedef VOID  *PEI_FILE_HANDLE;
+typedef VOID *PEI_FILE_HANDLE;
 
 typedef enum {
   Fat12,
@@ -21,5 +20,3 @@ typedef enum {
   Fat32,
   FatUnknown
 } PEI_FAT_TYPE;
-
-#endif

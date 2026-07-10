@@ -7,8 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _INTERNAL_PLATFORM_DRIVER_OVERRIDE_H_
-#define _INTERNAL_PLATFORM_DRIVER_OVERRIDE_H_
+#pragma once
 
 #include <PiDxe.h>
 
@@ -53,7 +52,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 FreeMappingDatabase (
-  IN  OUT  LIST_ENTRY            *MappingDataBase
+  IN  OUT  LIST_ENTRY  *MappingDataBase
   )
 ;
 
@@ -72,7 +71,7 @@ FreeMappingDatabase (
 EFI_STATUS
 EFIAPI
 InitOverridesMapping (
-  OUT  LIST_ENTRY            *MappingDataBase
+  OUT  LIST_ENTRY  *MappingDataBase
   )
 ;
 
@@ -89,7 +88,7 @@ InitOverridesMapping (
 EFI_STATUS
 EFIAPI
 SaveOverridesMapping (
-  IN  LIST_ENTRY              *MappingDataBase
+  IN  LIST_ENTRY  *MappingDataBase
   )
 ;
 
@@ -120,10 +119,10 @@ SaveOverridesMapping (
 EFI_STATUS
 EFIAPI
 GetDriverFromMapping (
-  IN     EFI_HANDLE                                     ControllerHandle,
-  IN OUT EFI_HANDLE                                     *DriverImageHandle,
-  IN     LIST_ENTRY                                     *MappingDataBase,
-  IN     EFI_HANDLE                                     CallerImageHandle
+  IN     EFI_HANDLE  ControllerHandle,
+  IN OUT EFI_HANDLE  *DriverImageHandle,
+  IN     LIST_ENTRY  *MappingDataBase,
+  IN     EFI_HANDLE  CallerImageHandle
   )
 ;
 
@@ -147,11 +146,11 @@ GetDriverFromMapping (
 EFI_STATUS
 EFIAPI
 CheckMapping (
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *ControllerDevicePath,
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *DriverImageDevicePath  OPTIONAL,
-  IN     LIST_ENTRY                                     *MappingDataBase,
-  OUT    UINT32                                         *DriverInfoNum  OPTIONAL,
-  OUT    UINT32                                         *DriverImageNO  OPTIONAL
+  IN     EFI_DEVICE_PATH_PROTOCOL  *ControllerDevicePath,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DriverImageDevicePath  OPTIONAL,
+  IN     LIST_ENTRY                *MappingDataBase,
+  OUT    UINT32                    *DriverInfoNum  OPTIONAL,
+  OUT    UINT32                    *DriverImageNO  OPTIONAL
   )
 ;
 
@@ -177,10 +176,10 @@ CheckMapping (
 EFI_STATUS
 EFIAPI
 InsertDriverImage (
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *ControllerDevicePath,
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *DriverImageDevicePath,
-  IN     LIST_ENTRY                                     *MappingDataBase,
-  IN     UINT32                                         DriverImageNO
+  IN     EFI_DEVICE_PATH_PROTOCOL  *ControllerDevicePath,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DriverImageDevicePath,
+  IN     LIST_ENTRY                *MappingDataBase,
+  IN     UINT32                    DriverImageNO
   )
 ;
 
@@ -202,10 +201,8 @@ InsertDriverImage (
 EFI_STATUS
 EFIAPI
 DeleteDriverImage (
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *ControllerDevicePath,
-  IN     EFI_DEVICE_PATH_PROTOCOL                       *DriverImageDevicePath,
-  IN     LIST_ENTRY                                     *MappingDataBase
+  IN     EFI_DEVICE_PATH_PROTOCOL  *ControllerDevicePath,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DriverImageDevicePath,
+  IN     LIST_ENTRY                *MappingDataBase
   )
 ;
-
-#endif

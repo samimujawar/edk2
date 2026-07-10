@@ -11,8 +11,7 @@
 
 **/
 
-#ifndef _CAPSULE_SERVICE_H_
-#define _CAPSULE_SERVICE_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -64,7 +63,5 @@ IsPersistAcrossResetCapsuleSupported (
 **/
 VOID
 CapsuleCacheWriteBack (
-  IN  EFI_PHYSICAL_ADDRESS    ScatterGatherList
+  IN  EFI_PHYSICAL_ADDRESS  ScatterGatherList
   );
-
-#endif

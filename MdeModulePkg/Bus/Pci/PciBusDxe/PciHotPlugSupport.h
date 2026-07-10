@@ -6,30 +6,29 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_PCI_HOT_PLUG_SUPPORT_H_
-#define _EFI_PCI_HOT_PLUG_SUPPORT_H_
+#pragma once
 
 //
 // stall 1 second, its unit is 100ns
 //
-#define STALL_1_SECOND        1000000
+#define STALL_1_SECOND  1000000
 
 //
 // PCI Hot Plug controller private data
 //
 typedef struct {
-  EFI_EVENT Event;
-  BOOLEAN   Found;
-  BOOLEAN   Initialized;
-  VOID      *Padding;
+  EFI_EVENT    Event;
+  BOOLEAN      Found;
+  BOOLEAN      Initialized;
+  VOID         *Padding;
 } ROOT_HPC_DATA;
 
 //
 // Reference of some global variables
 //
-extern EFI_PCI_HOT_PLUG_INIT_PROTOCOL *gPciHotPlugInit;
-extern EFI_HPC_LOCATION               *gPciRootHpcPool;
-extern ROOT_HPC_DATA                  *gPciRootHpcData;
+extern EFI_PCI_HOT_PLUG_INIT_PROTOCOL  *gPciHotPlugInit;
+extern EFI_HPC_LOCATION                *gPciRootHpcPool;
+extern ROOT_HPC_DATA                   *gPciRootHpcData;
 
 /**
   Event notification function to set Hot Plug controller status.
@@ -41,8 +40,8 @@ extern ROOT_HPC_DATA                  *gPciRootHpcData;
 VOID
 EFIAPI
 PciHPCInitialized (
-  IN EFI_EVENT    Event,
-  IN VOID         *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
 
 /**
@@ -57,8 +56,8 @@ PciHPCInitialized (
 **/
 BOOLEAN
 EfiCompareDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL *DevicePath1,
-  IN EFI_DEVICE_PATH_PROTOCOL *DevicePath2
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath1,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath2
   );
 
 /**
@@ -90,7 +89,7 @@ InitializeHotPlugSupport (
 **/
 BOOLEAN
 IsPciHotPlugBus (
-  PCI_IO_DEVICE                       *PciIoDevice
+  PCI_IO_DEVICE  *PciIoDevice
   );
 
 /**
@@ -106,8 +105,8 @@ IsPciHotPlugBus (
 **/
 BOOLEAN
 IsRootPciHotPlugBus (
-  IN  EFI_DEVICE_PATH_PROTOCOL        *HpbDevicePath,
-  OUT UINTN                           *HpIndex    OPTIONAL
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HpbDevicePath,
+  OUT UINTN                     *HpIndex    OPTIONAL
   );
 
 /**
@@ -123,8 +122,8 @@ IsRootPciHotPlugBus (
 **/
 BOOLEAN
 IsRootPciHotPlugController (
-  IN EFI_DEVICE_PATH_PROTOCOL         *HpcDevicePath,
-  OUT UINTN                           *HpIndex
+  IN EFI_DEVICE_PATH_PROTOCOL  *HpcDevicePath,
+  OUT UINTN                    *HpIndex
   );
 
 /**
@@ -153,7 +152,7 @@ CreateEventForHpc (
 **/
 EFI_STATUS
 AllRootHPCInitialized (
-  IN  UINTN           TimeoutInMicroSeconds
+  IN  UINTN  TimeoutInMicroSeconds
   );
 
 /**
@@ -167,7 +166,7 @@ AllRootHPCInitialized (
 **/
 BOOLEAN
 IsSHPC (
-  IN PCI_IO_DEVICE                      *PciIoDevice
+  IN PCI_IO_DEVICE  *PciIoDevice
   );
 
 /**
@@ -188,7 +187,7 @@ IsSHPC (
 **/
 BOOLEAN
 SupportsPcieHotplug (
-  IN PCI_IO_DEVICE                      *PciIoDevice
+  IN PCI_IO_DEVICE  *PciIoDevice
   );
 
 /**
@@ -199,7 +198,5 @@ SupportsPcieHotplug (
 **/
 VOID
 GetResourcePaddingForHpb (
-  IN PCI_IO_DEVICE      *PciIoDevice
+  IN PCI_IO_DEVICE  *PciIoDevice
   );
-
-#endif

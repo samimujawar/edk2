@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __FSP_WRAPPER_API_TEST_LIB_H__
-#define __FSP_WRAPPER_API_TEST_LIB_H__
+#pragma once
 
 #include <PiPei.h>
 
@@ -22,8 +21,8 @@
 EFI_STATUS
 EFIAPI
 TestFspMemoryInitApiOutput (
-  IN  VOID        *FspmUpdDataPtr,
-  IN  VOID        **HobListPtr
+  IN  VOID  *FspmUpdDataPtr,
+  IN  VOID  **HobListPtr
   );
 
 /**
@@ -36,7 +35,7 @@ TestFspMemoryInitApiOutput (
 EFI_STATUS
 EFIAPI
 TestFspTempRamExitApiOutput (
-  IN VOID        *TempRamExitParam
+  IN VOID  *TempRamExitParam
   );
 
 /**
@@ -49,7 +48,18 @@ TestFspTempRamExitApiOutput (
 EFI_STATUS
 EFIAPI
 TestFspSiliconInitApiOutput (
-  IN  VOID        *FspsUpdDataPtr
+  IN  VOID  *FspsUpdDataPtr
   );
 
-#endif
+/**
+  Test the output of FSP API - FspSmmInit.
+
+  @param[in] FspiUpdDataPtr Address pointer to the Smm Init parameters structure.
+
+  @return test result on output of FspSmmInit API.
+**/
+EFI_STATUS
+EFIAPI
+TestFspSmmInitApiOutput (
+  IN  VOID  *FspiUpdDataPtr
+  );

@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __EFI_EAP_MANAGEMENT2_PROTOCOL_H__
-#define __EFI_EAP_MANAGEMENT2_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/EapManagement.h>
 
@@ -49,7 +48,7 @@ typedef struct _EFI_EAP_MANAGEMENT2_PROTOCOL EFI_EAP_MANAGEMENT2_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_EAP_GET_KEY) (
+(EFIAPI *EFI_EAP_GET_KEY)(
   IN EFI_EAP_MANAGEMENT2_PROTOCOL         *This,
   IN OUT UINT8                            *Msk,
   IN OUT UINTN                            *MskSize,
@@ -76,6 +75,4 @@ struct _EFI_EAP_MANAGEMENT2_PROTOCOL {
   EFI_EAP_GET_KEY                         GetKey;
 };
 
-extern EFI_GUID gEfiEapManagement2ProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiEapManagement2ProtocolGuid;

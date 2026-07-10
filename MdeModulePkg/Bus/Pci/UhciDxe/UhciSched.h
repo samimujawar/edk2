@@ -7,9 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_UHCI_SCHED_H_
-#define _EFI_UHCI_SCHED_H_
-
+#pragma once
 
 #define UHCI_ASYNC_INT_SIGNATURE  SIGNATURE_32 ('u', 'h', 'c', 'a')
 //
@@ -23,7 +21,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
                             EFI_USB_ERR_TIMEOUT | EFI_USB_ERR_BITSTUFF | \
                             EFI_USB_ERR_SYSTEM)
 
-
 //
 // Structure to return the result of UHCI QH execution.
 // Result is the final result of the QH's QTD. NextToggle
@@ -31,48 +28,47 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // length of data transferred.
 //
 typedef struct {
-  UINT32                  Result;
-  UINT8                   NextToggle;
-  UINTN                   Complete;
+  UINT32    Result;
+  UINT8     NextToggle;
+  UINTN     Complete;
 } UHCI_QH_RESULT;
 
-typedef struct _UHCI_ASYNC_REQUEST  UHCI_ASYNC_REQUEST;
+typedef struct _UHCI_ASYNC_REQUEST UHCI_ASYNC_REQUEST;
 
 //
 // Structure used to manager the asynchronous interrupt transfers.
 //
-struct _UHCI_ASYNC_REQUEST{
-  UINTN                           Signature;
-  LIST_ENTRY                      Link;
-  UHCI_ASYNC_REQUEST              *Recycle;
+struct _UHCI_ASYNC_REQUEST {
+  UINTN                              Signature;
+  LIST_ENTRY                         Link;
+  UHCI_ASYNC_REQUEST                 *Recycle;
 
   //
   // Endpoint attributes
   //
-  UINT8                           DevAddr;
-  UINT8                           EndPoint;
-  BOOLEAN                         IsLow;
-  UINTN                           Interval;
+  UINT8                              DevAddr;
+  UINT8                              EndPoint;
+  BOOLEAN                            IsLow;
+  UINTN                              Interval;
 
   //
   // Data and UHC structures
   //
-  UHCI_QH_SW                      *QhSw;
-  UHCI_TD_SW                      *FirstTd;
-  UINT8                           *Data;      // Allocated host memory, not mapped memory
-  UINTN                           DataLen;
-  VOID                            *Mapping;
+  UHCI_QH_SW                         *QhSw;
+  UHCI_TD_SW                         *FirstTd;
+  UINT8                              *Data;   // Allocated host memory, not mapped memory
+  UINTN                              DataLen;
+  VOID                               *Mapping;
 
   //
   // User callback and its context
   //
-  EFI_ASYNC_USB_TRANSFER_CALLBACK Callback;
-  VOID                            *Context;
+  EFI_ASYNC_USB_TRANSFER_CALLBACK    Callback;
+  VOID                               *Context;
 };
 
 #define UHCI_ASYNC_INT_FROM_LINK(a) \
           CR (a, UHCI_ASYNC_REQUEST, Link, UHCI_ASYNC_INT_SIGNATURE)
-
 
 /**
   Create Frame List Structure.
@@ -86,7 +82,7 @@ struct _UHCI_ASYNC_REQUEST{
 **/
 EFI_STATUS
 UhciInitFrameList (
-  IN USB_HC_DEV         *Uhc
+  IN USB_HC_DEV  *Uhc
   );
 
 /**
@@ -99,9 +95,8 @@ UhciInitFrameList (
 **/
 VOID
 UhciDestoryFrameList (
-  IN USB_HC_DEV           *Uhc
+  IN USB_HC_DEV  *Uhc
   );
-
 
 /**
   Convert the poll rate to the maxium 2^n that is smaller
@@ -114,9 +109,8 @@ UhciDestoryFrameList (
 **/
 UINTN
 UhciConvertPollRate (
-  IN  UINTN               Interval
+  IN  UINTN  Interval
   );
-
 
 /**
   Link a queue head (for asynchronous interrupt transfer) to
@@ -128,10 +122,9 @@ UhciConvertPollRate (
 **/
 VOID
 UhciLinkQhToFrameList (
-  USB_HC_DEV              *Uhc,
-  UHCI_QH_SW              *Qh
+  USB_HC_DEV  *Uhc,
+  UHCI_QH_SW  *Qh
   );
-
 
 /**
   Unlink QH from the frame list is easier: find all
@@ -144,10 +137,9 @@ UhciLinkQhToFrameList (
 **/
 VOID
 UhciUnlinkQhFromFrameList (
-  USB_HC_DEV              *Uhc,
-  UHCI_QH_SW              *Qh
+  USB_HC_DEV  *Uhc,
+  UHCI_QH_SW  *Qh
   );
-
 
 /**
   Check the result of the transfer.
@@ -165,14 +157,13 @@ UhciUnlinkQhFromFrameList (
 **/
 EFI_STATUS
 UhciExecuteTransfer (
-  IN  USB_HC_DEV          *Uhc,
-  IN  UHCI_QH_SW          *Qh,
-  IN  UHCI_TD_SW          *Td,
-  IN  UINTN               TimeOut,
-  IN  BOOLEAN             IsLow,
-  OUT UHCI_QH_RESULT      *QhResult
+  IN  USB_HC_DEV      *Uhc,
+  IN  UHCI_QH_SW      *Qh,
+  IN  UHCI_TD_SW      *Td,
+  IN  UINTN           TimeOut,
+  IN  BOOLEAN         IsLow,
+  OUT UHCI_QH_RESULT  *QhResult
   );
-
 
 /**
   Create Async Request node, and Link to List.
@@ -209,7 +200,6 @@ UhciCreateAsyncReq (
   IN BOOLEAN                          IsLow
   );
 
-
 /**
   Delete Async Interrupt QH and TDs.
 
@@ -225,12 +215,11 @@ UhciCreateAsyncReq (
 **/
 EFI_STATUS
 UhciRemoveAsyncReq (
-  IN  USB_HC_DEV          *Uhc,
-  IN  UINT8               DevAddr,
-  IN  UINT8               EndPoint,
-  OUT UINT8               *Toggle
+  IN  USB_HC_DEV  *Uhc,
+  IN  UINT8       DevAddr,
+  IN  UINT8       EndPoint,
+  OUT UINT8       *Toggle
   );
-
 
 /**
   Release all the asynchronous transfers on the lsit.
@@ -242,9 +231,8 @@ UhciRemoveAsyncReq (
 **/
 VOID
 UhciFreeAllAsyncReq (
-  IN USB_HC_DEV           *Uhc
+  IN USB_HC_DEV  *Uhc
   );
-
 
 /**
   Interrupt transfer periodic check handler.
@@ -258,8 +246,6 @@ UhciFreeAllAsyncReq (
 VOID
 EFIAPI
 UhciMonitorAsyncReqList (
-  IN EFI_EVENT            Event,
-  IN VOID                 *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
-
-#endif

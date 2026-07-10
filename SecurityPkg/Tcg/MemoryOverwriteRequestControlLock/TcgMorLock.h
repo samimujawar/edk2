@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_TCG_MOR_LOCK_H_
-#define _EFI_TCG_MOR_LOCK_H_
+#pragma once
 
 /**
   This service is a wrapper for the UEFI Runtime Service GetVariable().
@@ -34,11 +33,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 InternalGetVariable (
-  IN      CHAR16                   *VariableName,
-  IN      EFI_GUID                 *VendorGuid,
-  OUT     UINT32                   *Attributes OPTIONAL,
-  IN OUT  UINTN                    *DataSize,
-  OUT     VOID                     *Data
+  IN      CHAR16    *VariableName,
+  IN      EFI_GUID  *VendorGuid,
+  OUT     UINT32    *Attributes OPTIONAL,
+  IN OUT  UINTN     *DataSize,
+  OUT     VOID      *Data
   );
 
 /**
@@ -70,11 +69,11 @@ InternalGetVariable (
 EFI_STATUS
 EFIAPI
 InternalSetVariable (
-  IN CHAR16                       *VariableName,
-  IN EFI_GUID                     *VendorGuid,
-  IN UINT32                       Attributes,
-  IN UINTN                        DataSize,
-  IN VOID                         *Data
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid,
+  IN UINT32    Attributes,
+  IN UINTN     DataSize,
+  IN VOID      *Data
   );
 
 /**
@@ -106,11 +105,11 @@ InternalSetVariable (
 EFI_STATUS
 EFIAPI
 SetVariableCheckHandlerMor (
-  IN CHAR16     *VariableName,
-  IN EFI_GUID   *VendorGuid,
-  IN UINT32     Attributes,
-  IN UINTN      DataSize,
-  IN VOID       *Data
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid,
+  IN UINT32    Attributes,
+  IN UINTN     DataSize,
+  IN VOID      *Data
   );
 
 /**
@@ -127,5 +126,3 @@ EFIAPI
 MorLockDriverInit (
   VOID
   );
-
-#endif

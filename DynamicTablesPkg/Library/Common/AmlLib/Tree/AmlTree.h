@@ -6,8 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef AML_TREE_H_
-#define AML_TREE_H_
+#pragma once
 
 #include <AmlNodeDefines.h>
 
@@ -22,7 +21,7 @@
 AML_ROOT_NODE *
 EFIAPI
 AmlGetRootNode (
-  IN  CONST AML_NODE_HEADER   * Node
+  IN  CONST AML_NODE_HEADER  *Node
   );
 
 /** Check whether the input Node is in the fixed argument list of its parent
@@ -41,8 +40,8 @@ AmlGetRootNode (
 BOOLEAN
 EFIAPI
 AmlIsNodeFixedArgument (
-  IN  CONST  AML_NODE_HEADER     * Node,
-  OUT        EAML_PARSE_INDEX    * IndexPtr
+  IN  CONST  AML_NODE_HEADER   *Node,
+  OUT        EAML_PARSE_INDEX  *IndexPtr
   );
 
 /** Set the fixed argument of the ObjectNode at the Index to the NewNode.
@@ -63,9 +62,9 @@ AmlIsNodeFixedArgument (
 EFI_STATUS
 EFIAPI
 AmlSetFixedArgument (
-  IN  AML_OBJECT_NODE   * ObjectNode,
-  IN  EAML_PARSE_INDEX    Index,
-  IN  AML_NODE_HEADER   * NewNode
+  IN  AML_OBJECT_NODE   *ObjectNode,
+  IN  EAML_PARSE_INDEX  Index,
+  IN  AML_NODE_HEADER   *NewNode
   );
 
 /** If the given AML_NODE_HEADER has a variable list of arguments,
@@ -80,7 +79,7 @@ AmlSetFixedArgument (
 LIST_ENTRY *
 EFIAPI
 AmlNodeGetVariableArgList (
-  IN  CONST AML_NODE_HEADER   * Node
+  IN  CONST AML_NODE_HEADER  *Node
   );
 
 /** Add the NewNode to the tail of the variable list of arguments
@@ -99,8 +98,8 @@ AmlNodeGetVariableArgList (
 EFI_STATUS
 EFIAPI
 AmlVarListAddTailInternal (
-  IN  AML_NODE_HEADER  * ParentNode,
-  IN  AML_NODE_HEADER  * NewNode
+  IN  AML_NODE_HEADER  *ParentNode,
+  IN  AML_NODE_HEADER  *NewNode
   );
 
 /** Replace the OldNode by the NewNode.
@@ -119,9 +118,6 @@ AmlVarListAddTailInternal (
 EFI_STATUS
 EFIAPI
 AmlReplaceArgument (
-  IN  AML_NODE_HEADER   * OldNode,
-  IN  AML_NODE_HEADER   * NewNode
+  IN  AML_NODE_HEADER  *OldNode,
+  IN  AML_NODE_HEADER  *NewNode
   );
-
-#endif // AML_TREE_H_
-

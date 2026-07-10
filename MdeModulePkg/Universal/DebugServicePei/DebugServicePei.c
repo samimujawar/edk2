@@ -17,12 +17,12 @@
 
 #include "DebugService.h"
 
-EDKII_DEBUG_PPI mDebugPpi = {
+EDKII_DEBUG_PPI  mDebugPpi = {
   PeiDebugBPrint,
   PeiDebugAssert
 };
 
-EFI_PEI_PPI_DESCRIPTOR mDebugServicePpi = {
+EFI_PEI_PPI_DESCRIPTOR  mDebugServicePpi = {
   (EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST),
   &gEdkiiDebugPpiGuid,
   (VOID *)&mDebugPpi
@@ -39,13 +39,13 @@ EFI_PEI_PPI_DESCRIPTOR mDebugServicePpi = {
 **/
 VOID
 EFIAPI
-PeiDebugBPrint(
-  IN UINTN                          ErrorLevel,
-  IN CONST CHAR8                    *Format,
-  IN BASE_LIST                      Marker
+PeiDebugBPrint (
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Format,
+  IN BASE_LIST    Marker
   )
 {
-  DebugBPrint(ErrorLevel, Format, Marker);
+  DebugBPrint (ErrorLevel, Format, Marker);
 }
 
 /**
@@ -61,13 +61,13 @@ PeiDebugBPrint(
 **/
 VOID
 EFIAPI
-PeiDebugAssert(
-  IN CONST CHAR8                    *FileName,
-  IN UINTN                          LineNumber,
-  IN CONST CHAR8                    *Description
+PeiDebugAssert (
+  IN CONST CHAR8  *FileName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *Description
   )
 {
-  DebugAssert(FileName, LineNumber, Description);
+  DebugAssert (FileName, LineNumber, Description);
 }
 
 /**
@@ -78,17 +78,16 @@ PeiDebugAssert(
   @param  FileHandle  Handle of the file being invoked.
   @param  PeiServices Describes the list of possible PEI Services.
 
-  @retval EFI_SUCESS  The entry point of Debug Service PEIM executes successfully.
+  @retval EFI_SUCCESS The entry point of Debug Service PEIM executes successfully.
   @retval Others      Some error occurs during the execution of this function.
 
 **/
 EFI_STATUS
 EFIAPI
-DebugSerivceInitialize (
-  IN EFI_PEI_FILE_HANDLE        FileHandle,
-  IN CONST EFI_PEI_SERVICES     **PeiServices
+DebugServiceInitialize (
+  IN EFI_PEI_FILE_HANDLE     FileHandle,
+  IN CONST EFI_PEI_SERVICES  **PeiServices
   )
 {
   return PeiServicesInstallPpi (&mDebugServicePpi);
 }
-

@@ -12,8 +12,7 @@
 
 **/
 
-#ifndef _FMP_PAYLOAD_HEADER_LIB_H__
-#define _FMP_PAYLOAD_HEADER_LIB_H__
+#pragma once
 
 /**
   Returns the FMP Payload Header size in bytes.
@@ -75,9 +74,7 @@ GetFmpPayloadHeaderVersion (
 EFI_STATUS
 EFIAPI
 GetFmpPayloadHeaderLowestSupportedVersion (
-  IN  CONST VOID    *Header,
-  IN  CONST UINTN   FmpPayloadSize,
-  OUT UINT32        *LowestSupportedVersion
+  IN  CONST VOID   *Header,
+  IN  CONST UINTN  FmpPayloadSize,
+  OUT UINT32       *LowestSupportedVersion
   );
-
-#endif

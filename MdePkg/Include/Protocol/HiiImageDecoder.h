@@ -10,14 +10,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   This Protocol was introduced in UEFI Specification 2.6.
 
 **/
-#ifndef __HII_IMAGE_DECODER_H__
-#define __HII_IMAGE_DECODER_H__
+
+#pragma once
 
 #include <Protocol/HiiImage.h>
 
 #define EFI_HII_IMAGE_DECODER_PROTOCOL_GUID \
   {0x9e66f251, 0x727c, 0x418c, { 0xbf, 0xd6, 0xc2, 0xb4, 0x25, 0x28, 0x18, 0xea }}
-
 
 #define EFI_HII_IMAGE_DECODER_NAME_JPEG_GUID \
   {0xefefd093, 0xd9b, 0x46eb,  { 0xa8, 0x56, 0x48, 0x35, 0x7, 0x0, 0xc9, 0x8 }}
@@ -53,8 +52,11 @@ typedef struct _EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER {
   UINT8                               ColorDepthInBits;
 } EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER;
 
-#define EFI_IMAGE_JPEG_SCANTYPE_PROGREESSIVE 0x01
-#define EFI_IMAGE_JPEG_SCANTYPE_INTERLACED   0x02
+#define EFI_IMAGE_JPEG_SCANTYPE_PROGRESSIVE  0x01
+// This misspelling is kept temporarily for backwards compatibility and will
+// be removed in a future PR. Consumers must migrate to the new definition
+#define EFI_IMAGE_JPEG_SCANTYPE_PROGREESSIVE  EFI_IMAGE_JPEG_SCANTYPE_PROGRESSIVE
+#define EFI_IMAGE_JPEG_SCANTYPE_INTERLACED    0x02
 
 //
 // EFI_HII_IMAGE_DECODER_JPEG_INFO
@@ -63,9 +65,9 @@ typedef struct _EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER {
 // Reserved       Reserved
 //
 typedef struct _EFI_HII_IMAGE_DECODER_JPEG_INFO {
-  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER  Header;
-  UINT16                                    ScanType;
-  UINT64                                    Reserved;
+  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER    Header;
+  UINT16                                     ScanType;
+  UINT64                                     Reserved;
 } EFI_HII_IMAGE_DECODER_JPEG_INFO;
 
 //
@@ -75,17 +77,17 @@ typedef struct _EFI_HII_IMAGE_DECODER_JPEG_INFO {
 // Reserved       Reserved
 //
 typedef struct _EFI_HII_IMAGE_DECODER_PNG_INFO {
-  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER  Header;
-  UINT16                                    Channels;
-  UINT64                                    Reserved;
+  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER    Header;
+  UINT16                                     Channels;
+  UINT64                                     Reserved;
 } EFI_HII_IMAGE_DECODER_PNG_INFO;
 
 //
 // EFI_HII_IMAGE_DECODER_OTHER_INFO
 //
 typedef struct _EFI_HII_IMAGE_DECODER_OTHER_INFO {
-  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER Header;
-  CHAR16                                  ImageExtenion[1];
+  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER    Header;
+  CHAR16                                     ImageExtenion[1];
   //
   // Variable length of image file extension name.
   //
@@ -193,8 +195,6 @@ struct _EFI_HII_IMAGE_DECODER_PROTOCOL {
   EFI_HII_IMAGE_DECODER_DECODE            DecodeImage;
 };
 
-extern EFI_GUID gEfiHiiImageDecoderProtocolGuid;
-extern EFI_GUID gEfiHiiImageDecoderNameJpegGuid;
-extern EFI_GUID gEfiHiiImageDecoderNamePngGuid;
-
-#endif
+extern EFI_GUID  gEfiHiiImageDecoderProtocolGuid;
+extern EFI_GUID  gEfiHiiImageDecoderNameJpegGuid;
+extern EFI_GUID  gEfiHiiImageDecoderNamePngGuid;

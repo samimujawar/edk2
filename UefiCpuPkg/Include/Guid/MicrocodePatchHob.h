@@ -8,10 +8,9 @@
 
 **/
 
-#ifndef _MICROCODE_PATCH_HOB_H_
-#define _MICROCODE_PATCH_HOB_H_
+#pragma once
 
-extern EFI_GUID gEdkiiMicrocodePatchHobGuid;
+extern EFI_GUID  gEdkiiMicrocodePatchHobGuid;
 
 //
 // The EDKII microcode patch HOB will be produced by MpInitLib and it can be
@@ -40,5 +39,3 @@ typedef struct {
   //
   UINT64    ProcessorSpecificPatchOffset[0];
 } EDKII_MICROCODE_PATCH_HOB;
-
-#endif

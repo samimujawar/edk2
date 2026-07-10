@@ -6,9 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _EFI_PCI_OPTION_ROM_SUPPORT_H_
-#define _EFI_PCI_OPTION_ROM_SUPPORT_H_
-
+#pragma once
 
 /**
   Initialize a PCI LoadFile2 instance.
@@ -18,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 VOID
 InitializePciLoadFile2 (
-  IN PCI_IO_DEVICE       *PciIoDevice
+  IN PCI_IO_DEVICE  *PciIoDevice
   );
 
 /**
@@ -32,7 +30,7 @@ InitializePciLoadFile2 (
                      On output with a return code of EFI_BUFFER_TOO_SMALL,
                      the size of Buffer required to retrieve the requested file.
   @param Buffer      The memory buffer to transfer the file to. If Buffer is NULL,
-                     then no the size of the requested file is returned in BufferSize.
+                     then the size of the requested file is returned in BufferSize.
 
   @retval EFI_SUCCESS           The file was loaded.
   @retval EFI_UNSUPPORTED       BootPolicy is TRUE.
@@ -47,11 +45,11 @@ InitializePciLoadFile2 (
 EFI_STATUS
 EFIAPI
 LoadFile2 (
-  IN EFI_LOAD_FILE2_PROTOCOL  *This,
-  IN EFI_DEVICE_PATH_PROTOCOL *FilePath,
-  IN BOOLEAN                  BootPolicy,
-  IN OUT UINTN                *BufferSize,
-  IN VOID                     *Buffer      OPTIONAL
+  IN EFI_LOAD_FILE2_PROTOCOL   *This,
+  IN EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  IN BOOLEAN                   BootPolicy,
+  IN OUT UINTN                 *BufferSize,
+  IN VOID                      *Buffer      OPTIONAL
   );
 
 /**
@@ -66,8 +64,8 @@ LoadFile2 (
 **/
 BOOLEAN
 ContainEfiImage (
-  IN VOID            *RomImage,
-  IN UINT64          RomSize
+  IN VOID    *RomImage,
+  IN UINT64  RomSize
   );
 
 /**
@@ -82,7 +80,7 @@ ContainEfiImage (
 **/
 EFI_STATUS
 GetOpRomInfo (
-  IN OUT PCI_IO_DEVICE    *PciIoDevice
+  IN OUT PCI_IO_DEVICE  *PciIoDevice
   );
 
 /**
@@ -92,13 +90,13 @@ GetOpRomInfo (
   @param RomBase   Base address of Option Rom.
 
   @retval EFI_OUT_OF_RESOURCES No enough memory to hold image.
-  @retval EFI_SUCESS           Successfully loaded Option Rom.
+  @retval EFI_SUCCESS          Successfully loaded Option Rom.
 
 **/
 EFI_STATUS
 LoadOpRomImage (
-  IN PCI_IO_DEVICE   *PciDevice,
-  IN UINT64          RomBase
+  IN PCI_IO_DEVICE  *PciDevice,
+  IN UINT64         RomBase
   );
 
 /**
@@ -113,16 +111,17 @@ LoadOpRomImage (
 **/
 VOID
 RomDecode (
-  IN PCI_IO_DEVICE   *PciDevice,
-  IN UINT8           RomBarIndex,
-  IN UINT32          RomBar,
-  IN BOOLEAN         Enable
+  IN PCI_IO_DEVICE  *PciDevice,
+  IN UINT8          RomBarIndex,
+  IN UINT32         RomBar,
+  IN BOOLEAN        Enable
   );
 
 /**
   Load and start the Option Rom image.
 
   @param PciDevice       Pci device instance.
+  @param NativeOnly      Whether to consider only the native image.
 
   @retval EFI_SUCCESS    Successfully loaded and started PCI Option Rom image.
   @retval EFI_NOT_FOUND  Failed to process PCI Option Rom image.
@@ -130,7 +129,6 @@ RomDecode (
 **/
 EFI_STATUS
 ProcessOpRomImage (
-  IN PCI_IO_DEVICE   *PciDevice
+  IN PCI_IO_DEVICE  *PciDevice,
+  IN BOOLEAN        NativeOnly
   );
-
-#endif

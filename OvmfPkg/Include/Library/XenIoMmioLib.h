@@ -7,8 +7,7 @@
 *
 **/
 
-#ifndef _XENIO_MMIO_DEVICE_LIB_H_
-#define _XENIO_MMIO_DEVICE_LIB_H_
+#pragma once
 
 /**
 
@@ -32,10 +31,9 @@
 **/
 EFI_STATUS
 XenIoMmioInstall (
-  IN OUT   EFI_HANDLE              *Handle,
-  IN       EFI_PHYSICAL_ADDRESS    GrantTableAddress
+  IN OUT   EFI_HANDLE            *Handle,
+  IN       EFI_PHYSICAL_ADDRESS  GrantTableAddress
   );
-
 
 /**
 
@@ -52,7 +50,5 @@ XenIoMmioInstall (
 **/
 EFI_STATUS
 XenIoMmioUninstall (
-  IN       EFI_HANDLE              Handle
+  IN       EFI_HANDLE  Handle
   );
-
-#endif

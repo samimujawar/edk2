@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _SEC_CORE_DEBUG_AGENT_LIB_H_
-#define _SEC_CORE_DEBUG_AGENT_LIB_H_
+#pragma once
 
 #include <PiPei.h>
 #include <Ppi/MemoryDiscovered.h>
@@ -33,8 +32,8 @@ typedef struct {
 VOID
 EFIAPI
 InitializeDebugAgentPhase2 (
-  IN VOID                  *Context,
-  IN DEBUG_PORT_HANDLE     DebugPortHandle
+  IN VOID               *Context,
+  IN DEBUG_PORT_HANDLE  DebugPortHandle
   );
 
 /**
@@ -50,10 +49,7 @@ InitializeDebugAgentPhase2 (
 EFI_STATUS
 EFIAPI
 DebugAgentCallbackMemoryDiscoveredPpi (
-  IN EFI_PEI_SERVICES                     **PeiServices,
-  IN EFI_PEI_NOTIFY_DESCRIPTOR            *NotifyDescriptor,
-  IN VOID                                 *Ppi
+  IN EFI_PEI_SERVICES           **PeiServices,
+  IN EFI_PEI_NOTIFY_DESCRIPTOR  *NotifyDescriptor,
+  IN VOID                       *Ppi
   );
-
-#endif
-

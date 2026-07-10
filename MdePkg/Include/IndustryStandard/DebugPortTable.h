@@ -7,9 +7,7 @@
 
 **/
 
-
-#ifndef _DEBUG_PORT_TABLE_H_
-#define _DEBUG_PORT_TABLE_H_
+#pragma once
 
 #include <IndustryStandard/Acpi.h>
 
@@ -33,12 +31,10 @@ typedef struct {
 //
 // DBGP Revision (defined in spec)
 //
-#define EFI_ACPI_DEBUG_PORT_TABLE_REVISION      0x01
+#define EFI_ACPI_DEBUG_PORT_TABLE_REVISION  0x01
 
 //
 // Interface Type
 //
 #define EFI_ACPI_DBGP_INTERFACE_TYPE_FULL_16550                                 0
 #define EFI_ACPI_DBGP_INTERFACE_TYPE_16550_SUBSET_COMPATIBLE_WITH_MS_DBGP_SPEC  1
-
-#endif

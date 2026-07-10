@@ -12,8 +12,7 @@ Abstract:
 
 **/
 
-#ifndef _DPC_H_
-#define _DPC_H_
+#pragma once
 
 #include <Uefi.h>
 #include <Library/BaseLib.h>
@@ -28,9 +27,9 @@ Abstract:
 // list or on a DPC queue at a specific EFI_TPL.
 //
 typedef struct {
-  LIST_ENTRY             ListEntry;
-  EFI_DPC_PROCEDURE  DpcProcedure;
-  VOID               *DpcContext;
+  LIST_ENTRY           ListEntry;
+  EFI_DPC_PROCEDURE    DpcProcedure;
+  VOID                 *DpcContext;
 } DPC_ENTRY;
 
 /**
@@ -75,6 +74,3 @@ EFIAPI
 DpcDispatchDpc (
   IN EFI_DPC_PROTOCOL  *This
   );
-
-#endif
-

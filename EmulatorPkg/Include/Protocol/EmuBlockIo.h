@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef __EMU_BLOCK_IO_H__
-#define __EMU_BLOCK_IO_H__
+#pragma once
 
 #include <Protocol/BlockIo.h>
 #include <Protocol/BlockIo2.h>
@@ -19,9 +18,7 @@
 #define EMU_BLOCK_IO_PROTOCOL_GUID \
 { 0x6888A4AE, 0xAFCE, 0xE84B, { 0x91, 0x02, 0xF7, 0xB9, 0xDA, 0xE6, 0xA0, 0x30 } }
 
-typedef struct _EMU_BLOCK_IO_PROTOCOL   EMU_BLOCK_IO_PROTOCOL;
-
-
+typedef struct _EMU_BLOCK_IO_PROTOCOL EMU_BLOCK_IO_PROTOCOL;
 
 /**
   Reset the block device hardware.
@@ -38,7 +35,7 @@ typedef struct _EMU_BLOCK_IO_PROTOCOL   EMU_BLOCK_IO_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EMU_BLOCK_RESET) (
+(EFIAPI *EMU_BLOCK_RESET)(
   IN EMU_BLOCK_IO_PROTOCOL   *This,
   IN BOOLEAN                 ExtendedVerification
   );
@@ -78,13 +75,13 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EMU_BLOCK_READ) (
+(EFIAPI *EMU_BLOCK_READ)(
   IN     EMU_BLOCK_IO_PROTOCOL  *This,
   IN     UINT32                 MediaId,
   IN     EFI_LBA                LBA,
   IN OUT EFI_BLOCK_IO2_TOKEN    *Token,
   IN     UINTN                  BufferSize,
-     OUT VOID                   *Buffer
+  OUT VOID                   *Buffer
   );
 
 /**
@@ -120,7 +117,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EMU_BLOCK_WRITE) (
+(EFIAPI *EMU_BLOCK_WRITE)(
   IN     EMU_BLOCK_IO_PROTOCOL  *This,
   IN     UINT32                 MediaId,
   IN     EFI_LBA                LBA,
@@ -153,19 +150,17 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EMU_BLOCK_FLUSH) (
+(EFIAPI *EMU_BLOCK_FLUSH)(
   IN     EMU_BLOCK_IO_PROTOCOL    *This,
   IN OUT EFI_BLOCK_IO2_TOKEN      *Token
   );
 
-
 typedef
 EFI_STATUS
-(EFIAPI *EMU_BLOCK_CREATE_MAPPING) (
+(EFIAPI *EMU_BLOCK_CREATE_MAPPING)(
   IN     EMU_BLOCK_IO_PROTOCOL    *This,
   IN     EFI_BLOCK_IO_MEDIA       *Media
   );
-
 
 ///
 ///  The Block I/O2 protocol defines an extension to the Block I/O protocol which
@@ -173,14 +168,11 @@ EFI_STATUS
 //   manner.
 ///
 struct _EMU_BLOCK_IO_PROTOCOL  {
-  EMU_BLOCK_RESET           Reset;
-  EMU_BLOCK_READ            ReadBlocks;
-  EMU_BLOCK_WRITE           WriteBlocks;
-  EMU_BLOCK_FLUSH           FlushBlocks;
-  EMU_BLOCK_CREATE_MAPPING  CreateMapping;
+  EMU_BLOCK_RESET             Reset;
+  EMU_BLOCK_READ              ReadBlocks;
+  EMU_BLOCK_WRITE             WriteBlocks;
+  EMU_BLOCK_FLUSH             FlushBlocks;
+  EMU_BLOCK_CREATE_MAPPING    CreateMapping;
 };
 
-extern EFI_GUID gEmuBlockIoProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEmuBlockIoProtocolGuid;

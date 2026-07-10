@@ -5,7 +5,7 @@
   all over this file.
 
   The only place where multi-instance device paths are supported is in
-  environment varibles. Multi-instance device paths should never be placed
+  environment variables. Multi-instance device paths should never be placed
   on a Handle.
 
   Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
@@ -15,7 +15,6 @@
 **/
 
 #include "UefiDevicePathLib.h"
-
 
 /**
   Retrieves the device path protocol from a handle.
@@ -33,7 +32,7 @@
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 DevicePathFromHandle (
-  IN EFI_HANDLE                      Handle
+  IN EFI_HANDLE  Handle
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
@@ -42,10 +41,11 @@ DevicePathFromHandle (
   Status = gBS->HandleProtocol (
                   Handle,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID *) &DevicePath
+                  (VOID *)&DevicePath
                   );
   if (EFI_ERROR (Status)) {
     DevicePath = NULL;
   }
+
   return DevicePath;
 }

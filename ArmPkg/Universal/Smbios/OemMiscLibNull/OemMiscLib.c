@@ -1,6 +1,7 @@
 /** @file
 *  OemMiscLib.c
 *
+*  Copyright (c) 2022, Ampere Computing LLC. All rights reserved.
 *  Copyright (c) 2021, NUVIA Inc. All rights reserved.
 *  Copyright (c) 2018, Hisilicon Limited. All rights reserved.
 *  Copyright (c) 2018, Linaro Limited. All rights reserved.
@@ -10,12 +11,12 @@
 **/
 
 #include <Uefi.h>
+#include <Guid/ZeroGuid.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/HiiLib.h>
-
 #include <Library/OemMiscLib.h>
-
+#include <Library/PcdLib.h>
 
 /** Gets the CPU frequency of the specified processor.
 
@@ -23,10 +24,10 @@
 
   @return               CPU frequency in Hz
 **/
-EFIAPI
 UINTN
+EFIAPI
 OemGetCpuFreq (
-  IN UINT8 ProcessorIndex
+  IN UINT8  ProcessorIndex
   )
 {
   ASSERT (FALSE);
@@ -38,18 +39,18 @@ OemGetCpuFreq (
 
   @param ProcessorIndex  Index of the processor to get the information for.
   @param ProcessorStatus Processor status.
-  @param ProcessorCharacteristics Processor characteritics.
+  @param ProcessorCharacteristics Processor characteristics.
   @param MiscProcessorData        Miscellaneous processor information.
 
   @return  TRUE on success, FALSE on failure.
 **/
-EFIAPI
 BOOLEAN
+EFIAPI
 OemGetProcessorInformation (
-  IN UINTN ProcessorIndex,
-  IN OUT PROCESSOR_STATUS_DATA *ProcessorStatus,
-  IN OUT PROCESSOR_CHARACTERISTIC_FLAGS *ProcessorCharacteristics,
-  IN OUT OEM_MISC_PROCESSOR_DATA *MiscProcessorData
+  IN UINTN                               ProcessorIndex,
+  IN OUT PROCESSOR_STATUS_DATA           *ProcessorStatus,
+  IN OUT PROCESSOR_CHARACTERISTIC_FLAGS  *ProcessorCharacteristics,
+  IN OUT OEM_MISC_PROCESSOR_DATA         *MiscProcessorData
   )
 {
   ASSERT (FALSE);
@@ -66,27 +67,27 @@ OemGetProcessorInformation (
 
   @return TRUE on success, FALSE on failure.
 **/
-EFIAPI
 BOOLEAN
+EFIAPI
 OemGetCacheInformation (
-  IN UINT8   ProcessorIndex,
-  IN UINT8   CacheLevel,
-  IN BOOLEAN DataCache,
-  IN BOOLEAN UnifiedCache,
-  IN OUT SMBIOS_TABLE_TYPE7 *SmbiosCacheTable
+  IN UINT8                   ProcessorIndex,
+  IN UINT8                   CacheLevel,
+  IN BOOLEAN                 DataCache,
+  IN BOOLEAN                 UnifiedCache,
+  IN OUT SMBIOS_TABLE_TYPE7  *SmbiosCacheTable
   )
 {
   ASSERT (FALSE);
   return TRUE;
 }
 
-/** Gets the maximum number of sockets supported by the platform.
+/** Gets the maximum number of processors supported by the platform.
 
-  @return The maximum number of sockets.
+  @return The maximum number of processors.
 **/
-EFIAPI
 UINT8
-OemGetProcessorMaxSockets (
+EFIAPI
+OemGetMaxProcessors (
   VOID
   )
 {
@@ -96,19 +97,16 @@ OemGetProcessorMaxSockets (
 
 /** Gets the type of chassis for the system.
 
-  @param ChassisType The type of the chassis.
-
-  @retval EFI_SUCCESS The chassis type was fetched successfully.
+  @retval The type of the chassis.
 **/
-EFI_STATUS
+MISC_CHASSIS_TYPE
 EFIAPI
 OemGetChassisType (
-  UINT8 *ChassisType
+  VOID
   )
 {
   ASSERT (FALSE);
-  *ChassisType = MiscChassisTypeUnknown;
-  return EFI_SUCCESS;
+  return MiscChassisTypeUnknown;
 }
 
 /** Returns whether the specified processor is present or not.
@@ -117,10 +115,10 @@ OemGetChassisType (
 
   @return TRUE is the processor is present, FALSE otherwise.
 **/
-EFIAPI
 BOOLEAN
-OemIsSocketPresent (
-  IN UINTN ProcessorIndex
+EFIAPI
+OemIsProcessorPresent (
+  IN UINTN  ProcessorIndex
   )
 {
   ASSERT (FALSE);
@@ -129,17 +127,159 @@ OemIsSocketPresent (
 
 /** Updates the HII string for the specified field.
 
-  @param mHiiHandle    The HII handle.
+  @param HiiHandle     The HII handle.
   @param TokenToUpdate The string to update.
-  @param Offset        The field to get information about.
+  @param Field         The field to get information about.
 **/
-EFIAPI
 VOID
+EFIAPI
 OemUpdateSmbiosInfo (
-  IN EFI_HII_HANDLE mHiiHandle,
-  IN EFI_STRING_ID TokenToUpdate,
-  IN OEM_MISC_SMBIOS_HII_STRING_FIELD Offset
+  IN EFI_HII_HANDLE                    HiiHandle,
+  IN EFI_STRING_ID                     TokenToUpdate,
+  IN OEM_MISC_SMBIOS_HII_STRING_FIELD  Field
   )
 {
   ASSERT (FALSE);
+}
+
+/** Fetches the Type 32 boot information status.
+
+  @return Boot status.
+**/
+MISC_BOOT_INFORMATION_STATUS_DATA_TYPE
+EFIAPI
+OemGetBootStatus (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return BootInformationStatusNoError;
+}
+
+/** Fetches the chassis status when it was last booted.
+
+ @return Chassis status.
+**/
+MISC_CHASSIS_STATE
+EFIAPI
+OemGetChassisBootupState (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return ChassisStateSafe;
+}
+
+/** Fetches the chassis power supply/supplies status when last booted.
+
+ @return Chassis power supply/supplies status.
+**/
+MISC_CHASSIS_STATE
+EFIAPI
+OemGetChassisPowerSupplyState (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return ChassisStateSafe;
+}
+
+/** Fetches the chassis thermal status when last booted.
+
+ @return Chassis thermal status.
+**/
+MISC_CHASSIS_STATE
+EFIAPI
+OemGetChassisThermalState (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return ChassisStateSafe;
+}
+
+/** Fetches the chassis security status when last booted.
+
+ @return Chassis security status.
+**/
+MISC_CHASSIS_SECURITY_STATE
+EFIAPI
+OemGetChassisSecurityStatus (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return ChassisSecurityStatusNone;
+}
+
+/** Fetches the chassis height in RMUs (Rack Mount Units).
+
+  @return The height of the chassis.
+**/
+UINT8
+EFIAPI
+OemGetChassisHeight (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return 1U;
+}
+
+/** Fetches the number of power cords.
+
+  @return The number of power cords.
+**/
+UINT8
+EFIAPI
+OemGetChassisNumPowerCords (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return 1;
+}
+
+/**
+  Fetches the system UUID.
+
+  @param[out] SystemUuid     The pointer to the buffer to store the System UUID.
+
+**/
+VOID
+EFIAPI
+OemGetSystemUuid (
+  OUT GUID  *SystemUuid
+  )
+{
+  ASSERT (FALSE);
+  CopyGuid (SystemUuid, &gZeroGuid);
+}
+
+/** Fetches the BIOS release.
+
+  @return The BIOS release.
+**/
+UINT16
+EFIAPI
+OemGetBiosRelease (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return PcdGet16 (PcdSystemBiosRelease);
+}
+
+/** Fetches the embedded controller firmware release.
+
+  @return The embedded controller firmware release.
+**/
+UINT16
+EFIAPI
+OemGetEmbeddedControllerFirmwareRelease (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  return PcdGet16 (PcdEmbeddedControllerFirmwareRelease);
 }

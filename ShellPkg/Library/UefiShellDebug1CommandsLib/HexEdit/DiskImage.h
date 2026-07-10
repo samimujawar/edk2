@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _LIB_DISK_IMAGE_H_
-#define _LIB_DISK_IMAGE_H_
+#pragma once
 
 #include "HexEditor.h"
 
@@ -60,10 +59,10 @@ HDiskImageBackup (
 **/
 EFI_STATUS
 HDiskImageRead (
-  IN CONST CHAR16   *DeviceName,
-  IN UINTN    Offset,
-  IN UINTN    Size,
-  IN BOOLEAN  Recover
+  IN CONST CHAR16  *DeviceName,
+  IN UINTN         Offset,
+  IN UINTN         Size,
+  IN BOOLEAN       Recover
   );
 
 /**
@@ -81,9 +80,7 @@ HDiskImageRead (
 **/
 EFI_STATUS
 HDiskImageSave (
-  IN CHAR16 *DeviceName,
-  IN UINTN  Offset,
-  IN UINTN  Size
+  IN CHAR16  *DeviceName,
+  IN UINTN   Offset,
+  IN UINTN   Size
   );
-
-#endif

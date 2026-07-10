@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef _MP_INFORMATION_H_
-#define _MP_INFORMATION_H_
+#pragma once
 
 #include <Protocol/MpService.h>
 #include <PiPei.h>
@@ -24,12 +23,10 @@
 
 #pragma pack(1)
 typedef struct {
-  UINT64                     NumberOfProcessors;
-  UINT64                     NumberOfEnabledProcessors;
-  EFI_PROCESSOR_INFORMATION  ProcessorInfoBuffer[];
+  UINT64                       NumberOfProcessors;
+  UINT64                       NumberOfEnabledProcessors;
+  EFI_PROCESSOR_INFORMATION    ProcessorInfoBuffer[];
 } MP_INFORMATION_HOB_DATA;
 #pragma pack()
 
-extern EFI_GUID gMpInformationHobGuid;
-
-#endif
+extern EFI_GUID  gMpInformationHobGuid;

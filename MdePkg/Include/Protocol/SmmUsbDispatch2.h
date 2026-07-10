@@ -12,12 +12,11 @@
 
 **/
 
-#ifndef _SMM_USB_DISPATCH2_H_
-#define _SMM_USB_DISPATCH2_H_
+#pragma once
 
 #include <Protocol/MmUsbDispatch.h>
 
-#define EFI_SMM_USB_DISPATCH2_PROTOCOL_GUID EFI_MM_USB_DISPATCH_PROTOCOL_GUID
+#define EFI_SMM_USB_DISPATCH2_PROTOCOL_GUID  EFI_MM_USB_DISPATCH_PROTOCOL_GUID
 
 ///
 /// USB SMI event types
@@ -35,7 +34,4 @@ typedef EFI_MM_USB_REGISTER EFI_SMM_USB_REGISTER2;
 
 typedef EFI_MM_USB_UNREGISTER EFI_SMM_USB_UNREGISTER2;
 
-extern EFI_GUID gEfiSmmUsbDispatch2ProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiSmmUsbDispatch2ProtocolGuid;

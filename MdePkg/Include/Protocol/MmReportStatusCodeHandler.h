@@ -9,8 +9,7 @@
 
 **/
 
-#ifndef __MM_REPORT_STATUS_CODE_HANDLER_PROTOCOL_H__
-#define __MM_REPORT_STATUS_CODE_HANDLER_PROTOCOL_H__
+#pragma once
 
 #define EFI_MM_RSC_HANDLER_PROTOCOL_GUID \
   { \
@@ -25,7 +24,7 @@ EFI_STATUS
   IN UINT32                 Instance,
   IN EFI_GUID               *CallerId,
   IN EFI_STATUS_CODE_DATA   *Data
-);
+  );
 
 /**
   Register the callback function for ReportStatusCode() notification.
@@ -46,7 +45,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_MM_RSC_HANDLER_REGISTER)(
   IN EFI_MM_RSC_HANDLER_CALLBACK Callback
-);
+  );
 
 /**
   Remove a previously registered callback function from the notification list.
@@ -66,13 +65,11 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_MM_RSC_HANDLER_UNREGISTER)(
   IN EFI_MM_RSC_HANDLER_CALLBACK Callback
-);
+  );
 
 typedef struct _EFI_MM_RSC_HANDLER_PROTOCOL {
   EFI_MM_RSC_HANDLER_REGISTER      Register;
   EFI_MM_RSC_HANDLER_UNREGISTER    Unregister;
 } EFI_MM_RSC_HANDLER_PROTOCOL;
 
-extern EFI_GUID gEfiMmRscHandlerProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiMmRscHandlerProtocolGuid;

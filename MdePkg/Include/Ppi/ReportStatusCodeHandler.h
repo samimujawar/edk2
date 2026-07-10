@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __REPORT_STATUS_CODE_HANDLER_PPI_H__
-#define __REPORT_STATUS_CODE_HANDLER_PPI_H__
+#pragma once
 
 #define EFI_PEI_RSC_HANDLER_PPI_GUID \
   { \
@@ -23,7 +22,7 @@ EFI_STATUS
   IN        UINT32                  Instance,
   IN CONST  EFI_GUID                *CallerId,
   IN CONST  EFI_STATUS_CODE_DATA    *Data
-);
+  );
 
 /**
   Register the callback function for ReportStatusCode() notification.
@@ -45,7 +44,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_PEI_RSC_HANDLER_REGISTER)(
   IN EFI_PEI_RSC_HANDLER_CALLBACK Callback
-);
+  );
 
 /**
   Remove a previously registered callback function from the notification list.
@@ -64,13 +63,11 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_PEI_RSC_HANDLER_UNREGISTER)(
   IN EFI_PEI_RSC_HANDLER_CALLBACK Callback
-);
+  );
 
 typedef struct _EFI_PEI_RSC_HANDLER_PPI {
-  EFI_PEI_RSC_HANDLER_REGISTER Register;
-  EFI_PEI_RSC_HANDLER_UNREGISTER Unregister;
+  EFI_PEI_RSC_HANDLER_REGISTER      Register;
+  EFI_PEI_RSC_HANDLER_UNREGISTER    Unregister;
 } EFI_PEI_RSC_HANDLER_PPI;
 
-extern EFI_GUID gEfiPeiRscHandlerPpiGuid;
-
-#endif // __REPORT_STATUS_CODE_HANDLER_PPI_H__
+extern EFI_GUID  gEfiPeiRscHandlerPpiGuid;

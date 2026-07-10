@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _MM_RSC_LIB_H_
-#define _MM_RSC_LIB_H_
+#pragma once
 
 /**
   Returns the first protocol instance that matches the given protocol.
@@ -29,8 +28,6 @@
 EFI_STATUS
 InternalLocateProtocol (
   IN  EFI_GUID  *Protocol,
-  IN  VOID      *Registration, OPTIONAL
+  IN  VOID      *Registration  OPTIONAL,
   OUT VOID      **Interface
   );
-
-#endif // _MM_RSC_LIB_H_

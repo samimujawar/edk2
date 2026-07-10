@@ -9,10 +9,9 @@
 
 **/
 
-#ifndef __HASH_API_LIB_H_
-#define __HASH_API_LIB_H_
+#pragma once
 
-typedef VOID  *HASH_API_CONTEXT;
+typedef VOID *HASH_API_CONTEXT;
 
 /**
   Retrieves the size, in bytes, of the context buffer required for hash operations.
@@ -106,5 +105,3 @@ HashApiHashAll (
   IN  UINTN       DataToHashLen,
   OUT UINT8       *Digest
   );
-
-#endif

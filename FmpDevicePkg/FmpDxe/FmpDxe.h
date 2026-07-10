@@ -4,14 +4,13 @@
   information provided through PCDs and libraries.
 
   Copyright (c) Microsoft Corporation.<BR>
-  Copyright (c) 2018 - 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2018 - 2021, Intel Corporation. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _FMP_DXE_H_
-#define _FMP_DXE_H_
+#pragma once
 
 #include <PiDxe.h>
 #include <Library/DebugLib.h>
@@ -33,11 +32,11 @@
 #include <Library/FmpDependencyDeviceLib.h>
 #include <Protocol/FirmwareManagement.h>
 #include <Protocol/FirmwareManagementProgress.h>
-#include <Protocol/VariableLock.h>
 #include <Guid/SystemResourceTable.h>
 #include <Guid/EventGroup.h>
 #include <LastAttemptStatus.h>
 #include <FmpLastAttemptStatus.h>
+#include <Library/VariablePolicyHelperLib.h>
 
 #define VERSION_STRING_NOT_SUPPORTED  L"VERSION STRING NOT SUPPORTED"
 #define VERSION_STRING_NOT_AVAILABLE  L"VERSION STRING NOT AVAILABLE"
@@ -45,18 +44,18 @@
 ///
 ///
 ///
-#define FIRMWARE_MANAGEMENT_PRIVATE_DATA_SIGNATURE SIGNATURE_32 ('f','m','p','p')
+#define FIRMWARE_MANAGEMENT_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('f','m','p','p')
 
 typedef struct {
-  UINTN                                        Signature;
-  EFI_HANDLE                                   Handle;
-  EFI_FIRMWARE_MANAGEMENT_PROTOCOL             Fmp;
-  BOOLEAN                                      DescriptorPopulated;
-  EFI_FIRMWARE_IMAGE_DESCRIPTOR                Descriptor;
-  CHAR16                                       *ImageIdName;
-  CHAR16                                       *VersionName;
-  BOOLEAN                                      RuntimeVersionSupported;
-  EFI_EVENT                                    FmpDeviceLockEvent;
+  UINTN                               Signature;
+  EFI_HANDLE                          Handle;
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL    Fmp;
+  BOOLEAN                             DescriptorPopulated;
+  EFI_FIRMWARE_IMAGE_DESCRIPTOR       Descriptor;
+  CHAR16                              *ImageIdName;
+  CHAR16                              *VersionName;
+  BOOLEAN                             RuntimeVersionSupported;
+  EFI_EVENT                           FmpDeviceLockEvent;
   //
   // Indicates if an attempt has been made to lock a
   // FLASH storage device by calling FmpDeviceLock().
@@ -64,14 +63,14 @@ typedef struct {
   // so this variable is set to TRUE even if FmpDeviceLock()
   // returns an error.
   //
-  BOOLEAN                                      FmpDeviceLocked;
-  VOID                                         *FmpDeviceContext;
-  CHAR16                                       *VersionVariableName;
-  CHAR16                                       *LsvVariableName;
-  CHAR16                                       *LastAttemptStatusVariableName;
-  CHAR16                                       *LastAttemptVersionVariableName;
-  CHAR16                                       *FmpStateVariableName;
-  BOOLEAN                                      DependenciesSatisfied;
+  BOOLEAN                             FmpDeviceLocked;
+  VOID                                *FmpDeviceContext;
+  CHAR16                              *VersionVariableName;
+  CHAR16                              *LsvVariableName;
+  CHAR16                              *LastAttemptStatusVariableName;
+  CHAR16                              *LastAttemptVersionVariableName;
+  CHAR16                              *FmpStateVariableName;
+  BOOLEAN                             DependenciesSatisfied;
 } FIRMWARE_MANAGEMENT_PRIVATE_DATA;
 
 ///
@@ -114,6 +113,8 @@ DetectTestKey (
                                      to contain the image(s) information if the buffer was too small.
   @param[in, out] ImageInfo          A pointer to the buffer in which firmware places the current image(s)
                                      information. The information is an array of EFI_FIRMWARE_IMAGE_DESCRIPTORs.
+                                     May be NULL with a zero ImageInfoSize in order to determine the size of the
+                                     buffer needed.
   @param[out]     DescriptorVersion  A pointer to the location in which firmware returns the version number
                                      associated with the EFI_FIRMWARE_IMAGE_DESCRIPTOR.
   @param[out]     DescriptorCount    A pointer to the location in which firmware returns the number of
@@ -134,7 +135,12 @@ DetectTestKey (
   @retval EFI_SUCCESS                The device was successfully updated with the new image.
   @retval EFI_BUFFER_TOO_SMALL       The ImageInfo buffer was too small. The current buffer size
                                      needed to hold the image(s) information is returned in ImageInfoSize.
-  @retval EFI_INVALID_PARAMETER      ImageInfoSize is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is not too small and ImageInfo is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is non-zero and DescriptorVersion is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is non-zero and DescriptorCount is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is non-zero and DescriptorSize is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is non-zero and PackageVersion is NULL.
+  @retval EFI_INVALID_PARAMETER      ImageInfoSize is non-zero and PackageVersionName is NULL.
   @retval EFI_DEVICE_ERROR           Valid information could not be returned. Possible corrupted image.
 
 **/
@@ -161,6 +167,8 @@ GetTheImageInfo (
   @param[in]      ImageIndex     A unique number identifying the firmware image(s) within the device.
                                  The number is between 1 and DescriptorCount.
   @param[in, out] Image          Points to the buffer where the current image is copied to.
+                                 May be NULL with a zero ImageSize in order to determine the size of the
+                                 buffer needed.
   @param[in, out] ImageSize      On entry, points to the size of the buffer pointed to by Image, in bytes.
                                  On return, points to the length of the image, in bytes.
 
@@ -168,7 +176,7 @@ GetTheImageInfo (
   @retval EFI_BUFFER_TOO_SMALL   The buffer specified by ImageSize is too small to hold the
                                  image. The current buffer size needed to hold the image is returned
                                  in ImageSize.
-  @retval EFI_INVALID_PARAMETER  The Image was NULL.
+  @retval EFI_INVALID_PARAMETER  The ImageSize is not too small and Image is NULL.
   @retval EFI_NOT_FOUND          The current image is not copied to the buffer.
   @retval EFI_UNSUPPORTED        The operation is not supported.
   @retval EFI_SECURITY_VIOLATION The operation could not be performed due to an authentication failure.
@@ -182,7 +190,6 @@ GetTheImage (
   IN OUT VOID                              *Image,
   IN OUT UINTN                             *ImageSize
   );
-
 
 /**
   Checks if the firmware image is valid for the device.
@@ -357,5 +364,3 @@ SetPackageInfo (
   IN UINT32                            PackageVersion,
   IN CONST CHAR16                      *PackageVersionName
   );
-
-#endif

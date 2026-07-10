@@ -11,7 +11,7 @@
   When both Security and Security2 Architectural Protocols are published, LoadImage must use
   them in accordance with the following rules:
     The Security2 protocol must be used on every image being loaded.
-    The Security protocol must be used after the Securiy2 protocol and only on images that
+    The Security protocol must be used after the Security2 protocol and only on images that
     have been read using Firmware Volume protocol.
 
   When only Security architectural protocol is published, LoadImage must use it on every image
@@ -22,8 +22,7 @@
 
 **/
 
-#ifndef __ARCH_PROTOCOL_SECURITY2_H__
-#define __ARCH_PROTOCOL_SECURITY2_H__
+#pragma once
 
 ///
 /// Global ID for the Security2 Code Architectural Protocol
@@ -31,7 +30,7 @@
 #define EFI_SECURITY2_ARCH_PROTOCOL_GUID \
   { 0x94ab2f58, 0x1438, 0x4ef1, {0x91, 0x52, 0x18, 0x94, 0x1a, 0x3a, 0x0e, 0x68 } }
 
-typedef struct _EFI_SECURITY2_ARCH_PROTOCOL    EFI_SECURITY2_ARCH_PROTOCOL;
+typedef struct _EFI_SECURITY2_ARCH_PROTOCOL EFI_SECURITY2_ARCH_PROTOCOL;
 
 /**
   The DXE Foundation uses this service to measure and/or verify a UEFI image.
@@ -78,13 +77,13 @@ typedef struct _EFI_SECURITY2_ARCH_PROTOCOL    EFI_SECURITY2_ARCH_PROTOCOL;
                                   drivers from the device path specified by DevicePath. The
                                   image has been added into the list of the deferred images.
 **/
-typedef EFI_STATUS (EFIAPI *EFI_SECURITY2_FILE_AUTHENTICATION) (
+typedef EFI_STATUS (EFIAPI *EFI_SECURITY2_FILE_AUTHENTICATION)(
   IN CONST EFI_SECURITY2_ARCH_PROTOCOL *This,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL    *File, OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL    *File  OPTIONAL,
   IN VOID                              *FileBuffer,
   IN UINTN                             FileSize,
   IN BOOLEAN                           BootPolicy
-);
+  );
 
 ///
 /// The EFI_SECURITY2_ARCH_PROTOCOL is used to abstract platform-specific policy from the
@@ -93,9 +92,7 @@ typedef EFI_STATUS (EFIAPI *EFI_SECURITY2_FILE_AUTHENTICATION) (
 /// or registered hashes).
 ///
 struct _EFI_SECURITY2_ARCH_PROTOCOL {
-  EFI_SECURITY2_FILE_AUTHENTICATION FileAuthentication;
+  EFI_SECURITY2_FILE_AUTHENTICATION    FileAuthentication;
 };
 
-extern EFI_GUID gEfiSecurity2ArchProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiSecurity2ArchProtocolGuid;

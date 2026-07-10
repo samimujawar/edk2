@@ -6,13 +6,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __MNP_VLAN_H__
-#define __MNP_VLAN_H__
+#pragma once
 
 #include "MnpDriver.h"
 
-extern EFI_VLAN_CONFIG_PROTOCOL mVlanConfigProtocolTemplate;
-
+extern EFI_VLAN_CONFIG_PROTOCOL  mVlanConfigProtocolTemplate;
 
 /**
   Create a child handle for the VLAN ID.
@@ -27,10 +25,10 @@ extern EFI_VLAN_CONFIG_PROTOCOL mVlanConfigProtocolTemplate;
 **/
 EFI_HANDLE
 MnpCreateVlanChild (
-  IN     EFI_HANDLE                  ImageHandle,
-  IN     EFI_HANDLE                  ControllerHandle,
-  IN     UINT16                      VlanId,
-     OUT EFI_DEVICE_PATH_PROTOCOL    **Devicepath OPTIONAL
+  IN     EFI_HANDLE             ImageHandle,
+  IN     EFI_HANDLE             ControllerHandle,
+  IN     UINT16                 VlanId,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **Devicepath OPTIONAL
   );
 
 /**
@@ -46,9 +44,9 @@ MnpCreateVlanChild (
 **/
 BOOLEAN
 MnpRemoveVlanTag (
-  IN OUT MNP_DEVICE_DATA   *MnpDeviceData,
-  IN OUT NET_BUF           *Nbuf,
-     OUT UINT16            *VlanId
+  IN OUT MNP_DEVICE_DATA  *MnpDeviceData,
+  IN OUT NET_BUF          *Nbuf,
+  OUT UINT16              *VlanId
   );
 
 /**
@@ -65,11 +63,11 @@ MnpRemoveVlanTag (
 **/
 VOID
 MnpInsertVlanTag (
-  IN     MNP_SERVICE_DATA                    *MnpServiceData,
-  IN     EFI_MANAGED_NETWORK_TRANSMIT_DATA   *TxData,
-     OUT UINT16                              *ProtocolType,
-  IN OUT UINT8                               **Packet,
-  IN OUT UINT32                              *Length
+  IN     MNP_SERVICE_DATA                   *MnpServiceData,
+  IN     EFI_MANAGED_NETWORK_TRANSMIT_DATA  *TxData,
+  OUT UINT16                                *ProtocolType,
+  IN OUT UINT8                              **Packet,
+  IN OUT UINT32                             *Length
   );
 
 /**
@@ -88,9 +86,9 @@ MnpInsertVlanTag (
 **/
 EFI_STATUS
 MnpGetVlanVariable (
-  IN     MNP_DEVICE_DATA   *MnpDeviceData,
-     OUT UINTN             *NumberOfVlan,
-     OUT VLAN_TCI          **VlanVariable
+  IN     MNP_DEVICE_DATA  *MnpDeviceData,
+  OUT UINTN               *NumberOfVlan,
+  OUT VLAN_TCI            **VlanVariable
   );
 
 /**
@@ -106,9 +104,9 @@ MnpGetVlanVariable (
 **/
 EFI_STATUS
 MnpSetVlanVariable (
-  IN MNP_DEVICE_DATA             *MnpDeviceData,
-  IN UINTN                       NumberOfVlan,
-  IN VLAN_TCI                    *VlanVariable
+  IN MNP_DEVICE_DATA  *MnpDeviceData,
+  IN UINTN            NumberOfVlan,
+  IN VLAN_TCI         *VlanVariable
   );
 
 /**
@@ -145,9 +143,9 @@ MnpSetVlanVariable (
 EFI_STATUS
 EFIAPI
 VlanConfigSet (
-  IN EFI_VLAN_CONFIG_PROTOCOL    *This,
-  IN UINT16                      VlanId,
-  IN UINT8                       Priority
+  IN EFI_VLAN_CONFIG_PROTOCOL  *This,
+  IN UINT16                    VlanId,
+  IN UINT8                     Priority
   );
 
 /**
@@ -172,10 +170,10 @@ VlanConfigSet (
 EFI_STATUS
 EFIAPI
 VlanConfigFind (
-  IN     EFI_VLAN_CONFIG_PROTOCOL    *This,
-  IN     UINT16                      *VlanId OPTIONAL,
-     OUT UINT16                      *NumberOfVlan,
-     OUT EFI_VLAN_FIND_DATA          **Entries
+  IN     EFI_VLAN_CONFIG_PROTOCOL  *This,
+  IN     UINT16                    *VlanId OPTIONAL,
+  OUT UINT16                       *NumberOfVlan,
+  OUT EFI_VLAN_FIND_DATA           **Entries
   );
 
 /**
@@ -198,8 +196,6 @@ VlanConfigFind (
 EFI_STATUS
 EFIAPI
 VlanConfigRemove (
-  IN EFI_VLAN_CONFIG_PROTOCOL    *This,
-  IN UINT16                      VlanId
+  IN EFI_VLAN_CONFIG_PROTOCOL  *This,
+  IN UINT16                    VlanId
   );
-
-#endif

@@ -14,12 +14,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __HII_CONFIG_ROUTING_H__
-#define __HII_CONFIG_ROUTING_H__
+#pragma once
 
 #define EFI_HII_CONFIG_ROUTING_PROTOCOL_GUID \
   { 0x587e72d7, 0xcc50, 0x4f79, { 0x82, 0x09, 0xca, 0x29, 0x1f, 0xc1, 0xa1, 0x0f } }
-
 
 typedef struct _EFI_HII_CONFIG_ROUTING_PROTOCOL EFI_HII_CONFIG_ROUTING_PROTOCOL;
 
@@ -108,12 +106,12 @@ typedef struct _EFI_HII_CONFIG_ROUTING_PROTOCOL EFI_HII_CONFIG_ROUTING_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_EXTRACT_CONFIG)(
+(EFIAPI *EFI_HII_EXTRACT_CONFIG)(
   IN CONST  EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
   IN CONST  EFI_STRING                      Request,
   OUT       EFI_STRING                      *Progress,
   OUT       EFI_STRING                      *Results
-);
+  );
 
 /**
   This function allows the caller to request the current configuration
@@ -150,10 +148,10 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_EXPORT_CONFIG)(
+(EFIAPI *EFI_HII_EXPORT_CONFIG)(
   IN CONST  EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
   OUT       EFI_STRING                      *Results
-);
+  );
 
 /**
 
@@ -169,7 +167,7 @@ EFI_STATUS
 
   @param This           Points to the EFI_HII_CONFIG_ROUTING_PROTOCOL instance.
 
-  @param Configuration  A null-terminated string in <MulltiConfigResp> format.
+  @param Configuration  A null-terminated string in <MultiConfigResp> format.
 
   @param Progress       A pointer to a string filled in with the
                         offset of the most recent '&' before the
@@ -196,12 +194,11 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_ROUTE_CONFIG)(
+(EFIAPI *EFI_HII_ROUTE_CONFIG)(
   IN CONST  EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
   IN CONST  EFI_STRING                      Configuration,
   OUT       EFI_STRING                      *Progress
-);
-
+  );
 
 /**
 
@@ -266,16 +263,14 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_BLOCK_TO_CONFIG)(
+(EFIAPI *EFI_HII_BLOCK_TO_CONFIG)(
   IN CONST  EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
   IN CONST  EFI_STRING                      ConfigRequest,
   IN CONST  UINT8                           *Block,
   IN CONST  UINTN                           BlockSize,
   OUT       EFI_STRING                      *Config,
   OUT       EFI_STRING                      *Progress
-);
-
-
+  );
 
 /**
   This function maps a configuration containing a series of
@@ -343,13 +338,13 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_CONFIG_TO_BLOCK)(
+(EFIAPI *EFI_HII_CONFIG_TO_BLOCK)(
   IN CONST  EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
   IN CONST  EFI_STRING                      ConfigResp,
   IN OUT    UINT8                           *Block,
   IN OUT    UINTN                           *BlockSize,
   OUT       EFI_STRING                      *Progress
-);
+  );
 
 /**
   This helper function is to be called by drivers to extract portions of
@@ -386,7 +381,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI * EFI_HII_GET_ALT_CFG)(
+(EFIAPI *EFI_HII_GET_ALT_CFG)(
   IN  CONST EFI_HII_CONFIG_ROUTING_PROTOCOL    *This,
   IN  CONST EFI_STRING                         ConfigResp,
   IN  CONST EFI_GUID                           *Guid,
@@ -402,16 +397,12 @@ EFI_STATUS
 /// instance of this protocol in the system.
 ///
 struct _EFI_HII_CONFIG_ROUTING_PROTOCOL {
-  EFI_HII_EXTRACT_CONFIG  ExtractConfig;
-  EFI_HII_EXPORT_CONFIG   ExportConfig;
-  EFI_HII_ROUTE_CONFIG    RouteConfig;
-  EFI_HII_BLOCK_TO_CONFIG BlockToConfig;
-  EFI_HII_CONFIG_TO_BLOCK ConfigToBlock;
-  EFI_HII_GET_ALT_CFG     GetAltConfig;
+  EFI_HII_EXTRACT_CONFIG     ExtractConfig;
+  EFI_HII_EXPORT_CONFIG      ExportConfig;
+  EFI_HII_ROUTE_CONFIG       RouteConfig;
+  EFI_HII_BLOCK_TO_CONFIG    BlockToConfig;
+  EFI_HII_CONFIG_TO_BLOCK    ConfigToBlock;
+  EFI_HII_GET_ALT_CFG        GetAltConfig;
 };
 
-extern EFI_GUID gEfiHiiConfigRoutingProtocolGuid;
-
-
-#endif
-
+extern EFI_GUID  gEfiHiiConfigRoutingProtocolGuid;

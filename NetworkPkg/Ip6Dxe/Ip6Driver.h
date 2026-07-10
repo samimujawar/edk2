@@ -7,19 +7,18 @@
 
 **/
 
-#ifndef __EFI_IP6_DRIVER_H__
-#define __EFI_IP6_DRIVER_H__
+#pragma once
 
-extern EFI_DRIVER_BINDING_PROTOCOL  gIp6DriverBinding;
-extern EFI_COMPONENT_NAME_PROTOCOL  gIp6ComponentName;
-extern EFI_COMPONENT_NAME2_PROTOCOL gIp6ComponentName2;
-extern EFI_UNICODE_STRING_TABLE     *gIp6ControllerNameTable;
+extern EFI_DRIVER_BINDING_PROTOCOL   gIp6DriverBinding;
+extern EFI_COMPONENT_NAME_PROTOCOL   gIp6ComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gIp6ComponentName2;
+extern EFI_UNICODE_STRING_TABLE      *gIp6ControllerNameTable;
 
 typedef struct {
-  EFI_SERVICE_BINDING_PROTOCOL  *ServiceBinding;
-  UINTN                         NumberOfChildren;
-  EFI_HANDLE                    *ChildHandleBuffer;
-}IP6_DESTROY_CHILD_IN_HANDLE_BUF_CONTEXT;
+  EFI_SERVICE_BINDING_PROTOCOL    *ServiceBinding;
+  UINTN                           NumberOfChildren;
+  EFI_HANDLE                      *ChildHandleBuffer;
+} IP6_DESTROY_CHILD_IN_HANDLE_BUF_CONTEXT;
 
 /**
   Clean up an IP6 service binding instance. It releases all
@@ -36,7 +35,7 @@ typedef struct {
 **/
 EFI_STATUS
 Ip6CleanService (
-  IN IP6_SERVICE            *IpSb
+  IN IP6_SERVICE  *IpSb
   );
 
 //
@@ -61,8 +60,8 @@ Ip6CleanService (
 EFI_STATUS
 EFIAPI
 Ip6DriverEntryPoint (
-  IN EFI_HANDLE             ImageHandle,
-  IN EFI_SYSTEM_TABLE       *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 //
@@ -182,5 +181,3 @@ Ip6ServiceBindingDestroyChild (
   IN EFI_SERVICE_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                    ChildHandle
   );
-
-#endif

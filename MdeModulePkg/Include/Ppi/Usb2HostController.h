@@ -11,8 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _PEI_USB2_HOST_CONTROLLER_PPI_H_
-#define _PEI_USB2_HOST_CONTROLLER_PPI_H_
+#pragma once
 
 #include <Protocol/Usb2HostController.h>
 
@@ -248,15 +247,12 @@ EFI_STATUS
 /// Specification for more information on these interfaces.
 ///
 struct _PEI_USB2_HOST_CONTROLLER_PPI {
-  PEI_USB2_HOST_CONTROLLER_CONTROL_TRANSFER            ControlTransfer;
-  PEI_USB2_HOST_CONTROLLER_BULK_TRANSFER               BulkTransfer;
-  PEI_USB2_HOST_CONTROLLER_GET_ROOTHUB_PORT_NUMBER     GetRootHubPortNumber;
-  PEI_USB2_HOST_CONTROLLER_GET_ROOTHUB_PORT_STATUS     GetRootHubPortStatus;
-  PEI_USB2_HOST_CONTROLLER_SET_ROOTHUB_PORT_FEATURE    SetRootHubPortFeature;
-  PEI_USB2_HOST_CONTROLLER_CLEAR_ROOTHUB_PORT_FEATURE  ClearRootHubPortFeature;
+  PEI_USB2_HOST_CONTROLLER_CONTROL_TRANSFER              ControlTransfer;
+  PEI_USB2_HOST_CONTROLLER_BULK_TRANSFER                 BulkTransfer;
+  PEI_USB2_HOST_CONTROLLER_GET_ROOTHUB_PORT_NUMBER       GetRootHubPortNumber;
+  PEI_USB2_HOST_CONTROLLER_GET_ROOTHUB_PORT_STATUS       GetRootHubPortStatus;
+  PEI_USB2_HOST_CONTROLLER_SET_ROOTHUB_PORT_FEATURE      SetRootHubPortFeature;
+  PEI_USB2_HOST_CONTROLLER_CLEAR_ROOTHUB_PORT_FEATURE    ClearRootHubPortFeature;
 };
 
-extern EFI_GUID gPeiUsb2HostControllerPpiGuid;
-
-#endif
-
+extern EFI_GUID  gPeiUsb2HostControllerPpiGuid;

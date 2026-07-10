@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef __EFI_HTTP_UTILITIES_PROTOCOL_H__
-#define __EFI_HTTP_UTILITIES_PROTOCOL_H__
+#pragma once
 
 #include <Protocol/Http.h>
 
@@ -21,7 +20,6 @@
   }
 
 typedef struct _EFI_HTTP_UTILITIES_PROTOCOL EFI_HTTP_UTILITIES_PROTOCOL;
-
 
 /**
   Create HTTP header based on a combination of seed header, fields
@@ -57,14 +55,14 @@ typedef struct _EFI_HTTP_UTILITIES_PROTOCOL EFI_HTTP_UTILITIES_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HTTP_UTILS_BUILD) (
+(EFIAPI *EFI_HTTP_UTILS_BUILD)(
   IN  EFI_HTTP_UTILITIES_PROTOCOL  *This,
   IN  UINTN                        SeedMessageSize,
-  IN  VOID                         *SeedMessage,   OPTIONAL
+  IN  VOID                         *SeedMessage    OPTIONAL,
   IN  UINTN                        DeleteCount,
-  IN  CHAR8                        *DeleteList[],  OPTIONAL
+  IN  CHAR8                        *DeleteList[]   OPTIONAL,
   IN  UINTN                        AppendCount,
-  IN  EFI_HTTP_HEADER              *AppendList[],  OPTIONAL
+  IN  EFI_HTTP_HEADER              *AppendList[]   OPTIONAL,
   OUT UINTN                        *NewMessageSize,
   OUT VOID                         **NewMessage
   );
@@ -92,14 +90,13 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HTTP_UTILS_PARSE) (
+(EFIAPI *EFI_HTTP_UTILS_PARSE)(
   IN  EFI_HTTP_UTILITIES_PROTOCOL  *This,
   IN  CHAR8                        *HttpMessage,
   IN  UINTN                        HttpMessageSize,
   OUT EFI_HTTP_HEADER              **HeaderFields,
   OUT UINTN                        *FieldCount
   );
-
 
 ///
 /// EFI_HTTP_UTILITIES_PROTOCOL
@@ -109,10 +106,8 @@ EFI_STATUS
 /// infrastructure.
 ///
 struct _EFI_HTTP_UTILITIES_PROTOCOL {
-  EFI_HTTP_UTILS_BUILD          Build;
-  EFI_HTTP_UTILS_PARSE          Parse;
+  EFI_HTTP_UTILS_BUILD    Build;
+  EFI_HTTP_UTILS_PARSE    Parse;
 };
 
-extern EFI_GUID gEfiHttpUtilitiesProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiHttpUtilitiesProtocolGuid;

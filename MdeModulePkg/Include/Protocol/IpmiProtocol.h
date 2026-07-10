@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _IPMI_PROTOCOL_H_
-#define _IPMI_PROTOCOL_H_
+#pragma once
 
 typedef struct _IPMI_PROTOCOL IPMI_PROTOCOL;
 
@@ -20,7 +19,6 @@ typedef struct _IPMI_PROTOCOL IPMI_PROTOCOL;
   { \
     0x5169af60, 0x8c5a, 0x4243, 0xb3, 0xe9, 0x56, 0xc5, 0x6d, 0x18, 0xee, 0x26 \
   }
-
 
 /**
   This service enables submitting commands via Ipmi.
@@ -43,24 +41,22 @@ typedef struct _IPMI_PROTOCOL IPMI_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *IPMI_SUBMIT_COMMAND) (
+(EFIAPI *IPMI_SUBMIT_COMMAND)(
   IN     IPMI_PROTOCOL                 *This,
   IN     UINT8                         NetFunction,
   IN     UINT8                         Command,
   IN     UINT8                         *RequestData,
   IN     UINT32                        RequestDataSize,
-     OUT UINT8                         *ResponseData,
+  OUT UINT8                         *ResponseData,
   IN OUT UINT32                        *ResponseDataSize
   );
 
 //
 // IPMI COMMAND PROTOCOL
 //
-struct _IPMI_PROTOCOL{
-  IPMI_SUBMIT_COMMAND       IpmiSubmitCommand;
+struct _IPMI_PROTOCOL {
+  IPMI_SUBMIT_COMMAND    IpmiSubmitCommand;
 };
 
-extern EFI_GUID gIpmiProtocolGuid;
-extern EFI_GUID gSmmIpmiProtocolGuid;
-
-#endif
+extern EFI_GUID  gIpmiProtocolGuid;
+extern EFI_GUID  gSmmIpmiProtocolGuid;

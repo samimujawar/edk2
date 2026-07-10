@@ -7,13 +7,12 @@
 
 **/
 
-#ifndef _WIFI_MGR_CONFIG_H_
-#define _WIFI_MGR_CONFIG_H_
+#pragma once
 
 #include "WifiConnectionMgrConfigNVDataStruct.h"
 
-extern UINT8        WifiConnectionManagerDxeBin[];
-extern UINT8        WifiConnectionManagerDxeStrings[];
+extern UINT8  WifiConnectionManagerDxeBin[];
+extern UINT8  WifiConnectionManagerDxeStrings[];
 
 typedef struct {
   UINT32               Signature;
@@ -40,7 +39,7 @@ typedef struct {
   CHAR16               PrivateKeyName[WIFI_FILENAME_STR_MAX_SIZE];
   VOID                 *PrivateKeyData;
   UINTN                PrivateKeyDataSize;
-  CHAR16               PrivateKeyPassword[PASSWORD_STORAGE_SIZE];    //Password to protect private key file
+  CHAR16               PrivateKeyPassword[PASSWORD_STORAGE_SIZE];    // Password to protect private key file
   CHAR16               EapIdentity[EAP_IDENTITY_SIZE];
   CHAR16               EapPassword[PASSWORD_STORAGE_SIZE];
   UINT8                EapSecondAuthMethod;
@@ -60,9 +59,7 @@ typedef struct {
 /// HII specific Vendor Device Path definition.
 ///
 typedef struct {
-  VENDOR_DEVICE_PATH               VendorDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL         End;
+  VENDOR_DEVICE_PATH          VendorDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } HII_VENDOR_DEVICE_PATH;
 #pragma pack()
-
-#endif

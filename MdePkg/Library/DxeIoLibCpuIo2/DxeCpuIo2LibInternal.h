@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef _DXE_CPUIO2_LIB_INTERNAL_H_
-#define _DXE_CPUIO2_LIB_INTERNAL_H_
+#pragma once
 
 #include <PiDxe.h>
 
@@ -19,7 +18,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
-
 
 /**
   Reads registers in the EFI CPU I/O space.
@@ -136,8 +134,8 @@ IoWriteFifoWorker (
 UINT64
 EFIAPI
 MmioReadWorker (
-  IN      UINTN                     Address,
-  IN      EFI_CPU_IO_PROTOCOL_WIDTH Width
+  IN      UINTN                      Address,
+  IN      EFI_CPU_IO_PROTOCOL_WIDTH  Width
   );
 
 /**
@@ -158,9 +156,7 @@ MmioReadWorker (
 UINT64
 EFIAPI
 MmioWriteWorker (
-  IN      UINTN                     Address,
-  IN      EFI_CPU_IO_PROTOCOL_WIDTH Width,
-  IN      UINT64                    Data
+  IN      UINTN                      Address,
+  IN      EFI_CPU_IO_PROTOCOL_WIDTH  Width,
+  IN      UINT64                     Data
   );
-
-#endif

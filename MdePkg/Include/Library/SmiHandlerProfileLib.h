@@ -17,8 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __SMI_HANDLER_PROFILE_LIB_H__
-#define __SMI_HANDLER_PROFILE_LIB_H__
+#pragma once
 
 #include <PiSmm.h>
 
@@ -45,11 +44,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 SmiHandlerProfileRegisterHandler (
-  IN EFI_GUID                       *HandlerGuid,
-  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
-  IN PHYSICAL_ADDRESS               CallerAddress,
-  IN VOID                           *Context, OPTIONAL
-  IN UINTN                          ContextSize OPTIONAL
+  IN EFI_GUID                      *HandlerGuid,
+  IN EFI_SMM_HANDLER_ENTRY_POINT2  Handler,
+  IN PHYSICAL_ADDRESS              CallerAddress,
+  IN VOID                          *Context  OPTIONAL,
+  IN UINTN                         ContextSize OPTIONAL
   );
 
 /**
@@ -72,10 +71,8 @@ SmiHandlerProfileRegisterHandler (
 EFI_STATUS
 EFIAPI
 SmiHandlerProfileUnregisterHandler (
-  IN EFI_GUID                       *HandlerGuid,
-  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
-  IN VOID                           *Context, OPTIONAL
-  IN UINTN                          ContextSize OPTIONAL
+  IN EFI_GUID                      *HandlerGuid,
+  IN EFI_SMM_HANDLER_ENTRY_POINT2  Handler,
+  IN VOID                          *Context  OPTIONAL,
+  IN UINTN                         ContextSize OPTIONAL
   );
-
-#endif

@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __PEI_SERVICES_LIB_H__
-#define __PEI_SERVICES_LIB_H__
+#pragma once
 
 /**
   This service enables a given PEIM to register an interface into the PEI Foundation.
@@ -24,7 +23,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 PeiServicesInstallPpi (
-  IN CONST EFI_PEI_PPI_DESCRIPTOR     *PpiList
+  IN CONST EFI_PEI_PPI_DESCRIPTOR  *PpiList
   );
 
 /**
@@ -45,8 +44,8 @@ PeiServicesInstallPpi (
 EFI_STATUS
 EFIAPI
 PeiServicesReInstallPpi (
-  IN CONST EFI_PEI_PPI_DESCRIPTOR     *OldPpi,
-  IN CONST EFI_PEI_PPI_DESCRIPTOR     *NewPpi
+  IN CONST EFI_PEI_PPI_DESCRIPTOR  *OldPpi,
+  IN CONST EFI_PEI_PPI_DESCRIPTOR  *NewPpi
   );
 
 /**
@@ -65,10 +64,10 @@ PeiServicesReInstallPpi (
 EFI_STATUS
 EFIAPI
 PeiServicesLocatePpi (
-  IN CONST EFI_GUID                   *Guid,
-  IN UINTN                      Instance,
-  IN OUT EFI_PEI_PPI_DESCRIPTOR **PpiDescriptor, OPTIONAL
-  IN OUT VOID                   **Ppi
+  IN CONST EFI_GUID              *Guid,
+  IN UINTN                       Instance,
+  IN OUT EFI_PEI_PPI_DESCRIPTOR  **PpiDescriptor  OPTIONAL,
+  IN OUT VOID                    **Ppi
   );
 
 /**
@@ -103,7 +102,7 @@ PeiServicesNotifyPpi (
 EFI_STATUS
 EFIAPI
 PeiServicesGetBootMode (
-  OUT EFI_BOOT_MODE          *BootMode
+  OUT EFI_BOOT_MODE  *BootMode
   );
 
 /**
@@ -117,7 +116,7 @@ PeiServicesGetBootMode (
 EFI_STATUS
 EFIAPI
 PeiServicesSetBootMode (
-  IN EFI_BOOT_MODE              BootMode
+  IN EFI_BOOT_MODE  BootMode
   );
 
 /**
@@ -132,7 +131,7 @@ PeiServicesSetBootMode (
 EFI_STATUS
 EFIAPI
 PeiServicesGetHobList (
-  OUT VOID                      **HobList
+  OUT VOID  **HobList
   );
 
 /**
@@ -149,9 +148,9 @@ PeiServicesGetHobList (
 EFI_STATUS
 EFIAPI
 PeiServicesCreateHob (
-  IN UINT16                     Type,
-  IN UINT16                     Length,
-  OUT VOID                      **Hob
+  IN UINT16  Type,
+  IN UINT16  Length,
+  OUT VOID   **Hob
   );
 
 /**
@@ -169,8 +168,8 @@ PeiServicesCreateHob (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsFindNextVolume (
-  IN UINTN                          Instance,
-  IN OUT EFI_PEI_FV_HANDLE          *VolumeHandle
+  IN UINTN                  Instance,
+  IN OUT EFI_PEI_FV_HANDLE  *VolumeHandle
   );
 
 /**
@@ -189,9 +188,9 @@ PeiServicesFfsFindNextVolume (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsFindNextFile (
-  IN EFI_FV_FILETYPE            SearchType,
-  IN EFI_PEI_FV_HANDLE          VolumeHandle,
-  IN OUT EFI_PEI_FILE_HANDLE    *FileHandle
+  IN EFI_FV_FILETYPE          SearchType,
+  IN EFI_PEI_FV_HANDLE        VolumeHandle,
+  IN OUT EFI_PEI_FILE_HANDLE  *FileHandle
   );
 
 /**
@@ -209,9 +208,9 @@ PeiServicesFfsFindNextFile (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsFindSectionData (
-  IN EFI_SECTION_TYPE           SectionType,
-  IN EFI_PEI_FILE_HANDLE        FileHandle,
-  OUT VOID                      **SectionData
+  IN EFI_SECTION_TYPE     SectionType,
+  IN EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT VOID                **SectionData
   );
 
 /**
@@ -231,11 +230,11 @@ PeiServicesFfsFindSectionData (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsFindSectionData3 (
-  IN EFI_SECTION_TYPE           SectionType,
-  IN UINTN                      SectionInstance,
-  IN EFI_PEI_FILE_HANDLE        FileHandle,
-  OUT VOID                      **SectionData,
-  OUT UINT32                    *AuthenticationStatus
+  IN EFI_SECTION_TYPE     SectionType,
+  IN UINTN                SectionInstance,
+  IN EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT VOID                **SectionData,
+  OUT UINT32              *AuthenticationStatus
   );
 
 /**
@@ -253,8 +252,8 @@ PeiServicesFfsFindSectionData3 (
 EFI_STATUS
 EFIAPI
 PeiServicesInstallPeiMemory (
-  IN EFI_PHYSICAL_ADDRESS       MemoryBegin,
-  IN UINT64                     MemoryLength
+  IN EFI_PHYSICAL_ADDRESS  MemoryBegin,
+  IN UINT64                MemoryLength
   );
 
 /**
@@ -274,9 +273,9 @@ PeiServicesInstallPeiMemory (
 EFI_STATUS
 EFIAPI
 PeiServicesAllocatePages (
-  IN EFI_MEMORY_TYPE            MemoryType,
-  IN UINTN                      Pages,
-  OUT EFI_PHYSICAL_ADDRESS      *Memory
+  IN EFI_MEMORY_TYPE        MemoryType,
+  IN UINTN                  Pages,
+  OUT EFI_PHYSICAL_ADDRESS  *Memory
   );
 
 /**
@@ -294,8 +293,8 @@ PeiServicesAllocatePages (
 EFI_STATUS
 EFIAPI
 PeiServicesFreePages (
-  IN EFI_PHYSICAL_ADDRESS       Memory,
-  IN UINTN                      Pages
+  IN EFI_PHYSICAL_ADDRESS  Memory,
+  IN UINTN                 Pages
   );
 
 /**
@@ -312,8 +311,8 @@ PeiServicesFreePages (
 EFI_STATUS
 EFIAPI
 PeiServicesAllocatePool (
-  IN UINTN                      Size,
-  OUT VOID                      **Buffer
+  IN UINTN  Size,
+  OUT VOID  **Buffer
   );
 
 /**
@@ -328,7 +327,6 @@ EFIAPI
 PeiServicesResetSystem (
   VOID
   );
-
 
 /**
   This service is a wrapper for the PEI Service FfsFindByName(), except the pointer to the PEI Services
@@ -354,11 +352,10 @@ PeiServicesResetSystem (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsFindFileByName (
-  IN CONST  EFI_GUID            *FileName,
-  IN CONST  EFI_PEI_FV_HANDLE   VolumeHandle,
-  OUT       EFI_PEI_FILE_HANDLE *FileHandle
+  IN CONST  EFI_GUID             *FileName,
+  IN CONST  EFI_PEI_FV_HANDLE    VolumeHandle,
+  OUT       EFI_PEI_FILE_HANDLE  *FileHandle
   );
-
 
 /**
   This service is a wrapper for the PEI Service FfsGetFileInfo(), except the pointer to the PEI Services
@@ -381,8 +378,8 @@ PeiServicesFfsFindFileByName (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsGetFileInfo (
-  IN CONST  EFI_PEI_FILE_HANDLE   FileHandle,
-  OUT EFI_FV_FILE_INFO            *FileInfo
+  IN CONST  EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT EFI_FV_FILE_INFO           *FileInfo
   );
 
 /**
@@ -406,8 +403,8 @@ PeiServicesFfsGetFileInfo (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsGetFileInfo2 (
-  IN CONST  EFI_PEI_FILE_HANDLE   FileHandle,
-  OUT EFI_FV_FILE_INFO2           *FileInfo
+  IN CONST  EFI_PEI_FILE_HANDLE  FileHandle,
+  OUT EFI_FV_FILE_INFO2          *FileInfo
   );
 
 /**
@@ -431,10 +428,9 @@ PeiServicesFfsGetFileInfo2 (
 EFI_STATUS
 EFIAPI
 PeiServicesFfsGetVolumeInfo (
-  IN  EFI_PEI_FV_HANDLE       VolumeHandle,
-  OUT EFI_FV_INFO             *VolumeInfo
+  IN  EFI_PEI_FV_HANDLE  VolumeHandle,
+  OUT EFI_FV_INFO        *VolumeInfo
   );
-
 
 /**
   This service is a wrapper for the PEI Service RegisterForShadow(), except the pointer to the PEI Services
@@ -456,7 +452,7 @@ PeiServicesFfsGetVolumeInfo (
 EFI_STATUS
 EFIAPI
 PeiServicesRegisterForShadow (
-  IN  EFI_PEI_FILE_HANDLE FileHandle
+  IN  EFI_PEI_FILE_HANDLE  FileHandle
   );
 
 /**
@@ -486,11 +482,11 @@ PeiServicesRegisterForShadow (
 VOID
 EFIAPI
 PeiServicesInstallFvInfoPpi (
-  IN CONST EFI_GUID                *FvFormat, OPTIONAL
-  IN CONST VOID                    *FvInfo,
-  IN       UINT32                  FvInfoSize,
-  IN CONST EFI_GUID                *ParentFvName, OPTIONAL
-  IN CONST EFI_GUID                *ParentFileName OPTIONAL
+  IN CONST EFI_GUID  *FvFormat  OPTIONAL,
+  IN CONST VOID      *FvInfo,
+  IN       UINT32    FvInfoSize,
+  IN CONST EFI_GUID  *ParentFvName  OPTIONAL,
+  IN CONST EFI_GUID  *ParentFileName OPTIONAL
   );
 
 /**
@@ -526,12 +522,12 @@ PeiServicesInstallFvInfoPpi (
 VOID
 EFIAPI
 PeiServicesInstallFvInfo2Ppi (
-  IN CONST EFI_GUID                *FvFormat, OPTIONAL
-  IN CONST VOID                    *FvInfo,
-  IN       UINT32                  FvInfoSize,
-  IN CONST EFI_GUID                *ParentFvName, OPTIONAL
-  IN CONST EFI_GUID                *ParentFileName, OPTIONAL
-  IN       UINT32                  AuthenticationStatus
+  IN CONST EFI_GUID  *FvFormat  OPTIONAL,
+  IN CONST VOID      *FvInfo,
+  IN       UINT32    FvInfoSize,
+  IN CONST EFI_GUID  *ParentFvName  OPTIONAL,
+  IN CONST EFI_GUID  *ParentFileName  OPTIONAL,
+  IN       UINT32    AuthenticationStatus
   );
 
 /**
@@ -550,10 +546,8 @@ PeiServicesInstallFvInfo2Ppi (
 VOID
 EFIAPI
 PeiServicesResetSystem2 (
-  IN EFI_RESET_TYPE     ResetType,
-  IN EFI_STATUS         ResetStatus,
-  IN UINTN              DataSize,
-  IN VOID               *ResetData OPTIONAL
+  IN EFI_RESET_TYPE  ResetType,
+  IN EFI_STATUS      ResetStatus,
+  IN UINTN           DataSize,
+  IN VOID            *ResetData OPTIONAL
   );
-
-#endif

@@ -6,8 +6,7 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#ifndef AML_TREE_TRAVERSAL_H_
-#define AML_TREE_TRAVERSAL_H_
+#pragma once
 
 #include <AmlNodeDefines.h>
 
@@ -43,8 +42,8 @@
 AML_NODE_HEADER *
 EFIAPI
 AmlGetNextSibling (
-  IN  CONST AML_NODE_HEADER   * Node,
-  IN  CONST AML_NODE_HEADER   * ChildNode
+  IN  CONST AML_NODE_HEADER  *Node,
+  IN  CONST AML_NODE_HEADER  *ChildNode
   );
 
 /** Get the previous sibling node among the children of the input Node.
@@ -77,8 +76,8 @@ AmlGetNextSibling (
 AML_NODE_HEADER *
 EFIAPI
 AmlGetPreviousSibling (
-  IN  CONST  AML_NODE_HEADER  * Node,
-  IN  CONST  AML_NODE_HEADER  * ChildNode
+  IN  CONST  AML_NODE_HEADER  *Node,
+  IN  CONST  AML_NODE_HEADER  *ChildNode
   );
 
 /** Iterate through the nodes in the same order as the AML bytestream.
@@ -104,7 +103,7 @@ AmlGetPreviousSibling (
 AML_NODE_HEADER *
 EFIAPI
 AmlGetNextNode (
-  IN  CONST AML_NODE_HEADER   * Node
+  IN  CONST AML_NODE_HEADER  *Node
   );
 
 /** Iterate through the nodes in the reverse order of the AML bytestream.
@@ -131,8 +130,5 @@ AmlGetNextNode (
 AML_NODE_HEADER *
 EFIAPI
 AmlGetPreviousNode (
-  IN  CONST  AML_NODE_HEADER * Node
+  IN  CONST  AML_NODE_HEADER  *Node
   );
-
-#endif // AML_TREE_TRAVERSAL_H_
-

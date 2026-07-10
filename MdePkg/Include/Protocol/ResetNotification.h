@@ -2,7 +2,7 @@
   EFI Reset Notification Protocol as defined in UEFI 2.7.
   This protocol provides services to register for a notification when ResetSystem is called.
 
-  Copyright (c) 2017, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2017 - 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
   @par Revision Reference:
@@ -10,8 +10,7 @@
 
 **/
 
-#ifndef __EFI_RESET_NOTIFICATION_H__
-#define __EFI_RESET_NOTIFICATION_H__
+#pragma once
 
 #define EFI_RESET_NOTIFICATION_PROTOCOL_GUID \
   { 0x9da34ae0, 0xeaf9, 0x4bbf, { 0x8e, 0xc3, 0xfd, 0x60, 0x22, 0x6c, 0x44, 0xbe } }
@@ -41,10 +40,10 @@ typedef struct _EFI_RESET_NOTIFICATION_PROTOCOL EFI_RESET_NOTIFICATION_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_REGISTER_RESET_NOTIFY) (
+(EFIAPI *EFI_REGISTER_RESET_NOTIFY)(
   IN EFI_RESET_NOTIFICATION_PROTOCOL *This,
   IN EFI_RESET_SYSTEM                ResetFunction
-);
+  );
 
 /**
   Unregister a notification function.
@@ -63,18 +62,14 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_UNREGISTER_RESET_NOTIFY) (
+(EFIAPI *EFI_UNREGISTER_RESET_NOTIFY)(
   IN EFI_RESET_NOTIFICATION_PROTOCOL *This,
   IN EFI_RESET_SYSTEM                ResetFunction
-);
+  );
 
-typedef struct _EFI_RESET_NOTIFICATION_PROTOCOL {
-  EFI_REGISTER_RESET_NOTIFY   RegisterResetNotify;
-  EFI_UNREGISTER_RESET_NOTIFY UnregisterResetNotify;
-} EFI_RESET_NOTIFICATION_PROTOCOL;
+struct _EFI_RESET_NOTIFICATION_PROTOCOL {
+  EFI_REGISTER_RESET_NOTIFY      RegisterResetNotify;
+  EFI_UNREGISTER_RESET_NOTIFY    UnregisterResetNotify;
+};
 
-
-extern EFI_GUID gEfiResetNotificationProtocolGuid;
-
-#endif
-
+extern EFI_GUID  gEfiResetNotificationProtocolGuid;

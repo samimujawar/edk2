@@ -6,7 +6,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include "Snp.h"
 
 /**
@@ -23,15 +22,18 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_STATUS
 PxeInit (
-  SNP_DRIVER *Snp,
-  UINT16     CableDetectFlag
+  SNP_DRIVER  *Snp,
+  UINT16      CableDetectFlag
   )
 {
   PXE_CPB_INITIALIZE  *Cpb;
   VOID                *Addr;
   EFI_STATUS          Status;
 
-  Status = EFI_SUCCESS;
+  if (Snp->Cdb == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Snp->Cdb is NULL\n", __func__));
+    return EFI_DEVICE_ERROR;
+  }
 
   Cpb = Snp->Cpb;
   if (Snp->TxRxBufferSize != 0) {
@@ -46,10 +48,10 @@ PxeInit (
 
     if (Status != EFI_SUCCESS) {
       DEBUG (
-        (EFI_D_ERROR,
-        "\nSnp->PxeInit()  AllocateBuffer  %xh (%r)\n",
-        Status,
-        Status)
+        (DEBUG_ERROR,
+         "\nSnp->PxeInit()  AllocateBuffer  %xh (%r)\n",
+         Status,
+         Status)
         );
 
       return Status;
@@ -60,89 +62,89 @@ PxeInit (
     Snp->TxRxBuffer = Addr;
   }
 
-  Cpb->MemoryAddr   = (UINT64)(UINTN) Snp->TxRxBuffer;
+  Cpb->MemoryAddr = (UINT64)(UINTN)Snp->TxRxBuffer;
 
   Cpb->MemoryLength = Snp->TxRxBufferSize;
 
   //
   // let UNDI decide/detect these values
   //
-  Cpb->LinkSpeed      = 0;
-  Cpb->TxBufCnt       = 0;
-  Cpb->TxBufSize      = 0;
-  Cpb->RxBufCnt       = 0;
-  Cpb->RxBufSize      = 0;
+  Cpb->LinkSpeed = 0;
+  Cpb->TxBufCnt  = 0;
+  Cpb->TxBufSize = 0;
+  Cpb->RxBufCnt  = 0;
+  Cpb->RxBufSize = 0;
 
-  Cpb->DuplexMode         = PXE_DUPLEX_DEFAULT;
+  Cpb->DuplexMode = PXE_DUPLEX_DEFAULT;
 
-  Cpb->LoopBackMode       = LOOPBACK_NORMAL;
+  Cpb->LoopBackMode = LOOPBACK_NORMAL;
 
-  Snp->Cdb.OpCode     = PXE_OPCODE_INITIALIZE;
-  Snp->Cdb.OpFlags    = CableDetectFlag;
+  Snp->Cdb->OpCode  = PXE_OPCODE_INITIALIZE;
+  Snp->Cdb->OpFlags = CableDetectFlag;
 
-  Snp->Cdb.CPBsize    = (UINT16) sizeof (PXE_CPB_INITIALIZE);
-  Snp->Cdb.DBsize     = (UINT16) sizeof (PXE_DB_INITIALIZE);
+  Snp->Cdb->CPBsize = (UINT16)sizeof (PXE_CPB_INITIALIZE);
+  Snp->Cdb->DBsize  = (UINT16)sizeof (PXE_DB_INITIALIZE);
 
-  Snp->Cdb.CPBaddr    = (UINT64)(UINTN) Snp->Cpb;
-  Snp->Cdb.DBaddr     = (UINT64)(UINTN) Snp->Db;
+  Snp->Cdb->CPBaddr = (UINT64)(UINTN)Snp->Cpb;
+  Snp->Cdb->DBaddr  = (UINT64)(UINTN)Snp->Db;
 
-  Snp->Cdb.StatCode   = PXE_STATCODE_INITIALIZE;
-  Snp->Cdb.StatFlags  = PXE_STATFLAGS_INITIALIZE;
-  Snp->Cdb.IFnum      = Snp->IfNum;
-  Snp->Cdb.Control    = PXE_CONTROL_LAST_CDB_IN_LIST;
+  Snp->Cdb->StatCode  = PXE_STATCODE_INITIALIZE;
+  Snp->Cdb->StatFlags = PXE_STATFLAGS_INITIALIZE;
+  Snp->Cdb->IFnum     = Snp->IfNum;
+  Snp->Cdb->Control   = PXE_CONTROL_LAST_CDB_IN_LIST;
 
-  DEBUG ((EFI_D_NET, "\nSnp->undi.initialize()  "));
+  DEBUG ((DEBUG_NET, "\nSnp->undi.initialize()  "));
 
-  (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
+  (*Snp->IssueUndi32Command)((UINT64)(UINTN)Snp->Cdb);
 
   //
   // There are two fields need to be checked here:
-  // First is the upper two bits (14 & 15) in the CDB.StatFlags field. Until these bits change to report
+  // First is the upper two bits (14 & 15) in the Cdb->StatFlags field. Until these bits change to report
   // PXE_STATFLAGS_COMMAND_COMPLETE or PXE_STATFLAGS_COMMAND_FAILED, the command has not been executed by the UNDI.
-  // Second is the CDB.StatCode field. After command execution completes, either successfully or not,
-  // the CDB.StatCode field contains the result of the command execution.
+  // Second is the Cdb->StatCode field. After command execution completes, either successfully or not,
+  // the Cdb->StatCode field contains the result of the command execution.
   //
-  if ((((Snp->Cdb.StatFlags) & PXE_STATFLAGS_STATUS_MASK) == PXE_STATFLAGS_COMMAND_COMPLETE) &&
-      (Snp->Cdb.StatCode == PXE_STATCODE_SUCCESS)) {
+  if ((((Snp->Cdb->StatFlags) & PXE_STATFLAGS_STATUS_MASK) == PXE_STATFLAGS_COMMAND_COMPLETE) &&
+      (Snp->Cdb->StatCode == PXE_STATCODE_SUCCESS))
+  {
     //
-    // If cable detect feature is enabled in CDB.OpFlags, check the CDB.StatFlags to see if there is an
+    // If cable detect feature is enabled in Cdb->OpFlags, check the Cdb->StatFlags to see if there is an
     // active connection to this network device. If the no media StatFlag is set, the UNDI and network
     // device are still initialized.
     //
     if (CableDetectFlag == PXE_OPFLAGS_INITIALIZE_DETECT_CABLE) {
-      if(((Snp->Cdb.StatFlags) & PXE_STATFLAGS_INITIALIZED_NO_MEDIA) != PXE_STATFLAGS_INITIALIZED_NO_MEDIA) {
+      if (((Snp->Cdb->StatFlags) & PXE_STATFLAGS_INITIALIZED_NO_MEDIA) != PXE_STATFLAGS_INITIALIZED_NO_MEDIA) {
         Snp->Mode.MediaPresent = TRUE;
       } else {
         Snp->Mode.MediaPresent = FALSE;
       }
     }
 
-    Snp->Mode.State   = EfiSimpleNetworkInitialized;
-    Status            = EFI_SUCCESS;
+    Snp->Mode.State = EfiSimpleNetworkInitialized;
+    Status          = EFI_SUCCESS;
   } else {
     DEBUG (
-      (EFI_D_WARN,
-      "\nSnp->undi.initialize()  %xh:%xh\n",
-      Snp->Cdb.StatFlags,
-      Snp->Cdb.StatCode)
+      (DEBUG_WARN,
+       "\nSnp->undi.initialize()  %xh:%xh\n",
+       Snp->Cdb->StatFlags,
+       Snp->Cdb->StatCode)
       );
 
     if (Snp->TxRxBuffer != NULL) {
       Snp->PciIo->FreeBuffer (
                     Snp->PciIo,
                     SNP_MEM_PAGES (Snp->TxRxBufferSize),
-                    (VOID *) Snp->TxRxBuffer
+                    (VOID *)Snp->TxRxBuffer
                     );
     }
 
     Snp->TxRxBuffer = NULL;
 
-    Status          = EFI_DEVICE_ERROR;
+    Status = EFI_DEVICE_ERROR;
   }
 
   return Status;
 }
-
 
 /**
   Resets a network adapter and allocates the transmit and receive buffers
@@ -180,12 +182,13 @@ PxeInit (
 EFI_STATUS
 EFIAPI
 SnpUndi32Initialize (
-  IN EFI_SIMPLE_NETWORK_PROTOCOL *This,
-  IN UINTN                       ExtraRxBufferSize OPTIONAL,
-  IN UINTN                       ExtraTxBufferSize OPTIONAL
+  IN EFI_SIMPLE_NETWORK_PROTOCOL  *This,
+  IN UINTN                        ExtraRxBufferSize OPTIONAL,
+  IN UINTN                        ExtraTxBufferSize OPTIONAL
   )
 {
   EFI_STATUS  EfiStatus;
+  EFI_STATUS  StnAddrStatus;
   SNP_DRIVER  *Snp;
   EFI_TPL     OldTpl;
 
@@ -203,36 +206,37 @@ SnpUndi32Initialize (
   }
 
   switch (Snp->Mode.State) {
-  case EfiSimpleNetworkStarted:
-    break;
+    case EfiSimpleNetworkStarted:
+      break;
 
-  case EfiSimpleNetworkStopped:
-    EfiStatus = EFI_NOT_STARTED;
-    goto ON_EXIT;
+    case EfiSimpleNetworkStopped:
+      EfiStatus = EFI_NOT_STARTED;
+      goto ON_EXIT;
 
-  default:
-    EfiStatus = EFI_DEVICE_ERROR;
-    goto ON_EXIT;
+    default:
+      EfiStatus = EFI_DEVICE_ERROR;
+      goto ON_EXIT;
   }
 
   EfiStatus = gBS->CreateEvent (
-                    EVT_NOTIFY_WAIT,
-                    TPL_NOTIFY,
-                    &SnpWaitForPacketNotify,
-                    Snp,
-                    &Snp->Snp.WaitForPacket
-                    );
+                     EVT_NOTIFY_WAIT,
+                     TPL_NOTIFY,
+                     &SnpWaitForPacketNotify,
+                     Snp,
+                     &Snp->Snp.WaitForPacket
+                     );
 
   if (EFI_ERROR (EfiStatus)) {
     Snp->Snp.WaitForPacket = NULL;
-    EfiStatus = EFI_DEVICE_ERROR;
+    EfiStatus              = EFI_DEVICE_ERROR;
     goto ON_EXIT;
   }
+
   //
   //
   //
-  Snp->Mode.MCastFilterCount      = 0;
-  Snp->Mode.ReceiveFilterSetting  = 0;
+  Snp->Mode.MCastFilterCount     = 0;
+  Snp->Mode.ReceiveFilterSetting = 0;
   ZeroMem (Snp->Mode.MCastFilter, sizeof Snp->Mode.MCastFilter);
   CopyMem (
     &Snp->Mode.CurrentAddress,
@@ -243,20 +247,25 @@ SnpUndi32Initialize (
   //
   // Compute tx/rx buffer sizes based on UNDI init info and parameters.
   //
-  Snp->TxRxBufferSize = (UINT32) (Snp->InitInfo.MemoryRequired + ExtraRxBufferSize + ExtraTxBufferSize);
+  Snp->TxRxBufferSize = (UINT32)(Snp->InitInfo.MemoryRequired + ExtraRxBufferSize + ExtraTxBufferSize);
 
   //
   // If UNDI support cable detect for INITIALIZE command, try it first.
   //
   if (Snp->CableDetectSupported) {
     if (PxeInit (Snp, PXE_OPFLAGS_INITIALIZE_DETECT_CABLE) == EFI_SUCCESS) {
+      StnAddrStatus = PxeGetStnAddr (Snp);
+      if (EFI_ERROR (StnAddrStatus)) {
+        DEBUG ((DEBUG_WARN, "%a: failed to refresh station address (%r)\n", __func__, StnAddrStatus));
+      }
+
       goto ON_EXIT;
     }
   }
 
-  Snp->Mode.MediaPresent  = FALSE;
+  Snp->Mode.MediaPresent = FALSE;
 
-  EfiStatus               = PxeInit (Snp, PXE_OPFLAGS_INITIALIZE_DO_NOT_DETECT_CABLE);
+  EfiStatus = PxeInit (Snp, PXE_OPFLAGS_INITIALIZE_DO_NOT_DETECT_CABLE);
 
   if (EFI_ERROR (EfiStatus)) {
     gBS->CloseEvent (Snp->Snp.WaitForPacket);
@@ -268,6 +277,11 @@ SnpUndi32Initialize (
   //
   if (Snp->MediaStatusSupported) {
     PxeGetStatus (Snp, NULL, FALSE);
+  }
+
+  StnAddrStatus = PxeGetStnAddr (Snp);
+  if (EFI_ERROR (StnAddrStatus)) {
+    DEBUG ((DEBUG_WARN, "%a: failed to refresh station address (%r)\n", __func__, StnAddrStatus));
   }
 
 ON_EXIT:

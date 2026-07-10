@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef __FSP_WRAPPER_API_LIB_H__
-#define __FSP_WRAPPER_API_LIB_H__
+#pragma once
 
 #include <FspEas.h>
 
@@ -34,7 +33,7 @@ FspFindFspHeader (
 EFI_STATUS
 EFIAPI
 CallFspNotifyPhase (
-  IN NOTIFY_PHASE_PARAMS *NotifyPhaseParams
+  IN NOTIFY_PHASE_PARAMS  *NotifyPhaseParams
   );
 
 /**
@@ -48,8 +47,8 @@ CallFspNotifyPhase (
 EFI_STATUS
 EFIAPI
 CallFspMemoryInit (
-  IN VOID                       *FspmUpdDataPtr,
-  OUT VOID                      **HobListPtr
+  IN VOID   *FspmUpdDataPtr,
+  OUT VOID  **HobListPtr
   );
 
 /**
@@ -62,7 +61,7 @@ CallFspMemoryInit (
 EFI_STATUS
 EFIAPI
 CallTempRamExit (
-  IN VOID                       *TempRamExitParam
+  IN VOID  *TempRamExitParam
   );
 
 /**
@@ -75,7 +74,18 @@ CallTempRamExit (
 EFI_STATUS
 EFIAPI
 CallFspSiliconInit (
-  IN VOID                       *FspsUpdDataPtr
+  IN VOID  *FspsUpdDataPtr
   );
 
-#endif
+/**
+  Call FSP API - FspSmmInit.
+
+  @param[in] FspiUpdDataPtr     Pointer to the FSPI_UPD data structure.
+
+  @return EFI status returned by FspSmmInit API.
+**/
+EFI_STATUS
+EFIAPI
+CallFspSmmInit (
+  IN VOID  *FspiUpdDataPtr
+  );

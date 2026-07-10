@@ -8,7 +8,6 @@
 
 #include "BasePeCoffLibInternals.h"
 
-
 /**
   Performs an Itanium-based specific relocation fixup and is a no-op on other
   instruction sets.
@@ -23,10 +22,10 @@
 **/
 RETURN_STATUS
 PeCoffLoaderRelocateImageEx (
-  IN UINT16      *Reloc,
-  IN OUT CHAR8   *Fixup,
-  IN OUT CHAR8   **FixupData,
-  IN UINT64      Adjust
+  IN UINT16     *Reloc,
+  IN OUT CHAR8  *Fixup,
+  IN OUT CHAR8  **FixupData,
+  IN UINT64     Adjust
   )
 {
   return RETURN_UNSUPPORTED;
@@ -38,7 +37,7 @@ PeCoffLoaderRelocateImageEx (
   loading and relocating of the image type. It's up to the caller to support
   the entry point.
 
-  The IA32/X64 version PE/COFF loader/relocater both support IA32, X64 and EBC images.
+  The IA32/X64 version PE/COFF loader/relocator both support IA32, X64 and EBC images.
 
   @param  Machine   The machine type from the PE Header.
 
@@ -51,7 +50,8 @@ PeCoffLoaderImageFormatSupported (
   )
 {
   if ((Machine == IMAGE_FILE_MACHINE_I386) || (Machine == IMAGE_FILE_MACHINE_X64) ||
-      (Machine == IMAGE_FILE_MACHINE_EBC) || (Machine == IMAGE_FILE_MACHINE_ARM64)) {
+      (Machine == IMAGE_FILE_MACHINE_EBC) || (Machine == IMAGE_FILE_MACHINE_ARM64))
+  {
     return TRUE;
   }
 
@@ -73,12 +73,11 @@ PeCoffLoaderImageFormatSupported (
 **/
 RETURN_STATUS
 PeHotRelocateImageEx (
-  IN UINT16      *Reloc,
-  IN OUT CHAR8   *Fixup,
-  IN OUT CHAR8   **FixupData,
-  IN UINT64      Adjust
+  IN UINT16     *Reloc,
+  IN OUT CHAR8  *Fixup,
+  IN OUT CHAR8  **FixupData,
+  IN UINT64     Adjust
   )
 {
   return RETURN_UNSUPPORTED;
 }
-

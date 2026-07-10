@@ -9,8 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "ConPlatform.h"
 
-
-EFI_DRIVER_BINDING_PROTOCOL gConPlatformTextInDriverBinding = {
+EFI_DRIVER_BINDING_PROTOCOL  gConPlatformTextInDriverBinding = {
   ConPlatformTextInDriverBindingSupported,
   ConPlatformTextInDriverBindingStart,
   ConPlatformTextInDriverBindingStop,
@@ -19,7 +18,7 @@ EFI_DRIVER_BINDING_PROTOCOL gConPlatformTextInDriverBinding = {
   NULL
 };
 
-EFI_DRIVER_BINDING_PROTOCOL gConPlatformTextOutDriverBinding = {
+EFI_DRIVER_BINDING_PROTOCOL  gConPlatformTextOutDriverBinding = {
   ConPlatformTextOutDriverBindingSupported,
   ConPlatformTextOutDriverBindingStart,
   ConPlatformTextOutDriverBindingStop,
@@ -27,6 +26,15 @@ EFI_DRIVER_BINDING_PROTOCOL gConPlatformTextOutDriverBinding = {
   NULL,
   NULL
 };
+
+//
+// Values from Usb Inteface Association Descriptor Device
+//  Class Code and Usage Model specification (iadclasscode_r10.pdf)
+//  from Usb.org
+//
+#define USB_BASE_CLASS_MISCELLANEOUS       0xEF
+#define USB_MISCELLANEOUS_SUBCLASS_COMMON  0x02
+#define USB_MISCELLANEOUS_PROTOCOL_IAD     0x01
 
 /**
   Entrypoint of this module.
@@ -42,12 +50,12 @@ EFI_DRIVER_BINDING_PROTOCOL gConPlatformTextOutDriverBinding = {
 **/
 EFI_STATUS
 EFIAPI
-InitializeConPlatform(
-  IN EFI_HANDLE           ImageHandle,
-  IN EFI_SYSTEM_TABLE     *SystemTable
+InitializeConPlatform (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS              Status;
+  EFI_STATUS  Status;
 
   Status = EfiLibInstallDriverBindingComponentName2 (
              ImageHandle,
@@ -71,7 +79,6 @@ InitializeConPlatform(
 
   return EFI_SUCCESS;
 }
-
 
 /**
   Test to see if EFI_SIMPLE_TEXT_INPUT_PROTOCOL is supported on ControllerHandle.
@@ -100,7 +107,6 @@ ConPlatformTextInDriverBindingSupported (
            );
 }
 
-
 /**
   Test to see if EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL is supported on ControllerHandle.
 
@@ -127,7 +133,6 @@ ConPlatformTextOutDriverBindingSupported (
            &gEfiSimpleTextOutProtocolGuid
            );
 }
-
 
 /**
   Test to see if the specified protocol is supported on ControllerHandle.
@@ -165,13 +170,14 @@ ConPlatformDriverBindingSupported (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Test to see if this device supports the specified Protocol.
   //
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   ProtocolGuid,
-                  (VOID **) &Interface,
+                  (VOID **)&Interface,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -211,15 +217,15 @@ ConPlatformDriverBindingSupported (
 EFI_STATUS
 EFIAPI
 ConPlatformTextInDriverBindingStart (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    ControllerHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *RemainingDevicePath
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
-  EFI_STATUS                     Status;
-  EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL *TextIn;
-  BOOLEAN                        IsInConInVariable;
+  EFI_STATUS                      Status;
+  EFI_DEVICE_PATH_PROTOCOL        *DevicePath;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *TextIn;
+  BOOLEAN                         IsInConInVariable;
 
   //
   // Get the Device Path Protocol so the environment variables can be updated
@@ -227,7 +233,7 @@ ConPlatformTextInDriverBindingStart (
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &DevicePath,
+                  (VOID **)&DevicePath,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -235,13 +241,14 @@ ConPlatformTextInDriverBindingStart (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Open the Simple Text Input Protocol BY_DRIVER
   //
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiSimpleTextInProtocolGuid,
-                  (VOID **) &TextIn,
+                  (VOID **)&TextIn,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -249,15 +256,16 @@ ConPlatformTextInDriverBindingStart (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Check if the device path is in ConIn Variable
   //
   IsInConInVariable = FALSE;
-  Status = ConPlatformUpdateDeviceVariable (
-             L"ConIn",
-             DevicePath,
-             Check
-             );
+  Status            = ConPlatformUpdateDeviceVariable (
+                        L"ConIn",
+                        DevicePath,
+                        Check
+                        );
   if (!EFI_ERROR (Status)) {
     IsInConInVariable = TRUE;
   }
@@ -316,9 +324,9 @@ ConPlatformTextInDriverBindingStart (
 EFI_STATUS
 EFIAPI
 ConPlatformTextOutDriverBindingStart (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    ControllerHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *RemainingDevicePath
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
   EFI_STATUS                       Status;
@@ -336,7 +344,7 @@ ConPlatformTextOutDriverBindingStart (
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &DevicePath,
+                  (VOID **)&DevicePath,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -344,13 +352,14 @@ ConPlatformTextOutDriverBindingStart (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Open the Simple Text Output Protocol BY_DRIVER
   //
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiSimpleTextOutProtocolGuid,
-                  (VOID **) &TextOut,
+                  (VOID **)&TextOut,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -358,25 +367,26 @@ ConPlatformTextOutDriverBindingStart (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Check if the device path is in ConOut & ErrOut Variable
   //
   IsInConOutVariable = FALSE;
-  Status = ConPlatformUpdateDeviceVariable (
-             L"ConOut",
-             DevicePath,
-             Check
-             );
+  Status             = ConPlatformUpdateDeviceVariable (
+                         L"ConOut",
+                         DevicePath,
+                         Check
+                         );
   if (!EFI_ERROR (Status)) {
     IsInConOutVariable = TRUE;
   }
 
   IsInErrOutVariable = FALSE;
-  Status = ConPlatformUpdateDeviceVariable (
-             L"ErrOut",
-             DevicePath,
-             Check
-             );
+  Status             = ConPlatformUpdateDeviceVariable (
+                         L"ErrOut",
+                         DevicePath,
+                         Check
+                         );
   if (!EFI_ERROR (Status)) {
     IsInErrOutVariable = TRUE;
   }
@@ -407,13 +417,14 @@ ConPlatformTextOutDriverBindingStart (
   //
   if (IsInConOutVariable) {
     NeedClose = FALSE;
-    Status = gBS->InstallMultipleProtocolInterfaces (
-                    &ControllerHandle,
-                    &gEfiConsoleOutDeviceGuid,
-                    NULL,
-                    NULL
-                    );
+    Status    = gBS->InstallMultipleProtocolInterfaces (
+                       &ControllerHandle,
+                       &gEfiConsoleOutDeviceGuid,
+                       NULL,
+                       NULL
+                       );
   }
+
   //
   // If the device path is an instance in the ErrOut environment variable,
   // then install EfiStandardErrorDeviceGuid onto ControllerHandle
@@ -472,7 +483,7 @@ ConPlatformTextInDriverBindingStop (
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &DevicePath,
+                  (VOID **)&DevicePath,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -513,7 +524,6 @@ ConPlatformTextInDriverBindingStop (
   return EFI_SUCCESS;
 }
 
-
 /**
   Stop this driver on ControllerHandle by removing Console Out Devcice GUID
   and closing the Simple Text Output protocol on ControllerHandle.
@@ -546,7 +556,7 @@ ConPlatformTextOutDriverBindingStop (
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &DevicePath,
+                  (VOID **)&DevicePath,
                   This->DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -586,15 +596,14 @@ ConPlatformTextOutDriverBindingStop (
   // Close the Simple Text Output Protocol
   //
   gBS->CloseProtocol (
-        ControllerHandle,
-        &gEfiSimpleTextOutProtocolGuid,
-        This->DriverBindingHandle,
-        ControllerHandle
-        );
+         ControllerHandle,
+         &gEfiSimpleTextOutProtocolGuid,
+         This->DriverBindingHandle,
+         ControllerHandle
+         );
 
   return EFI_SUCCESS;
 }
-
 
 /**
   Uninstall the specified protocol.
@@ -631,7 +640,7 @@ ConPlatformUnInstallProtocol (
            );
   }
 
-  return ;
+  return;
 }
 
 /**
@@ -650,15 +659,15 @@ ConPlatformUnInstallProtocol (
 **/
 VOID *
 ConPlatformGetVariable (
-  IN  CHAR16    *Name
+  IN  CHAR16  *Name
   )
 {
   EFI_STATUS  Status;
   VOID        *Buffer;
   UINTN       BufferSize;
 
-  BufferSize  = 0;
-  Buffer      = NULL;
+  BufferSize = 0;
+  Buffer     = NULL;
 
   //
   // Test to see if the variable exists.  If it doesn't, return NULL.
@@ -679,6 +688,7 @@ ConPlatformGetVariable (
     if (Buffer == NULL) {
       return NULL;
     }
+
     //
     // Read variable into the allocated buffer.
     //
@@ -722,9 +732,10 @@ IsGopSibling (
   EFI_DEVICE_PATH_PROTOCOL  *NodeRight;
 
   for (NodeLeft = Left; !IsDevicePathEndType (NodeLeft); NodeLeft = NextDevicePathNode (NodeLeft)) {
-    if ((DevicePathType (NodeLeft) == ACPI_DEVICE_PATH && DevicePathSubType (NodeLeft) == ACPI_ADR_DP) ||
-        (DevicePathType (NodeLeft) == HARDWARE_DEVICE_PATH && DevicePathSubType (NodeLeft) == HW_CONTROLLER_DP &&
-         DevicePathType (NextDevicePathNode (NodeLeft)) == ACPI_DEVICE_PATH && DevicePathSubType (NextDevicePathNode (NodeLeft)) == ACPI_ADR_DP)) {
+    if (((DevicePathType (NodeLeft) == ACPI_DEVICE_PATH) && (DevicePathSubType (NodeLeft) == ACPI_ADR_DP)) ||
+        ((DevicePathType (NodeLeft) == HARDWARE_DEVICE_PATH) && (DevicePathSubType (NodeLeft) == HW_CONTROLLER_DP) &&
+         (DevicePathType (NextDevicePathNode (NodeLeft)) == ACPI_DEVICE_PATH) && (DevicePathSubType (NextDevicePathNode (NodeLeft)) == ACPI_ADR_DP)))
+    {
       break;
     }
   }
@@ -734,9 +745,10 @@ IsGopSibling (
   }
 
   for (NodeRight = Right; !IsDevicePathEndType (NodeRight); NodeRight = NextDevicePathNode (NodeRight)) {
-    if ((DevicePathType (NodeRight) == ACPI_DEVICE_PATH && DevicePathSubType (NodeRight) == ACPI_ADR_DP) ||
-        (DevicePathType (NodeRight) == HARDWARE_DEVICE_PATH && DevicePathSubType (NodeRight) == HW_CONTROLLER_DP &&
-         DevicePathType (NextDevicePathNode (NodeRight)) == ACPI_DEVICE_PATH && DevicePathSubType (NextDevicePathNode (NodeRight)) == ACPI_ADR_DP)) {
+    if (((DevicePathType (NodeRight) == ACPI_DEVICE_PATH) && (DevicePathSubType (NodeRight) == ACPI_ADR_DP)) ||
+        ((DevicePathType (NodeRight) == HARDWARE_DEVICE_PATH) && (DevicePathSubType (NodeRight) == HW_CONTROLLER_DP) &&
+         (DevicePathType (NextDevicePathNode (NodeRight)) == ACPI_DEVICE_PATH) && (DevicePathSubType (NextDevicePathNode (NodeRight)) == ACPI_ADR_DP)))
+    {
       break;
     }
   }
@@ -745,11 +757,11 @@ IsGopSibling (
     return FALSE;
   }
 
-  if (((UINTN) NodeLeft - (UINTN) Left) != ((UINTN) NodeRight - (UINTN) Right)) {
+  if (((UINTN)NodeLeft - (UINTN)Left) != ((UINTN)NodeRight - (UINTN)Right)) {
     return FALSE;
   }
 
-  return (BOOLEAN) (CompareMem (Left, Right, (UINTN) NodeLeft - (UINTN) Left) == 0);
+  return (BOOLEAN)(CompareMem (Left, Right, (UINTN)NodeLeft - (UINTN)Left) == 0);
 }
 
 /**
@@ -765,8 +777,8 @@ IsGopSibling (
 **/
 BOOLEAN
 MatchUsbClass (
-  IN EFI_USB_IO_PROTOCOL        *UsbIo,
-  IN USB_CLASS_DEVICE_PATH      *UsbClass
+  IN EFI_USB_IO_PROTOCOL    *UsbIo,
+  IN USB_CLASS_DEVICE_PATH  *UsbClass
   )
 {
   EFI_STATUS                    Status;
@@ -777,7 +789,8 @@ MatchUsbClass (
   UINT8                         DeviceProtocol;
 
   if ((DevicePathType (UsbClass) != MESSAGING_DEVICE_PATH) ||
-      (DevicePathSubType (UsbClass) != MSG_USB_CLASS_DP)){
+      (DevicePathSubType (UsbClass) != MSG_USB_CLASS_DP))
+  {
     return FALSE;
   }
 
@@ -790,22 +803,30 @@ MatchUsbClass (
   }
 
   if ((UsbClass->VendorId != 0xffff) &&
-      (UsbClass->VendorId != DevDesc.IdVendor)) {
+      (UsbClass->VendorId != DevDesc.IdVendor))
+  {
     return FALSE;
   }
 
   if ((UsbClass->ProductId != 0xffff) &&
-      (UsbClass->ProductId != DevDesc.IdProduct)) {
+      (UsbClass->ProductId != DevDesc.IdProduct))
+  {
     return FALSE;
   }
 
   DeviceClass    = DevDesc.DeviceClass;
   DeviceSubClass = DevDesc.DeviceSubClass;
   DeviceProtocol = DevDesc.DeviceProtocol;
-  if (DeviceClass == 0) {
+
+  if ((DeviceClass == 0) ||
+      ((DeviceClass == USB_BASE_CLASS_MISCELLANEOUS) &&
+       (DeviceSubClass == USB_MISCELLANEOUS_SUBCLASS_COMMON) &&
+       (DeviceProtocol == USB_MISCELLANEOUS_PROTOCOL_IAD)))
+  {
     //
-    // If Class in Device Descriptor is set to 0, use the Class, SubClass and
-    // Protocol in Interface Descriptor instead.
+    // If Class in Device Descriptor is set to 0 (Device), or
+    // Class/SubClass/Protocol is 0xEF/0x02/0x01 (IAD), use the Class, SubClass
+    // and Protocol in Interface Descriptor instead.
     //
     Status = UsbIo->UsbGetInterfaceDescriptor (UsbIo, &IfDesc);
     if (EFI_ERROR (Status)) {
@@ -821,17 +842,20 @@ MatchUsbClass (
   // Check Class, SubClass and Protocol.
   //
   if ((UsbClass->DeviceClass != 0xff) &&
-      (UsbClass->DeviceClass != DeviceClass)) {
+      (UsbClass->DeviceClass != DeviceClass))
+  {
     return FALSE;
   }
 
   if ((UsbClass->DeviceSubClass != 0xff) &&
-      (UsbClass->DeviceSubClass != DeviceSubClass)) {
+      (UsbClass->DeviceSubClass != DeviceSubClass))
+  {
     return FALSE;
   }
 
   if ((UsbClass->DeviceProtocol != 0xff) &&
-      (UsbClass->DeviceProtocol != DeviceProtocol)) {
+      (UsbClass->DeviceProtocol != DeviceProtocol))
+  {
     return FALSE;
   }
 
@@ -851,23 +875,24 @@ MatchUsbClass (
 **/
 BOOLEAN
 MatchUsbWwid (
-  IN EFI_USB_IO_PROTOCOL        *UsbIo,
-  IN USB_WWID_DEVICE_PATH       *UsbWwid
+  IN EFI_USB_IO_PROTOCOL   *UsbIo,
+  IN USB_WWID_DEVICE_PATH  *UsbWwid
   )
 {
-  EFI_STATUS                   Status;
-  EFI_USB_DEVICE_DESCRIPTOR    DevDesc;
-  EFI_USB_INTERFACE_DESCRIPTOR IfDesc;
-  UINT16                       *LangIdTable;
-  UINT16                       TableSize;
-  UINT16                       Index;
-  CHAR16                       *CompareStr;
-  UINTN                        CompareLen;
-  CHAR16                       *SerialNumberStr;
-  UINTN                        Length;
+  EFI_STATUS                    Status;
+  EFI_USB_DEVICE_DESCRIPTOR     DevDesc;
+  EFI_USB_INTERFACE_DESCRIPTOR  IfDesc;
+  UINT16                        *LangIdTable;
+  UINT16                        TableSize;
+  UINT16                        Index;
+  CHAR16                        *CompareStr;
+  UINTN                         CompareLen;
+  CHAR16                        *SerialNumberStr;
+  UINTN                         Length;
 
   if ((DevicePathType (UsbWwid) != MESSAGING_DEVICE_PATH) ||
-      (DevicePathSubType (UsbWwid) != MSG_USB_WWID_DP)) {
+      (DevicePathSubType (UsbWwid) != MSG_USB_WWID_DP))
+  {
     return FALSE;
   }
 
@@ -878,8 +903,10 @@ MatchUsbWwid (
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
+
   if ((DevDesc.IdVendor != UsbWwid->VendorId) ||
-      (DevDesc.IdProduct != UsbWwid->ProductId)) {
+      (DevDesc.IdProduct != UsbWwid->ProductId))
+  {
     return FALSE;
   }
 
@@ -890,6 +917,7 @@ MatchUsbWwid (
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
+
   if (IfDesc.InterfaceNumber != UsbWwid->InterfaceNumber) {
     return FALSE;
   }
@@ -904,9 +932,9 @@ MatchUsbWwid (
   //
   // Get all supported languages.
   //
-  TableSize = 0;
+  TableSize   = 0;
   LangIdTable = NULL;
-  Status = UsbIo->UsbGetSupportedLanguages (UsbIo, &LangIdTable, &TableSize);
+  Status      = UsbIo->UsbGetSupportedLanguages (UsbIo, &LangIdTable, &TableSize);
   if (EFI_ERROR (Status) || (TableSize == 0) || (LangIdTable == NULL)) {
     return FALSE;
   }
@@ -914,7 +942,7 @@ MatchUsbWwid (
   //
   // Serial number in USB WWID device path is the last 64-or-less UTF-16 characters.
   //
-  CompareStr = (CHAR16 *) (UINTN) (UsbWwid + 1);
+  CompareStr = (CHAR16 *)(UINTN)(UsbWwid + 1);
   CompareLen = (DevicePathNodeLength (UsbWwid) - sizeof (USB_WWID_DEVICE_PATH)) / sizeof (CHAR16);
   if (CompareStr[CompareLen - 1] == L'\0') {
     CompareLen--;
@@ -925,19 +953,20 @@ MatchUsbWwid (
   //
   for (Index = 0; Index < TableSize / sizeof (UINT16); Index++) {
     SerialNumberStr = NULL;
-    Status = UsbIo->UsbGetStringDescriptor (
-                      UsbIo,
-                      LangIdTable[Index],
-                      DevDesc.StrSerialNumber,
-                      &SerialNumberStr
-                      );
+    Status          = UsbIo->UsbGetStringDescriptor (
+                               UsbIo,
+                               LangIdTable[Index],
+                               DevDesc.StrSerialNumber,
+                               &SerialNumberStr
+                               );
     if (EFI_ERROR (Status) || (SerialNumberStr == NULL)) {
       continue;
     }
 
     Length = StrLen (SerialNumberStr);
     if ((Length >= CompareLen) &&
-        (CompareMem (SerialNumberStr + Length - CompareLen, CompareStr, CompareLen * sizeof (CHAR16)) == 0)) {
+        (CompareMem (SerialNumberStr + Length - CompareLen, CompareStr, CompareLen * sizeof (CHAR16)) == 0))
+    {
       FreePool (SerialNumberStr);
       return TRUE;
     }
@@ -971,13 +1000,15 @@ MatchUsbShortformDevicePath (
   EFI_HANDLE                Handle;
 
   for ( ShortformNode = ShortformPath
-      ; !IsDevicePathEnd (ShortformNode)
-      ; ShortformNode = NextDevicePathNode (ShortformNode)
-      ) {
+        ; !IsDevicePathEnd (ShortformNode)
+        ; ShortformNode = NextDevicePathNode (ShortformNode)
+        )
+  {
     if ((DevicePathType (ShortformNode) == MESSAGING_DEVICE_PATH) &&
         ((DevicePathSubType (ShortformNode) == MSG_USB_CLASS_DP) ||
          (DevicePathSubType (ShortformNode) == MSG_USB_WWID_DP))
-        ) {
+        )
+    {
       break;
     }
   }
@@ -992,15 +1023,17 @@ MatchUsbShortformDevicePath (
   //
   // Compare the parent device path when the ShortformPath doesn't start with short-form node.
   //
-  ParentDevicePathSize = (UINTN) ShortformNode - (UINTN) ShortformPath;
+  ParentDevicePathSize = (UINTN)ShortformNode - (UINTN)ShortformPath;
   RemainingDevicePath  = FullPath;
   Status               = gBS->LocateDevicePath (&gEfiUsbIoProtocolGuid, &RemainingDevicePath, &Handle);
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
+
   if (ParentDevicePathSize != 0) {
-    if ((ParentDevicePathSize > (UINTN) RemainingDevicePath - (UINTN) FullPath) ||
-        (CompareMem (FullPath, ShortformPath, ParentDevicePathSize) != 0)) {
+    if ((ParentDevicePathSize > (UINTN)RemainingDevicePath - (UINTN)FullPath) ||
+        (CompareMem (FullPath, ShortformPath, ParentDevicePathSize) != 0))
+    {
       return FALSE;
     }
   }
@@ -1008,10 +1041,10 @@ MatchUsbShortformDevicePath (
   //
   // Compar the USB layer.
   //
-  Status = gBS->HandleProtocol(
+  Status = gBS->HandleProtocol (
                   Handle,
                   &gEfiUsbIoProtocolGuid,
-                  (VOID **) &UsbIo
+                  (VOID **)&UsbIo
                   );
   ASSERT_EFI_ERROR (Status);
 
@@ -1063,23 +1096,22 @@ ConPlatformMatchDevicePaths (
   //
   // If performing Delete operation, the NewDevicePath must not be NULL.
   //
-  if (Delete) {
-    if (NewDevicePath == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
+  if (Delete && (NewDevicePath == NULL)) {
+    return EFI_INVALID_PARAMETER;
   }
 
   TempDevicePath1 = NULL;
 
-  DevicePath      = Multi;
-  DevicePathInst  = GetNextDevicePathInstance (&DevicePath, &Size);
+  DevicePath     = Multi;
+  DevicePathInst = GetNextDevicePathInstance (&DevicePath, &Size);
 
   //
   // Search for the match of 'Single' in 'Multi'
   //
   while (DevicePathInst != NULL) {
     if ((CompareMem (Single, DevicePathInst, Size) == 0) ||
-      IsGopSibling (Single, DevicePathInst) || MatchUsbShortformDevicePath (Single, DevicePathInst)) {
+        IsGopSibling (Single, DevicePathInst) || MatchUsbShortformDevicePath (Single, DevicePathInst))
+    {
       if (!Delete) {
         //
         // If Delete is FALSE, return EFI_SUCCESS if Single is found in Multi.
@@ -1100,6 +1132,7 @@ ConPlatformMatchDevicePaths (
         if (TempDevicePath1 != NULL) {
           FreePool (TempDevicePath1);
         }
+
         TempDevicePath1 = TempDevicePath2;
       }
     }
@@ -1134,14 +1167,16 @@ ConPlatformMatchDevicePaths (
 **/
 EFI_STATUS
 ConPlatformUpdateDeviceVariable (
-  IN  CHAR16                    *VariableName,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN  CONPLATFORM_VAR_OPERATION Operation
+  IN  CHAR16                     *VariableName,
+  IN  EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
+  IN  CONPLATFORM_VAR_OPERATION  Operation
   )
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *VariableDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *NewVariableDevicePath;
+
+  Status = EFI_SUCCESS;
 
   VariableDevicePath    = NULL;
   NewVariableDevicePath = NULL;
@@ -1152,7 +1187,7 @@ ConPlatformUpdateDeviceVariable (
   // it is the caller's responsibility to free the memory before return.
   //
   VariableDevicePath = ConPlatformGetVariable (VariableName);
-
+  // At this point, VariableDevicePath may be null.  This is expected.
   if (Operation != Delete) {
     //
     // Match specified DevicePath in Console Variable.
@@ -1176,10 +1211,11 @@ ConPlatformUpdateDeviceVariable (
 
       return Status;
     }
+
     //
     // We reach here to append a device path that does not exist in variable.
     //
-    Status = EFI_SUCCESS;
+    Status                = EFI_SUCCESS;
     NewVariableDevicePath = AppendDevicePathInstance (
                               VariableDevicePath,
                               DevicePath
@@ -1187,7 +1223,6 @@ ConPlatformUpdateDeviceVariable (
     if (NewVariableDevicePath == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     }
-
   } else {
     //
     // We reach here to remove DevicePath from the environment variable that
@@ -1239,22 +1274,23 @@ ConPlatformUpdateDeviceVariable (
 **/
 BOOLEAN
 ConPlatformUpdateGopCandidate (
-  IN  EFI_DEVICE_PATH_PROTOCOL    *DevicePath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_STATUS                           Status;
-  EFI_HANDLE                           PciHandle;
-  EFI_HANDLE                           GopHandle;
-  EFI_DEVICE_PATH_PROTOCOL             *TempDevicePath;
+  EFI_STATUS                Status;
+  EFI_HANDLE                PciHandle;
+  EFI_HANDLE                GopHandle;
+  EFI_DEVICE_PATH_PROTOCOL  *TempDevicePath;
 
   //
   // Check whether it's a GOP device.
   //
   TempDevicePath = DevicePath;
-  Status = gBS->LocateDevicePath (&gEfiGraphicsOutputProtocolGuid, &TempDevicePath, &GopHandle);
+  Status         = gBS->LocateDevicePath (&gEfiGraphicsOutputProtocolGuid, &TempDevicePath, &GopHandle);
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
+
   //
   // Get the parent PciIo handle in order to find all the children
   //
@@ -1262,10 +1298,12 @@ ConPlatformUpdateGopCandidate (
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
+
   TempDevicePath = EfiBootManagerGetGopDevicePath (PciHandle);
   if (TempDevicePath != NULL) {
     ConPlatformUpdateDeviceVariable (L"ConOutDev", TempDevicePath, Append);
     ConPlatformUpdateDeviceVariable (L"ErrOutDev", TempDevicePath, Append);
   }
+
   return TRUE;
 }

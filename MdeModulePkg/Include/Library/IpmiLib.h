@@ -6,12 +6,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _IPMI_LIB_H_
-#define _IPMI_LIB_H_
+#pragma once
 
 #include <Uefi.h>
 #include <IndustryStandard/Ipmi.h>
-
 
 /**
   This service enables submitting commands via Ipmi.
@@ -34,12 +32,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 IpmiSubmitCommand (
-  IN     UINT8     NetFunction,
-  IN     UINT8     Command,
-  IN     UINT8     *RequestData,
-  IN     UINT32    RequestDataSize,
-     OUT UINT8     *ResponseData,
-  IN OUT UINT32    *ResponseDataSize
+  IN     UINT8   NetFunction,
+  IN     UINT8   Command,
+  IN     UINT8   *RequestData,
+  IN     UINT32  RequestDataSize,
+  OUT UINT8      *ResponseData,
+  IN OUT UINT32  *ResponseDataSize
   );
-
-#endif

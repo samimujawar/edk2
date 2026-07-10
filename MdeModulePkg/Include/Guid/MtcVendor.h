@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __MTC_VENDOR_GUID_H__
-#define __MTC_VENDOR_GUID_H__
+#pragma once
 
 //
 // Vendor GUID of the variable for the high part of monotonic counter (UINT32).
@@ -18,8 +17,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Name of the variable for the high part of monotonic counter
 //
-#define MTC_VARIABLE_NAME L"MTC"
+#define MTC_VARIABLE_NAME  L"MTC"
 
-extern EFI_GUID gMtcVendorGuid;
-
-#endif
+extern EFI_GUID  gMtcVendorGuid;

@@ -1,7 +1,7 @@
 /** @file
   Security Architectural Protocol as defined in PI Specification VOLUME 2 DXE
 
-  Used to provide Security services.  Specifically, dependening upon the
+  Used to provide Security services.  Specifically, depending upon the
   authentication state of a discovered driver in a Firmware Volume, the
   portable DXE Core Dispatcher will call into the Security Architectural
   Protocol (SAP) with the authentication state of the driver.
@@ -19,8 +19,7 @@
 
 **/
 
-#ifndef __ARCH_PROTOCOL_SECURITY_H__
-#define __ARCH_PROTOCOL_SECURITY_H__
+#pragma once
 
 ///
 /// Global ID for the Security Code Architectural Protocol
@@ -28,7 +27,7 @@
 #define EFI_SECURITY_ARCH_PROTOCOL_GUID  \
   { 0xA46423E3, 0x4617, 0x49f1, {0xB9, 0xFF, 0xD1, 0xBF, 0xA9, 0x11, 0x58, 0x39 } }
 
-typedef struct _EFI_SECURITY_ARCH_PROTOCOL    EFI_SECURITY_ARCH_PROTOCOL;
+typedef struct _EFI_SECURITY_ARCH_PROTOCOL EFI_SECURITY_ARCH_PROTOCOL;
 
 /**
   The EFI_SECURITY_ARCH_PROTOCOL (SAP) is used to abstract platform-specific
@@ -89,9 +88,7 @@ EFI_STATUS
 /// attestation logging, and other exception operations.
 ///
 struct _EFI_SECURITY_ARCH_PROTOCOL {
-  EFI_SECURITY_FILE_AUTHENTICATION_STATE  FileAuthenticationState;
+  EFI_SECURITY_FILE_AUTHENTICATION_STATE    FileAuthenticationState;
 };
 
-extern EFI_GUID gEfiSecurityArchProtocolGuid;
-
-#endif
+extern EFI_GUID  gEfiSecurityArchProtocolGuid;

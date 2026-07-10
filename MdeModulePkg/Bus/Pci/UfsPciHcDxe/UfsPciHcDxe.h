@@ -7,8 +7,7 @@
 
 **/
 
-#ifndef _EFI_UFS_HOST_CONTROLLER_H_
-#define _EFI_UFS_HOST_CONTROLLER_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -30,27 +29,27 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 
-extern EFI_DRIVER_BINDING_PROTOCOL                gUfsHcDriverBinding;
-extern EFI_COMPONENT_NAME_PROTOCOL                gUfsHcComponentName;
-extern EFI_COMPONENT_NAME2_PROTOCOL               gUfsHcComponentName2;
+extern EFI_DRIVER_BINDING_PROTOCOL   gUfsHcDriverBinding;
+extern EFI_COMPONENT_NAME_PROTOCOL   gUfsHcComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gUfsHcComponentName2;
 
 //
 // Unique signature for private data structure.
 //
-#define UFS_HC_PRIVATE_DATA_SIGNATURE             SIGNATURE_32 ('U','F','S','H')
+#define UFS_HC_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('U','F','S','H')
 
-typedef struct _UFS_HOST_CONTROLLER_PRIVATE_DATA  UFS_HOST_CONTROLLER_PRIVATE_DATA;
+typedef struct _UFS_HOST_CONTROLLER_PRIVATE_DATA UFS_HOST_CONTROLLER_PRIVATE_DATA;
 
 //
 // Ufs host controller private data structure.
 //
 struct _UFS_HOST_CONTROLLER_PRIVATE_DATA {
-  UINT32                             Signature;
+  UINT32                                Signature;
 
-  EDKII_UFS_HOST_CONTROLLER_PROTOCOL UfsHc;
-  EFI_PCI_IO_PROTOCOL                *PciIo;
-  UINT8                              BarIndex;
-  UINT64                             PciAttributes;
+  EDKII_UFS_HOST_CONTROLLER_PROTOCOL    UfsHc;
+  EFI_PCI_IO_PROTOCOL                   *PciIo;
+  UINT8                                 BarIndex;
+  UINT64                                PciAttributes;
 };
 
 #define UFS_HOST_CONTROLLER_PRIVATE_DATA_FROM_UFSHC(a) \
@@ -178,11 +177,11 @@ UfsHcComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 UfsHcComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   );
 
 /**
@@ -307,10 +306,10 @@ UfsHcDriverBindingStart (
 EFI_STATUS
 EFIAPI
 UfsHcDriverBindingStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL     *This,
-  IN  EFI_HANDLE                      Controller,
-  IN  UINTN                           NumberOfChildren,
-  IN  EFI_HANDLE                      *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   Controller,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   );
 
 /**
@@ -325,8 +324,8 @@ UfsHcDriverBindingStop (
 EFI_STATUS
 EFIAPI
 UfsHcGetMmioBar (
-  IN     EDKII_UFS_HOST_CONTROLLER_PROTOCOL *This,
-     OUT UINTN                              *MmioBar
+  IN     EDKII_UFS_HOST_CONTROLLER_PROTOCOL  *This,
+  OUT UINTN                                  *MmioBar
   );
 
 /**
@@ -355,8 +354,8 @@ UfsHcMap (
   IN     EDKII_UFS_HOST_CONTROLLER_OPERATION  Operation,
   IN     VOID                                 *HostAddress,
   IN OUT UINTN                                *NumberOfBytes,
-     OUT EFI_PHYSICAL_ADDRESS                 *DeviceAddress,
-     OUT VOID                                 **Mapping
+  OUT EFI_PHYSICAL_ADDRESS                    *DeviceAddress,
+  OUT VOID                                    **Mapping
   );
 
 /**
@@ -372,8 +371,8 @@ UfsHcMap (
 EFI_STATUS
 EFIAPI
 UfsHcUnmap (
-  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL   *This,
-  IN  VOID                                 *Mapping
+  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL  *This,
+  IN  VOID                                *Mapping
   );
 
 /**
@@ -399,12 +398,12 @@ UfsHcUnmap (
 EFI_STATUS
 EFIAPI
 UfsHcAllocateBuffer (
-  IN     EDKII_UFS_HOST_CONTROLLER_PROTOCOL *This,
-  IN     EFI_ALLOCATE_TYPE                  Type,
-  IN     EFI_MEMORY_TYPE                    MemoryType,
-  IN     UINTN                              Pages,
-     OUT VOID                               **HostAddress,
-  IN     UINT64                             Attributes
+  IN     EDKII_UFS_HOST_CONTROLLER_PROTOCOL  *This,
+  IN     EFI_ALLOCATE_TYPE                   Type,
+  IN     EFI_MEMORY_TYPE                     MemoryType,
+  IN     UINTN                               Pages,
+  OUT VOID                                   **HostAddress,
+  IN     UINT64                              Attributes
   );
 
 /**
@@ -422,9 +421,9 @@ UfsHcAllocateBuffer (
 EFI_STATUS
 EFIAPI
 UfsHcFreeBuffer (
-  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL    *This,
-  IN  UINTN                                 Pages,
-  IN  VOID                                  *HostAddress
+  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL  *This,
+  IN  UINTN                               Pages,
+  IN  VOID                                *HostAddress
   );
 
 /**
@@ -441,7 +440,7 @@ UfsHcFreeBuffer (
 EFI_STATUS
 EFIAPI
 UfsHcFlush (
-  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL   *This
+  IN  EDKII_UFS_HOST_CONTROLLER_PROTOCOL  *This
   );
 
 /**
@@ -499,5 +498,3 @@ UfsHcMmioWrite (
   IN     UINTN                                     Count,
   IN OUT VOID                                      *Buffer
   );
-
-#endif

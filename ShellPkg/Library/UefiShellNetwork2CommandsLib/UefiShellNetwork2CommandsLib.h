@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef _UEFI_SHELL_NETWORK2_COMMANDS_LIB_H_
-#define _UEFI_SHELL_NETWORK2_COMMANDS_LIB_H_
+#pragma once
 
 #include <Protocol/Cpu.h>
 #include <Protocol/ServiceBinding.h>
@@ -27,7 +26,7 @@
 #include <Library/HiiLib.h>
 #include <Library/NetLib.h>
 
-extern EFI_HII_HANDLE gShellNetwork2HiiHandle;
+extern EFI_HII_HANDLE  gShellNetwork2HiiHandle;
 
 /**
   Function for 'ping6' command.
@@ -62,6 +61,3 @@ ShellCommandRunIfconfig6 (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
-
-#endif
-

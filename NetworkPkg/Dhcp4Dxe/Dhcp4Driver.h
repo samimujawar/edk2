@@ -6,12 +6,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __EFI_DHCP4_DRIVER_H__
-#define __EFI_DHCP4_DRIVER_H__
+#pragma once
 
-extern EFI_COMPONENT_NAME_PROTOCOL  gDhcp4ComponentName;
-extern EFI_COMPONENT_NAME2_PROTOCOL gDhcp4ComponentName2;
-extern EFI_UNICODE_STRING_TABLE     *gDhcpControllerNameTable;
+extern EFI_COMPONENT_NAME_PROTOCOL   gDhcp4ComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gDhcp4ComponentName2;
+extern EFI_UNICODE_STRING_TABLE      *gDhcpControllerNameTable;
 
 /**
   Test to see if this driver supports ControllerHandle. This service
@@ -142,5 +141,3 @@ Dhcp4ServiceBindingDestroyChild (
   IN EFI_SERVICE_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                    ChildHandle
   );
-
-#endif

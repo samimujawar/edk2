@@ -8,8 +8,7 @@
 
 **/
 
-#ifndef __NON_DISCOVERABLE_DEVICE_GUID_H__
-#define __NON_DISCOVERABLE_DEVICE_GUID_H__
+#pragma once
 
 #define EDKII_NON_DISCOVERABLE_AHCI_DEVICE_GUID \
   { 0xC7D35798, 0xE4D2, 0x4A93, {0xB1, 0x45, 0x54, 0x88, 0x9F, 0x02, 0x58, 0x4B } }
@@ -38,15 +37,12 @@
 #define EDKII_NON_DISCOVERABLE_XHCI_DEVICE_GUID \
   { 0xB1BE0BC5, 0x6C28, 0x442D, {0xAA, 0x37, 0x15, 0x1B, 0x42, 0x57, 0xBD, 0x78 } }
 
-
-extern EFI_GUID gEdkiiNonDiscoverableAhciDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableAmbaDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableEhciDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableNvmeDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableOhciDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableSdhciDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableUfsDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableUhciDeviceGuid;
-extern EFI_GUID gEdkiiNonDiscoverableXhciDeviceGuid;
-
-#endif
+extern EFI_GUID  gEdkiiNonDiscoverableAhciDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableAmbaDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableEhciDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableNvmeDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableOhciDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableSdhciDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableUfsDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableUhciDeviceGuid;
+extern EFI_GUID  gEdkiiNonDiscoverableXhciDeviceGuid;

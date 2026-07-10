@@ -6,9 +6,17 @@
 
 **/
 
-
 #include "BaseLibInternals.h"
 
+#pragma pack(1)
+typedef union {
+  UINT16    Val16;
+  UINT32    Val32;
+  UINT64    Val64;
+} MISALIGNED;
+#pragma pack()
+
+STATIC_ASSERT (ALIGNOF (MISALIGNED) == 1, "Alignment error");
 
 /**
   Reads a 16-bit value from memory that may be unaligned.
@@ -26,12 +34,12 @@
 UINT16
 EFIAPI
 ReadUnaligned16 (
-  IN CONST UINT16              *Buffer
+  IN CONST VOID  *Buffer
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer;
+  return ((CONST MISALIGNED *)Buffer)->Val16;
 }
 
 /**
@@ -52,13 +60,13 @@ ReadUnaligned16 (
 UINT16
 EFIAPI
 WriteUnaligned16 (
-  OUT UINT16                    *Buffer,
-  IN  UINT16                    Value
+  OUT VOID    *Buffer,
+  IN  UINT16  Value
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer = Value;
+  return ((MISALIGNED *)Buffer)->Val16 = Value;
 }
 
 /**
@@ -77,12 +85,12 @@ WriteUnaligned16 (
 UINT32
 EFIAPI
 ReadUnaligned24 (
-  IN CONST UINT32              *Buffer
+  IN CONST VOID  *Buffer
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer & 0xffffff;
+  return ((UINT32)((UINT8 *)Buffer)[2] << 16) | ReadUnaligned16 (Buffer);
 }
 
 /**
@@ -103,14 +111,15 @@ ReadUnaligned24 (
 UINT32
 EFIAPI
 WriteUnaligned24 (
-  OUT UINT32                    *Buffer,
-  IN  UINT32                    Value
+  OUT VOID    *Buffer,
+  IN  UINT32  Value
   )
 {
   ASSERT (Buffer != NULL);
 
-  *Buffer = BitFieldWrite32 (*Buffer, 0, 23, Value);
-  return Value;
+  WriteUnaligned16 (Buffer, (UINT16)Value);
+  ((UINT8 *)Buffer)[2] = (UINT8)(Value >> 16);
+  return Value & 0xffffff;
 }
 
 /**
@@ -129,12 +138,12 @@ WriteUnaligned24 (
 UINT32
 EFIAPI
 ReadUnaligned32 (
-  IN CONST UINT32              *Buffer
+  IN CONST VOID  *Buffer
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer;
+  return ((CONST MISALIGNED *)Buffer)->Val32;
 }
 
 /**
@@ -155,13 +164,13 @@ ReadUnaligned32 (
 UINT32
 EFIAPI
 WriteUnaligned32 (
-  OUT UINT32                    *Buffer,
-  IN  UINT32                    Value
+  OUT VOID    *Buffer,
+  IN  UINT32  Value
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer = Value;
+  return ((MISALIGNED *)Buffer)->Val32 = Value;
 }
 
 /**
@@ -180,12 +189,12 @@ WriteUnaligned32 (
 UINT64
 EFIAPI
 ReadUnaligned64 (
-  IN CONST UINT64              *Buffer
+  IN CONST VOID  *Buffer
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer;
+  return ((CONST MISALIGNED *)Buffer)->Val64;
 }
 
 /**
@@ -206,11 +215,11 @@ ReadUnaligned64 (
 UINT64
 EFIAPI
 WriteUnaligned64 (
-  OUT UINT64                    *Buffer,
-  IN  UINT64                    Value
+  OUT VOID    *Buffer,
+  IN  UINT64  Value
   )
 {
   ASSERT (Buffer != NULL);
 
-  return *Buffer = Value;
+  return ((MISALIGNED *)Buffer)->Val64 = Value;
 }
